@@ -95,6 +95,7 @@ export default function App() {
 
   // Recorder engine instance reference
   const recorderEngineRef = useRef<RecorderEngine | null>(null);
+  const isStartingRecordingRef = useRef<boolean>(false);
 
   const initRecorderEngine = useCallback(() => {
     if (!recorderEngineRef.current) {
@@ -115,6 +116,7 @@ export default function App() {
           console.error('Recorder Engine Error:', err);
           alert(`Recording Error: ${err.message || 'Capture interrupted'}`);
           setActiveWebcamStream(null);
+          isStartingRecordingRef.current = false;
           setRecordingState('idle');
         },
         onBookmarkAdded: () => {
@@ -125,22 +127,17 @@ export default function App() {
     return recorderEngineRef.current;
   }, []);
 
-  const handleStartRecordingSequence = () => {
-    if (recordingState !== 'idle') {
-      console.warn('Cannot start recording; current state is:', recordingState);
+  const executeStartRecording = useCallback(async () => {
+    if (isStartingRecordingRef.current) {
+      console.warn('executeStartRecording ignored: start sequence already in progress');
       return;
     }
-    if (videoSettings.countdownSeconds > 0) {
-      setRecordingState('countdown');
-    } else {
-      executeStartRecording();
-    }
-  };
-
-  const executeStartRecording = async () => {
     if (recordingState === 'recording' || recordingState === 'paused') {
+      console.warn('executeStartRecording ignored: already recording or paused');
       return;
     }
+
+    isStartingRecordingRef.current = true;
     try {
       const engine = initRecorderEngine();
       setDurationSeconds(0);
@@ -157,8 +154,22 @@ export default function App() {
       console.warn('Failed to start recording:', err);
       setActiveWebcamStream(null);
       setRecordingState('idle');
+    } finally {
+      isStartingRecordingRef.current = false;
     }
-  };
+  }, [recordingState, mode, audioSettings, videoSettings, pipConfig, initRecorderEngine]);
+
+  const handleStartRecordingSequence = useCallback(() => {
+    if (isStartingRecordingRef.current || recordingState !== 'idle') {
+      console.warn('Cannot start recording; current state is:', recordingState, 'or starting in progress');
+      return;
+    }
+    if (videoSettings.countdownSeconds > 0) {
+      setRecordingState('countdown');
+    } else {
+      executeStartRecording();
+    }
+  }, [recordingState, videoSettings.countdownSeconds, executeStartRecording]);
 
   const handleTogglePause = () => {
     const engine = recorderEngineRef.current;

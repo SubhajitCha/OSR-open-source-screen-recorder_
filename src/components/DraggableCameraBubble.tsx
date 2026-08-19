@@ -192,15 +192,31 @@ export const DraggableCameraBubble: React.FC<DraggableCameraBubbleProps> = ({
             : 'rounded-xl'
         }`}
       >
-        <video
-          ref={videoRef}
-          autoPlay
-          muted
-          playsInline
-          className={`w-full h-full object-cover pointer-events-none ${
-            pipConfig.mirror ? '-scale-x-100' : ''
-          }`}
-        />
+        {isOsPipActive ? (
+          <div className="w-full h-full flex flex-col items-center justify-center p-3 text-center bg-gray-900 text-white select-none">
+            <LinkSquare01Icon className="w-6 h-6 text-red-500 mb-1" />
+            <span className="text-[10px] font-bold">Floating in OS Window</span>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleRequestOsPip();
+              }}
+              className="mt-1 px-2 py-0.5 bg-red-600 hover:bg-red-500 rounded text-[9px] font-semibold text-white cursor-pointer"
+            >
+              Dock Back
+            </button>
+          </div>
+        ) : (
+          <video
+            ref={videoRef}
+            autoPlay
+            muted
+            playsInline
+            className={`w-full h-full object-cover pointer-events-none ${
+              pipConfig.mirror ? '-scale-x-100' : ''
+            }`}
+          />
+        )}
 
         {/* Drag handle & action overlays on hover */}
         {isHovered && (

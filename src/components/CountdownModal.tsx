@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Cancel01Icon, SparklesIcon } from 'hugeicons-react';
 
@@ -15,10 +15,16 @@ export const CountdownModal: React.FC<CountdownModalProps> = ({
 }) => {
   const [currentCount, setCurrentCount] = useState<number>(seconds);
   const totalSeconds = Math.max(1, seconds);
+  const onCompleteRef = useRef(onComplete);
+  onCompleteRef.current = onComplete;
+  const hasTriggeredCompleteRef = useRef(false);
 
   useEffect(() => {
     if (currentCount <= 0) {
-      onComplete();
+      if (!hasTriggeredCompleteRef.current) {
+        hasTriggeredCompleteRef.current = true;
+        onCompleteRef.current();
+      }
       return;
     }
 
@@ -45,7 +51,7 @@ export const CountdownModal: React.FC<CountdownModalProps> = ({
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [currentCount, onComplete]);
+  }, [currentCount]);
 
   // Handle Escape key to cancel
   useEffect(() => {

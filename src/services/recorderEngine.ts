@@ -29,6 +29,7 @@ export class RecorderEngine {
 
   private isPaused = false;
   private isRecording = false;
+  private isStarting = false;
 
   constructor(private callbacks: RecorderCallbacks) {}
 
@@ -38,6 +39,11 @@ export class RecorderEngine {
     videoSettings: VideoSettings,
     pipConfig: PipConfig
   ): Promise<{ webcamStream: MediaStream | null }> {
+    if (this.isStarting || this.isRecording) {
+      console.warn('RecorderEngine: startRecording called while already starting or recording.');
+      return { webcamStream: this.webcamStream };
+    }
+    this.isStarting = true;
     try {
       this.cleanupStreams();
       this.recordedChunks = [];
@@ -128,25 +134,22 @@ export class RecorderEngine {
         audioSettings.systemVolume
       );
 
-      // 4. Setup Video Stream Compositor
+      // 4. Setup Video Stream
       let finalVideoStream: MediaStream;
 
       if (mode === 'audio_only') {
         finalVideoStream = new MediaStream();
-      } else if (mode === 'screen') {
-        // Direct screen stream without canvas overhead
-        finalVideoStream = this.screenStream || new MediaStream();
       } else if (mode === 'cam_only') {
+        // Direct webcam stream
         finalVideoStream = this.webcamStream || new MediaStream();
+      } else if (mode === 'screen' || mode === 'screen_cam') {
+        // Direct screen stream - captures the user's screen which already includes the live,
+        // interactive on-screen DraggableCameraBubble.
+        // This delivers native 60fps hardware-accelerated video with zero canvas lag
+        // and guarantees exactly ONE camera bubble without duplicate PIP overlays.
+        finalVideoStream = this.screenStream || new MediaStream();
       } else {
-        // Mode is 'screen_cam' -> Compositor with moveable PIP
-        this.compositor = createStreamCompositor(
-          this.screenStream,
-          this.webcamStream,
-          pipConfig,
-          videoSettings.fps
-        );
-        finalVideoStream = this.compositor.outputStream;
+        finalVideoStream = this.screenStream || this.webcamStream || new MediaStream();
       }
 
       // Combine video + mixed audio into one final recording MediaStream
@@ -227,6 +230,8 @@ export class RecorderEngine {
       this.cleanupStreams();
       this.callbacks.onError(err as Error);
       throw err;
+    } finally {
+      this.isStarting = false;
     }
   }
 

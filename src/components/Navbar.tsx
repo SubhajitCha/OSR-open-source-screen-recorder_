@@ -1,12 +1,12 @@
 import React from 'react';
 import {
-  Video,
-  Film,
-  BookOpen,
-  Settings,
-  ShieldCheck,
-  Activity,
-} from 'lucide-react';
+  Video01Icon,
+  Film01Icon,
+  BookOpen01Icon,
+  Settings01Icon,
+  SecurityCheckIcon,
+  Activity01Icon,
+} from 'hugeicons-react';
 import { ActiveView } from '../types';
 
 interface NavbarProps {
@@ -63,7 +63,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200/60'
             } ${isRecording ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
-            <Video className="w-4 h-4 text-red-500" />
+            <Video01Icon className="w-4 h-4 text-red-500" />
             <span>Studio</span>
           </button>
 
@@ -77,7 +77,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200/60'
             } ${isRecording ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
-            <Film className="w-4 h-4 text-gray-500" />
+            <Film01Icon className="w-4 h-4 text-gray-500" />
             <span>Library</span>
             {recordingsCount > 0 && (
               <span className="px-1.5 py-0.2 text-[10px] font-bold bg-gray-200 text-gray-700 rounded-full">
@@ -96,7 +96,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200/60'
             } ${isRecording ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
-            <Activity className="w-4 h-4 text-green-600" />
+            <Activity01Icon className="w-4 h-4 text-green-600" />
             <span>Services</span>
           </button>
 
@@ -110,7 +110,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200/60'
             } ${isRecording ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
-            <BookOpen className="w-4 h-4 text-gray-500" />
+            <BookOpen01Icon className="w-4 h-4 text-gray-500" />
             <span>Docs</span>
           </button>
         </nav>
@@ -130,7 +130,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Privacy badge */}
           <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gray-100 border border-gray-200 text-gray-600 text-xs font-medium">
-            <ShieldCheck className="w-3.5 h-3.5 text-green-600" />
+            <SecurityCheckIcon className="w-3.5 h-3.5 text-green-600" />
             <span>100% Local</span>
           </div>
 
@@ -141,7 +141,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             title="Recording & Audio Settings"
             className="p-2 text-gray-500 hover:text-gray-900 rounded-xl bg-gray-100 hover:bg-gray-200 border border-gray-200 transition-colors"
           >
-            <Settings className="w-4 h-4" />
+            <Settings01Icon className="w-4 h-4" />
           </button>
         </div>
       </div>

@@ -1,14 +1,11 @@
 import React from 'react';
 import {
-  X,
-  Settings as SettingsIcon,
-  Sliders,
-  Mic,
-  Video,
-  Keyboard,
-  HardDrive,
-  Info,
-} from 'lucide-react';
+  Cancel01Icon,
+  Settings01Icon,
+  Mic01Icon,
+  Video01Icon,
+  KeyboardIcon,
+} from 'hugeicons-react';
 import { AudioSettings, FrameRatePreset, ResolutionPreset, VideoSettings } from '../types';
 
 interface SettingsModalProps {
@@ -39,7 +36,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-white">
           <div className="flex items-center gap-3">
             <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-gray-100 text-gray-800 border border-gray-200">
-              <SettingsIcon className="w-5 h-5 text-red-500" />
+              <Settings01Icon className="w-5 h-5 text-red-500" />
             </div>
             <div>
               <h2 className="text-base font-bold text-gray-900">Recording Preferences</h2>
@@ -49,9 +46,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           <button
             id="btn-close-settings"
             onClick={onClose}
-            className="p-2 text-gray-400 hover:text-gray-700 rounded-lg hover:bg-gray-100 transition-colors"
+            className="p-2 text-gray-400 hover:text-gray-700 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
           >
-            <X className="w-5 h-5" />
+            <Cancel01Icon className="w-5 h-5" />
           </button>
         </div>
 
@@ -60,7 +57,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           {/* Section: Video Settings */}
           <div className="space-y-4">
             <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center gap-2">
-              <Video className="w-4 h-4 text-red-500" />
+              <Video01Icon className="w-4 h-4 text-red-500" />
               Video Encoding & Performance
             </h3>
 
@@ -167,7 +164,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           {/* Section: Audio DSP Settings */}
           <div className="space-y-4">
             <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center gap-2">
-              <Mic className="w-4 h-4 text-green-600" />
+              <Mic01Icon className="w-4 h-4 text-green-600" />
               Microphone Digital Signal Processing (DSP)
             </h3>
 
@@ -216,7 +213,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           {/* Section: Keyboard Shortcuts */}
           <div className="space-y-3">
             <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center gap-2">
-              <Keyboard className="w-4 h-4 text-purple-600" />
+              <KeyboardIcon className="w-4 h-4 text-purple-600" />
               Keyboard Shortcuts Cheatsheet
             </h3>
 
@@ -271,7 +268,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           <button
             id="btn-save-settings-close"
             onClick={onClose}
-            className="px-5 py-2 text-xs font-semibold text-white bg-red-600 hover:bg-red-500 rounded-xl shadow-md shadow-red-200 transition-all"
+            className="px-5 py-2 text-xs font-semibold text-white bg-red-600 hover:bg-red-500 rounded-xl shadow-md shadow-red-200 transition-all cursor-pointer"
           >
             Save Preferences
           </button>

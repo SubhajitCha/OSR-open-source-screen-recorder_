@@ -5,16 +5,14 @@ import {
   PipSize,
 } from '../types';
 import {
-  Move,
-  Maximize2,
-  Minimize2,
-  RefreshCw,
-  ExternalLink,
-  Circle,
-  Square,
-  Sparkles,
-  X,
-} from 'lucide-react';
+  MoveIcon,
+  Maximize01Icon,
+  Minimize01Icon,
+  RefreshIcon,
+  LinkSquare01Icon,
+  CircleIcon,
+  SquareIcon,
+} from 'hugeicons-react';
 
 interface DraggableCameraBubbleProps {
   stream: MediaStream | null;
@@ -29,26 +27,6 @@ export const DraggableCameraBubble: React.FC<DraggableCameraBubbleProps> = ({
   onUpdatePipConfig,
   isRecording = false,
 }) => {
-  const [position, setPosition] = useState<{ x: number; y: number }>({
-    x: window.innerWidth - 240,
-    y: window.innerHeight - 240,
-  });
-  const [isDragging, setIsDragging] = useState<boolean>(false);
-  const [dragOffset, setDragOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
-  const [isHovered, setIsHovered] = useState<boolean>(false);
-  const [isOsPipActive, setIsOsPipActive] = useState<boolean>(false);
-
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-  const containerRef = useRef<HTMLDivElement | null>(null);
-
-  // Set video stream
-  useEffect(() => {
-    if (videoRef.current && stream) {
-      videoRef.current.srcObject = stream;
-      videoRef.current.play().catch((e) => console.warn('Bubble play error:', e));
-    }
-  }, [stream]);
-
   // Determine size pixel dimensions
   const getDimensions = () => {
     if (pipConfig.size === 'small') return { width: 140, height: 140 };
@@ -57,6 +35,53 @@ export const DraggableCameraBubble: React.FC<DraggableCameraBubbleProps> = ({
   };
 
   const { width, height } = getDimensions();
+
+  const [position, setPosition] = useState<{ x: number; y: number }>(() => {
+    const padding = 24;
+    return {
+      x: window.innerWidth - 214,
+      y: window.innerHeight - 280,
+    };
+  });
+
+  const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [dragOffset, setDragOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [isHovered, setIsHovered] = useState<boolean>(false);
+  const [isOsPipActive, setIsOsPipActive] = useState<boolean>(false);
+
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  // Sync position from preset config if not actively dragging
+  useEffect(() => {
+    if (isDragging) return;
+    const padding = 24;
+    const w = width;
+    const h = height;
+
+    if (pipConfig.position === 'top-left') {
+      setPosition({ x: padding, y: padding });
+    } else if (pipConfig.position === 'top-right') {
+      setPosition({ x: window.innerWidth - w - padding, y: padding });
+    } else if (pipConfig.position === 'bottom-left') {
+      setPosition({ x: padding, y: Math.max(padding, window.innerHeight - h - padding - 80) });
+    } else if (pipConfig.position === 'bottom-right') {
+      setPosition({ x: Math.max(padding, window.innerWidth - w - padding), y: Math.max(padding, window.innerHeight - h - padding - 80) });
+    } else if (pipConfig.position === 'custom' && pipConfig.customX !== undefined && pipConfig.customY !== undefined) {
+      setPosition({
+        x: Math.max(10, Math.min(window.innerWidth - w - 10, Math.round((pipConfig.customX / 100) * (window.innerWidth - w)))),
+        y: Math.max(10, Math.min(window.innerHeight - h - 10, Math.round((pipConfig.customY / 100) * (window.innerHeight - h)))),
+      });
+    }
+  }, [pipConfig.position, pipConfig.size, pipConfig.customX, pipConfig.customY, isDragging, width, height]);
+
+  // Set video stream
+  useEffect(() => {
+    if (videoRef.current && stream) {
+      videoRef.current.srcObject = stream;
+      videoRef.current.play().catch((e) => console.warn('Bubble play error:', e));
+    }
+  }, [stream]);
 
   // Mouse Drag handlers
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -153,13 +178,13 @@ export const DraggableCameraBubble: React.FC<DraggableCameraBubbleProps> = ({
         width: `${width}px`,
         height: `${height}px`,
       }}
-      className={`fixed z-50 cursor-grab active:cursor-grabbing select-none transition-shadow ${
-        isDragging ? 'shadow-2xl scale-[1.02]' : 'shadow-xl'
+      className={`fixed z-50 cursor-grab active:cursor-grabbing select-none transition-shadow duration-150 ${
+        isDragging ? 'shadow-2xl scale-[1.03]' : 'shadow-xl'
       }`}
     >
       {/* Container with specified shape */}
       <div
-        className={`w-full h-full relative overflow-hidden bg-gray-900 border-4 border-white shadow-xl ${
+        className={`w-full h-full relative overflow-hidden bg-gray-900 border-[3.5px] border-white shadow-2xl ${
           pipConfig.shape === 'circle'
             ? 'rounded-full'
             : pipConfig.shape === 'rounded'
@@ -179,12 +204,12 @@ export const DraggableCameraBubble: React.FC<DraggableCameraBubbleProps> = ({
 
         {/* Drag handle & action overlays on hover */}
         {isHovered && (
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex flex-col items-center justify-between p-2.5 transition-opacity">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex flex-col items-center justify-between p-2 transition-opacity">
             {/* Top Toolbar */}
-            <div className="flex items-center gap-1 bg-black/60 backdrop-blur-md px-2 py-1 rounded-full border border-white/20">
+            <div className="flex items-center gap-1 bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/20 shadow-md">
               <span className="text-[10px] text-white font-semibold flex items-center gap-1">
-                <Move className="w-3 h-3 text-red-400" />
-                Drag
+                <MoveIcon className="w-3 h-3 text-red-400" />
+                Move
               </span>
 
               {/* OS Float PiP everywhere button */}
@@ -195,15 +220,15 @@ export const DraggableCameraBubble: React.FC<DraggableCameraBubbleProps> = ({
                     handleRequestOsPip();
                   }}
                   title="Float across ALL desktop apps & screens (OS PiP)"
-                  className="p-1 text-white hover:text-red-400 transition-colors"
+                  className="p-1 text-white hover:text-red-400 transition-colors ml-1 cursor-pointer"
                 >
-                  <ExternalLink className="w-3 h-3" />
+                  <LinkSquare01Icon className="w-3 h-3" />
                 </button>
               )}
             </div>
 
             {/* Bottom Controls: Shape, Mirror, Size */}
-            <div className="flex items-center gap-1 bg-black/60 backdrop-blur-md p-1 rounded-full border border-white/20">
+            <div className="flex items-center gap-1.5 bg-black/70 backdrop-blur-md px-2 py-1 rounded-full border border-white/20 shadow-md">
               {/* Shape Toggle */}
               <button
                 onClick={(e) => {
@@ -212,13 +237,13 @@ export const DraggableCameraBubble: React.FC<DraggableCameraBubbleProps> = ({
                     pipConfig.shape === 'circle' ? 'rounded' : pipConfig.shape === 'rounded' ? 'square' : 'circle';
                   onUpdatePipConfig({ shape: nextShape });
                 }}
-                title="Change Shape"
-                className="p-1 text-white hover:text-red-400"
+                title="Change Shape (Circle / Rounded / Square)"
+                className="p-1 text-white hover:text-red-400 transition-colors cursor-pointer"
               >
                 {pipConfig.shape === 'circle' ? (
-                  <Circle className="w-3 h-3" />
+                  <CircleIcon className="w-3.5 h-3.5" />
                 ) : (
-                  <Square className="w-3 h-3" />
+                  <SquareIcon className="w-3.5 h-3.5" />
                 )}
               </button>
 
@@ -229,9 +254,9 @@ export const DraggableCameraBubble: React.FC<DraggableCameraBubbleProps> = ({
                   onUpdatePipConfig({ mirror: !pipConfig.mirror });
                 }}
                 title="Mirror Camera"
-                className={`p-1 ${pipConfig.mirror ? 'text-red-400' : 'text-white'}`}
+                className={`p-1 transition-colors cursor-pointer ${pipConfig.mirror ? 'text-red-400' : 'text-white hover:text-gray-300'}`}
               >
-                <RefreshCw className="w-3 h-3" />
+                <RefreshIcon className="w-3.5 h-3.5" />
               </button>
 
               {/* Size Toggle */}
@@ -242,13 +267,13 @@ export const DraggableCameraBubble: React.FC<DraggableCameraBubbleProps> = ({
                     pipConfig.size === 'small' ? 'medium' : pipConfig.size === 'medium' ? 'large' : 'small';
                   onUpdatePipConfig({ size: nextSize });
                 }}
-                title="Toggle Size"
-                className="p-1 text-white hover:text-red-400"
+                title="Toggle Size (Small / Medium / Large)"
+                className="p-1 text-white hover:text-red-400 transition-colors cursor-pointer"
               >
                 {pipConfig.size === 'large' ? (
-                  <Minimize2 className="w-3 h-3" />
+                  <Minimize01Icon className="w-3.5 h-3.5" />
                 ) : (
-                  <Maximize2 className="w-3 h-3" />
+                  <Maximize01Icon className="w-3.5 h-3.5" />
                 )}
               </button>
             </div>
@@ -256,8 +281,8 @@ export const DraggableCameraBubble: React.FC<DraggableCameraBubbleProps> = ({
         )}
 
         {/* Live Recording Pulsing Dot if active */}
-        {isRecording && (
-          <div className="absolute top-2.5 right-2.5 w-3 h-3 bg-red-500 rounded-full ring-2 ring-white animate-pulse" />
+        {isRecording && !isHovered && (
+          <div className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-white animate-pulse" />
         )}
       </div>
     </div>

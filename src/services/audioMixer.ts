@@ -4,6 +4,7 @@ export interface AudioMixerController {
   setMicVolume: (volume: number) => void;
   setSystemVolume: (volume: number) => void;
   getAudioData: (dataArray: Uint8Array) => void;
+  getFrequencyData: () => Uint8Array;
   getAverageVolume: () => number; // 0 to 100
   cleanup: () => void;
 }
@@ -74,6 +75,12 @@ export function createAudioMixer(
     analyserNode.getByteFrequencyData(dataArray);
   };
 
+  const getFrequencyData = (): Uint8Array => {
+    const data = new Uint8Array(analyserNode.frequencyBinCount);
+    analyserNode.getByteFrequencyData(data);
+    return data;
+  };
+
   const getAverageVolume = (): number => {
     const data = new Uint8Array(analyserNode.frequencyBinCount);
     analyserNode.getByteFrequencyData(data);
@@ -106,6 +113,7 @@ export function createAudioMixer(
     setMicVolume,
     setSystemVolume,
     getAudioData,
+    getFrequencyData,
     getAverageVolume,
     cleanup,
   };

@@ -13,11 +13,17 @@ export function createStreamCompositor(
   targetFps = 60
 ): CompositorController {
   const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d', { alpha: false });
+  // High performance context settings
+  const ctx = canvas.getContext('2d', {
+    alpha: false,
+    desynchronized: true,
+  });
 
   let pipConfig = { ...initialPipConfig };
   let animationFrameId: number | null = null;
+  let intervalTickerId: number | null = null;
   let isRunning = true;
+  let lastFrameTime = performance.now();
 
   // Screen video element
   const screenVideo = document.createElement('video');
@@ -47,8 +53,9 @@ export function createStreamCompositor(
 
   const render = () => {
     if (!isRunning || !ctx) return;
+    lastFrameTime = performance.now();
 
-    // Detect actual dimensions from screenVideo if available
+    // 1. Detect actual dimensions from screenVideo if available
     if (screenVideo.videoWidth && screenVideo.videoHeight) {
       if (canvas.width !== screenVideo.videoWidth || canvas.height !== screenVideo.videoHeight) {
         canvas.width = screenVideo.videoWidth;
@@ -75,14 +82,14 @@ export function createStreamCompositor(
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
 
-    // Draw Picture-in-Picture webcam overlay if enabled and screen is also present
+    // 2. Draw Picture-in-Picture webcam overlay if enabled and screen is also present
     if (pipConfig.enabled && screenStream && webcamStream && webcamVideo.videoWidth && webcamVideo.videoHeight) {
       const cw = canvas.width;
       const ch = canvas.height;
 
       // Calculate size
       let pipWidth = 320;
-      if (pipConfig.size === 'small') pipWidth = cw * 0.16;
+      if (pipConfig.size === 'small') pipWidth = cw * 0.15;
       else if (pipConfig.size === 'medium') pipWidth = cw * 0.22;
       else if (pipConfig.size === 'large') pipWidth = cw * 0.30;
 
@@ -113,9 +120,9 @@ export function createStreamCompositor(
 
       ctx.save();
 
-      // Shadow
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
-      ctx.shadowBlur = 20;
+      // Soft Shadow
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.40)';
+      ctx.shadowBlur = 18;
       ctx.shadowOffsetX = 0;
       ctx.shadowOffsetY = 6;
 
@@ -139,10 +146,10 @@ export function createStreamCompositor(
         ctx.drawImage(webcamVideo, x, y, pipWidth, pipHeight);
         ctx.restore();
 
-        // Stroke border
+        // White border
         if (pipConfig.borderWidth > 0) {
           ctx.lineWidth = pipConfig.borderWidth * 2;
-          ctx.strokeStyle = pipConfig.borderColor || '#3b82f6';
+          ctx.strokeStyle = pipConfig.borderColor || '#ffffff';
           ctx.stroke();
         }
       } else if (pipConfig.shape === 'rounded') {
@@ -163,7 +170,7 @@ export function createStreamCompositor(
 
         if (pipConfig.borderWidth > 0) {
           ctx.lineWidth = pipConfig.borderWidth * 2;
-          ctx.strokeStyle = pipConfig.borderColor || '#3b82f6';
+          ctx.strokeStyle = pipConfig.borderColor || '#ffffff';
           ctx.stroke();
         }
       } else {
@@ -184,18 +191,35 @@ export function createStreamCompositor(
 
         if (pipConfig.borderWidth > 0) {
           ctx.lineWidth = pipConfig.borderWidth * 2;
-          ctx.strokeStyle = pipConfig.borderColor || '#3b82f6';
+          ctx.strokeStyle = pipConfig.borderColor || '#ffffff';
           ctx.stroke();
         }
       }
 
       ctx.restore();
     }
-
-    animationFrameId = requestAnimationFrame(render);
   };
 
-  render();
+  // Main RAF rendering loop
+  const rafLoop = () => {
+    if (!isRunning) return;
+    render();
+    animationFrameId = requestAnimationFrame(rafLoop);
+  };
+
+  rafLoop();
+
+  // Background watchdog ticker: if requestAnimationFrame stalls (e.g. user focused another window/app),
+  // this timer ensures the canvas is continuously rendered and captureStream never freezes or pauses
+  const frameIntervalMs = Math.round(1000 / targetFps);
+  intervalTickerId = window.setInterval(() => {
+    if (!isRunning) return;
+    const now = performance.now();
+    // If > 25ms has elapsed without a RAF frame, render immediately
+    if (now - lastFrameTime > Math.max(25, frameIntervalMs * 1.5)) {
+      render();
+    }
+  }, Math.max(16, frameIntervalMs));
 
   const outputStream = canvas.captureStream(targetFps);
 
@@ -207,6 +231,9 @@ export function createStreamCompositor(
     isRunning = false;
     if (animationFrameId !== null) {
       cancelAnimationFrame(animationFrameId);
+    }
+    if (intervalTickerId !== null) {
+      clearInterval(intervalTickerId);
     }
     screenVideo.srcObject = null;
     webcamVideo.srcObject = null;

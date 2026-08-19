@@ -1,23 +1,23 @@
 import React, { useState, useRef } from 'react';
 import {
-  Play,
-  Video,
-  Mic,
-  Settings,
-  Sliders,
-  Info,
-  ChevronDown,
-  Monitor,
-  Layers,
-  Radio,
-  Volume2,
-  VolumeX,
-  MicOff,
-  Move,
-  Circle,
-  Square,
-  RefreshCw,
-} from 'lucide-react';
+  PlayIcon,
+  Video01Icon,
+  Mic01Icon,
+  MicOff01Icon,
+  Settings01Icon,
+  PreferenceHorizontalIcon,
+  InformationCircleIcon,
+  ArrowDown01Icon,
+  ComputerIcon,
+  Layers01Icon,
+  RadioIcon,
+  VolumeHighIcon,
+  VolumeMute01Icon,
+  MoveIcon,
+  CircleIcon,
+  SquareIcon,
+  RefreshIcon,
+} from 'hugeicons-react';
 import {
   AudioSettings,
   PipConfig,
@@ -93,14 +93,14 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
             onClick={onOpenDocs}
             className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-gray-700 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-xl transition-all"
           >
-            <Info className="w-3.5 h-3.5 text-gray-500" />
+            <InformationCircleIcon className="w-3.5 h-3.5 text-gray-500" />
             <span>Architecture Docs</span>
           </button>
           <button
             onClick={onOpenSettings}
             className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-gray-700 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-xl transition-all"
           >
-            <Settings className="w-3.5 h-3.5 text-gray-500" />
+            <Settings01Icon className="w-3.5 h-3.5 text-gray-500" />
             <span>Preferences</span>
           </button>
         </div>
@@ -129,7 +129,7 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
             <div className={`p-2 rounded-xl ${
               mode === 'screen_cam' ? 'bg-red-500 text-white' : 'bg-gray-100 text-gray-700'
             }`}>
-              <Layers className="w-4 h-4" />
+              <Layers01Icon className="w-4 h-4" />
             </div>
             <div className="min-w-0">
               <span className="text-xs font-bold text-gray-900 block truncate">Screen + Cam</span>
@@ -150,7 +150,7 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
             <div className={`p-2 rounded-xl ${
               mode === 'screen' ? 'bg-red-500 text-white' : 'bg-gray-100 text-gray-700'
             }`}>
-              <Monitor className="w-4 h-4" />
+              <ComputerIcon className="w-4 h-4" />
             </div>
             <div className="min-w-0">
               <span className="text-xs font-bold text-gray-900 block truncate">Screen Only</span>
@@ -171,7 +171,7 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
             <div className={`p-2 rounded-xl ${
               mode === 'cam_only' ? 'bg-red-500 text-white' : 'bg-gray-100 text-gray-700'
             }`}>
-              <Video className="w-4 h-4" />
+              <Video01Icon className="w-4 h-4" />
             </div>
             <div className="min-w-0">
               <span className="text-xs font-bold text-gray-900 block truncate">Camera Only</span>
@@ -192,7 +192,7 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
             <div className={`p-2 rounded-xl ${
               mode === 'audio_only' ? 'bg-red-500 text-white' : 'bg-gray-100 text-gray-700'
             }`}>
-              <Radio className="w-4 h-4" />
+              <RadioIcon className="w-4 h-4" />
             </div>
             <div className="min-w-0">
               <span className="text-xs font-bold text-gray-900 block truncate">Audio Only</span>
@@ -212,7 +212,7 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
             </h3>
             {mode === 'screen_cam' && (
               <span className="text-[11px] text-gray-500 flex items-center gap-1 font-medium">
-                <Move className="w-3 h-3 text-red-500" />
+                <MoveIcon className="w-3 h-3 text-red-500" />
                 Click or drag camera anywhere on stage
               </span>
             )}
@@ -242,13 +242,13 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
               <div className="text-center p-6 space-y-2 pointer-events-none">
                 <div className="w-12 h-12 border-2 border-white/20 rounded-full flex items-center justify-center mx-auto">
                   {mode === 'screen_cam' ? (
-                    <Layers className="w-5 h-5 text-white/50" />
+                    <Layers01Icon className="w-5 h-5 text-white/50" />
                   ) : mode === 'cam_only' ? (
-                    <Video className="w-5 h-5 text-white/50" />
+                    <Video01Icon className="w-5 h-5 text-white/50" />
                   ) : mode === 'audio_only' ? (
-                    <Radio className="w-5 h-5 text-white/50" />
+                    <RadioIcon className="w-5 h-5 text-white/50" />
                   ) : (
-                    <Monitor className="w-5 h-5 text-white/50" />
+                    <ComputerIcon className="w-5 h-5 text-white/50" />
                   )}
                 </div>
                 <p className="text-white/70 text-xs font-semibold">
@@ -303,7 +303,7 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
                       : 'rounded-lg w-24 h-16'
                   }`}
                 >
-                  <Video className="w-3.5 h-3.5" />
+                  <Video01Icon className="w-3.5 h-3.5" />
                   <span className="text-[9px]">Camera PIP</span>
                 </div>
               )}
@@ -342,7 +342,7 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
                           : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-100'
                       }`}
                     >
-                      <Circle className="w-3 h-3 inline mr-1" />
+                      <CircleIcon className="w-3 h-3 inline mr-1" />
                       Circle
                     </button>
                     <button
@@ -353,7 +353,7 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
                           : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-100'
                       }`}
                     >
-                      <Square className="w-3 h-3 inline mr-1 rounded" />
+                      <SquareIcon className="w-3 h-3 inline mr-1 rounded" />
                       Rounded
                     </button>
                     <button
@@ -362,7 +362,7 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
                         pipConfig.mirror ? 'bg-red-50 text-red-700 border-red-300' : 'bg-white text-gray-600 border-gray-200'
                       }`}
                     >
-                      <RefreshCw className="w-3 h-3 inline mr-1" />
+                      <RefreshIcon className="w-3 h-3 inline mr-1" />
                       Mirror
                     </button>
                   </div>
@@ -387,7 +387,7 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
                   <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${
                     audioSettings.includeMic ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-400'
                   }`}>
-                    {audioSettings.includeMic ? <Mic className="w-3.5 h-3.5" /> : <MicOff className="w-3.5 h-3.5" />}
+                    {audioSettings.includeMic ? <Mic01Icon className="w-3.5 h-3.5" /> : <MicOff01Icon className="w-3.5 h-3.5" />}
                   </div>
                   <div>
                     <span className="text-xs font-bold text-gray-900 block">Microphone Audio</span>
@@ -433,7 +433,7 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
                   <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${
                     audioSettings.includeSystemAudio ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-400'
                   }`}>
-                    {audioSettings.includeSystemAudio ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
+                    {audioSettings.includeSystemAudio ? <VolumeHighIcon className="w-3.5 h-3.5" /> : <VolumeMute01Icon className="w-3.5 h-3.5" />}
                   </div>
                   <div>
                     <span className="text-xs font-bold text-gray-900 block">System Audio</span>
@@ -460,7 +460,7 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
             <div>
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-[10px] uppercase tracking-widest text-gray-400 font-bold flex items-center gap-1.5">
-                  <Sliders className="w-3.5 h-3.5 text-red-500" />
+                  <PreferenceHorizontalIcon className="w-3.5 h-3.5 text-red-500" />
                   Session Target & Preferences
                 </h3>
                 <button
@@ -468,7 +468,7 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
                   className="text-[11px] text-red-600 hover:text-red-700 font-semibold flex items-center gap-1"
                 >
                   <span>{isAdvancedTargetOpen ? 'Compact' : 'More Options'}</span>
-                  <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isAdvancedTargetOpen ? 'rotate-180' : ''}`} />
+                  <ArrowDown01Icon className={`w-3.5 h-3.5 transition-transform ${isAdvancedTargetOpen ? 'rotate-180' : ''}`} />
                 </button>
               </div>
 
@@ -566,10 +566,10 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
               <button
                 id="btn-start-recording-main"
                 onClick={onStartRecording}
-                className="w-full flex items-center justify-between px-5 py-3.5 bg-red-600 hover:bg-red-500 active:scale-98 text-white rounded-2xl font-bold text-sm shadow-lg shadow-red-200 hover:shadow-red-300 transition-all duration-200"
+                className="w-full flex items-center justify-between px-5 py-3.5 bg-red-600 hover:bg-red-500 active:scale-98 text-white rounded-2xl font-bold text-sm shadow-lg shadow-red-200 hover:shadow-red-300 transition-all duration-200 cursor-pointer"
               >
                 <div className="flex items-center gap-2.5">
-                  <Play className="w-4 h-4 fill-current" />
+                  <PlayIcon className="w-4 h-4 fill-current" />
                   <span>Start Recording</span>
                 </div>
 

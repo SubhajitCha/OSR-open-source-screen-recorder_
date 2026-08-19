@@ -1,6 +1,7 @@
 import { AudioSettings, PipConfig, RecordingMode, VideoBookmark, VideoSettings } from '../types';
 import { createAudioMixer, AudioMixerController } from './audioMixer';
 import { createStreamCompositor, CompositorController } from './streamCompositor';
+import { fixWebmDuration } from './webmDurationFixer';
 
 export interface RecorderCallbacks {
   onTimeUpdate: (durationSeconds: number) => void;
@@ -36,7 +37,7 @@ export class RecorderEngine {
     audioSettings: AudioSettings,
     videoSettings: VideoSettings,
     pipConfig: PipConfig
-  ): Promise<void> {
+  ): Promise<{ webcamStream: MediaStream | null }> {
     try {
       this.cleanupStreams();
       this.recordedChunks = [];
@@ -73,7 +74,7 @@ export class RecorderEngine {
         }
       }
 
-      // 2. Acquire Webcam & Mic Stream with a single combined getUserMedia call to avoid multiple browser popups
+      // 2. Acquire Webcam & Mic Stream with a single combined getUserMedia call
       const needCamera = mode === 'screen_cam' || mode === 'cam_only';
       const needMic = audioSettings.includeMic;
 
@@ -118,28 +119,26 @@ export class RecorderEngine {
         }
       }
 
-      // 4. Setup Web Audio Mixer
+      // 3. Setup Web Audio Mixer
       this.audioMixer = createAudioMixer(
         this.micStream,
-        this.screenStream, // contains system audio track if user shared system audio
+        this.screenStream,
         audioSettings.micVolume,
         audioSettings.systemVolume
       );
 
-      // 5. Setup Video Stream Compositor
+      // 4. Setup Video Stream Compositor
       let finalVideoStream: MediaStream;
 
       if (mode === 'audio_only') {
-        // Audio only recording
         finalVideoStream = new MediaStream();
-      } else if (mode === 'screen' && !pipConfig.enabled) {
-        // Pure screen stream directly
+      } else if (mode === 'screen') {
+        // Direct screen stream without canvas overhead
         finalVideoStream = this.screenStream || new MediaStream();
       } else if (mode === 'cam_only') {
-        // Pure webcam
         finalVideoStream = this.webcamStream || new MediaStream();
       } else {
-        // Compositor with PIP
+        // Mode is 'screen_cam' -> Compositor with moveable PIP
         this.compositor = createStreamCompositor(
           this.screenStream,
           this.webcamStream,
@@ -151,11 +150,10 @@ export class RecorderEngine {
 
       // Combine video + mixed audio into one final recording MediaStream
       const finalStream = new MediaStream();
-
       finalVideoStream.getVideoTracks().forEach((track) => finalStream.addTrack(track));
       this.audioMixer.destinationStream.getAudioTracks().forEach((track) => finalStream.addTrack(track));
 
-      // 6. Setup MediaRecorder with best supported MIME type & options
+      // 5. Setup MediaRecorder
       const mimeType = MediaRecorder.isTypeSupported(videoSettings.codec)
         ? videoSettings.codec
         : (MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')
@@ -218,8 +216,12 @@ export class RecorderEngine {
         this.callbacks.onError(new Error('Recording error occurred'));
       };
 
-      // Start recording with 1-second timeslices for responsive streaming
+      // Start recording with 1-second timeslices
       this.mediaRecorder.start(1000);
+
+      return {
+        webcamStream: this.webcamStream,
+      };
     } catch (err) {
       this.cleanupStreams();
       this.callbacks.onError(err as Error);
@@ -239,7 +241,7 @@ export class RecorderEngine {
     }
   }
 
-  public stopRecording(): Promise<{ blob: Blob; duration: number; mimeType: string; bookmarks: VideoBookmark[] }> {
+  public async stopRecording(): Promise<{ blob: Blob; duration: number; mimeType: string; bookmarks: VideoBookmark[] }> {
     return new Promise((resolve, reject) => {
       if (!this.mediaRecorder) {
         reject(new Error('No active recorder found'));
@@ -248,9 +250,16 @@ export class RecorderEngine {
 
       const mimeType = this.mediaRecorder.mimeType || 'video/webm';
       const durationSeconds = Math.max(1, Math.round((Date.now() - this.startTime - this.totalPausedDuration) / 1000));
+      const durationMs = Math.max(1000, Date.now() - this.startTime - this.totalPausedDuration);
 
-      this.mediaRecorder.onstop = () => {
-        const fullBlob = new Blob(this.recordedChunks, { type: mimeType });
+      this.mediaRecorder.onstop = async () => {
+        let fullBlob = new Blob(this.recordedChunks, { type: mimeType });
+        try {
+          // Patch WebM header with accurate duration so video seeks instantly and never freezes in VLC/WMP/Chrome
+          fullBlob = await fixWebmDuration(fullBlob, durationMs);
+        } catch {
+          // ignore
+        }
         const bookmarks = [...this.bookmarks];
         this.cleanupStreams();
         this.callbacks.onStateChange('stopped');
@@ -265,33 +274,38 @@ export class RecorderEngine {
       if (this.mediaRecorder.state !== 'inactive') {
         this.mediaRecorder.stop();
       } else {
-        const fullBlob = new Blob(this.recordedChunks, { type: mimeType });
-        resolve({
-          blob: fullBlob,
-          duration: durationSeconds,
-          mimeType,
-          bookmarks: [...this.bookmarks],
-        });
+        let fullBlob = new Blob(this.recordedChunks, { type: mimeType });
+        fixWebmDuration(fullBlob, durationMs)
+          .then((fixed) => {
+            resolve({
+              blob: fixed,
+              duration: durationSeconds,
+              mimeType,
+              bookmarks: [...this.bookmarks],
+            });
+          })
+          .catch(() => {
+            resolve({
+              blob: fullBlob,
+              duration: durationSeconds,
+              mimeType,
+              bookmarks: [...this.bookmarks],
+            });
+          });
       }
     });
   }
 
   public addBookmark(label?: string): VideoBookmark {
     const currentDuration = Math.max(0, (Date.now() - this.startTime - this.totalPausedDuration) / 1000);
-    const bookmark: VideoBookmark = {
-      id: 'bm_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
-      timestamp: parseFloat(currentDuration.toFixed(1)),
-      label: label || `Marker at ${this.formatTime(currentDuration)}`,
+    const newBookmark: VideoBookmark = {
+      id: 'bm_' + Date.now(),
+      timestamp: currentDuration,
+      label: label || `Bookmark @ ${Math.floor(currentDuration / 60)}:${Math.floor(currentDuration % 60).toString().padStart(2, '0')}`,
     };
-    this.bookmarks.push(bookmark);
-    this.callbacks.onBookmarkAdded(bookmark);
-    return bookmark;
-  }
-
-  public updatePipConfig(newConfig: PipConfig): void {
-    if (this.compositor) {
-      this.compositor.updatePipConfig(newConfig);
-    }
+    this.bookmarks.push(newBookmark);
+    this.callbacks.onBookmarkAdded(newBookmark);
+    return newBookmark;
   }
 
   public setMicVolume(vol: number): void {
@@ -306,6 +320,12 @@ export class RecorderEngine {
     }
   }
 
+  public updatePipConfig(config: PipConfig): void {
+    if (this.compositor) {
+      this.compositor.updatePipConfig(config);
+    }
+  }
+
   public getAudioMixer(): AudioMixerController | null {
     return this.audioMixer;
   }
@@ -314,20 +334,14 @@ export class RecorderEngine {
     return this.webcamStream;
   }
 
-  public getLiveDuration(): number {
-    if (!this.isRecording) return 0;
-    const paused = this.isPaused ? Date.now() - this.pausedTime : 0;
-    return Math.max(0, (Date.now() - this.startTime - this.totalPausedDuration - paused) / 1000);
-  }
-
   private startTimer(): void {
     this.stopTimer();
     this.timerInterval = window.setInterval(() => {
       if (this.isRecording && !this.isPaused) {
-        const seconds = this.getLiveDuration();
-        this.callbacks.onTimeUpdate(seconds);
+        const dur = (Date.now() - this.startTime - this.totalPausedDuration) / 1000;
+        this.callbacks.onTimeUpdate(dur);
       }
-    }, 200);
+    }, 250);
   }
 
   private stopTimer(): void {
@@ -337,34 +351,32 @@ export class RecorderEngine {
     }
   }
 
-  private formatTime(seconds: number): string {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  }
-
-  private cleanupStreams(): void {
+  public cleanupStreams(): void {
     this.stopTimer();
+
     if (this.compositor) {
       this.compositor.cleanup();
       this.compositor = null;
     }
+
     if (this.audioMixer) {
       this.audioMixer.cleanup();
       this.audioMixer = null;
     }
+
     if (this.screenStream) {
       this.screenStream.getTracks().forEach((track) => track.stop());
       this.screenStream = null;
     }
+
     if (this.webcamStream) {
       this.webcamStream.getTracks().forEach((track) => track.stop());
       this.webcamStream = null;
     }
+
     if (this.micStream) {
       this.micStream.getTracks().forEach((track) => track.stop());
       this.micStream = null;
     }
-    this.mediaRecorder = null;
   }
 }

@@ -14,18 +14,18 @@ import { getBestSupportedVideoMimeType } from './services/browserCapabilities';
 import { Navbar } from './components/Navbar';
 import { RecorderDashboard } from './components/RecorderDashboard';
 import { LiveRecordingOverlay } from './components/LiveRecordingOverlay';
+import { DraggableCameraBubble } from './components/DraggableCameraBubble';
 import { PostRecordingStudio } from './components/PostRecordingStudio';
 import { RecordingsLibrary } from './components/RecordingsLibrary';
 import { ServicesStatusPage } from './components/ServicesStatusPage';
 import { CountdownModal } from './components/CountdownModal';
 import { SettingsModal } from './components/SettingsModal';
-import { TechDocsModal } from './components/TechDocsModal';
+import { TechDocsPage } from './components/TechDocsPage';
 
 export default function App() {
   // Navigation & Views
   const [activeView, setActiveView] = useState<ActiveView>('studio');
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
-  const [isDocsOpen, setIsDocsOpen] = useState<boolean>(false);
   const [recordingsCount, setRecordingsCount] = useState<number>(0);
 
   // Recording State
@@ -34,6 +34,7 @@ export default function App() {
   const [bytesRecorded, setBytesRecorded] = useState<number>(0);
   const [bitrateMbps, setBitrateMbps] = useState<number>(0);
   const [micMuted, setMicMuted] = useState<boolean>(false);
+  const [activeWebcamStream, setActiveWebcamStream] = useState<MediaStream | null>(null);
 
   // Finished recording output data
   const [lastRecordingData, setLastRecordingData] = useState<{
@@ -113,6 +114,7 @@ export default function App() {
         onError: (err) => {
           console.error('Recorder Engine Error:', err);
           alert(`Recording Error: ${err.message || 'Capture interrupted'}`);
+          setActiveWebcamStream(null);
           setRecordingState('idle');
         },
         onBookmarkAdded: () => {
@@ -139,10 +141,14 @@ export default function App() {
       setBitrateMbps(0);
       setMicMuted(false);
 
-      await engine.startRecording(mode, audioSettings, videoSettings, pipConfig);
+      const result = await engine.startRecording(mode, audioSettings, videoSettings, pipConfig);
+      if (result && result.webcamStream) {
+        setActiveWebcamStream(result.webcamStream);
+      }
       setRecordingState('recording');
     } catch (err) {
       console.warn('Failed to start recording:', err);
+      setActiveWebcamStream(null);
       setRecordingState('idle');
     }
   };
@@ -184,10 +190,12 @@ export default function App() {
 
     try {
       const result = await engine.stopRecording();
+      setActiveWebcamStream(null);
       setLastRecordingData(result);
       setRecordingState('review');
     } catch (err) {
       console.error('Error stopping recording:', err);
+      setActiveWebcamStream(null);
       setRecordingState('idle');
     }
   };
@@ -232,7 +240,7 @@ export default function App() {
         }
       } else if (e.altKey && e.key.toLowerCase() === 'd') {
         e.preventDefault();
-        setIsDocsOpen((prev) => !prev);
+        setActiveView((prev) => (prev === 'docs' ? 'studio' : 'docs'));
       }
     };
 
@@ -246,10 +254,7 @@ export default function App() {
       <Navbar
         activeView={activeView}
         recordingsCount={recordingsCount}
-        onSelectView={(v) => {
-          setActiveView(v);
-          if (v === 'docs') setIsDocsOpen(true);
-        }}
+        onSelectView={(v) => setActiveView(v)}
         onOpenSettings={() => setIsSettingsOpen(true)}
         isRecording={recordingState === 'recording' || recordingState === 'paused'}
       />
@@ -265,12 +270,14 @@ export default function App() {
             bookmarks={lastRecordingData.bookmarks}
             onRecordAnother={() => {
               setLastRecordingData(null);
+              setActiveWebcamStream(null);
               setRecordingState('idle');
               setActiveView('studio');
               refreshLibraryCount();
             }}
             onSavedToLibrary={() => {
               refreshLibraryCount();
+              setActiveWebcamStream(null);
               setActiveView('library');
               setRecordingState('idle');
             }}
@@ -286,8 +293,16 @@ export default function App() {
         ) : activeView === 'services' ? (
           /* VIEW 3: Open Source Services Status & Diagnostics */
           <ServicesStatusPage />
+        ) : activeView === 'docs' ? (
+          /* VIEW 4: Technical Documentation & Architecture Page */
+          <TechDocsPage
+            onOpenStudio={() => {
+              setActiveView('studio');
+              setRecordingState('idle');
+            }}
+          />
         ) : (
-          /* VIEW 4: Main Studio Recorder Dashboard */
+          /* VIEW 5: Main Studio Recorder Dashboard */
           <RecorderDashboard
             mode={mode}
             onSelectMode={setMode}
@@ -305,7 +320,7 @@ export default function App() {
             onUpdateVideoSettings={(updates) => setVideoSettings((prev) => ({ ...prev, ...updates }))}
             onStartRecording={handleStartRecordingSequence}
             onOpenSettings={() => setIsSettingsOpen(true)}
-            onOpenDocs={() => setIsDocsOpen(true)}
+            onOpenDocs={() => setActiveView('docs')}
           />
         )}
       </main>
@@ -318,6 +333,24 @@ export default function App() {
           onCancel={() => setRecordingState('idle')}
         />
       )}
+
+      {/* Real-time Moveable Floating Camera Bubble on Screen during Active Recording */}
+      {(recordingState === 'recording' || recordingState === 'paused') &&
+        (mode === 'screen_cam' || mode === 'cam_only') &&
+        activeWebcamStream && (
+          <DraggableCameraBubble
+            stream={activeWebcamStream}
+            pipConfig={pipConfig}
+            onUpdatePipConfig={(updates) => {
+              setPipConfig((prev) => {
+                const next = { ...prev, ...updates };
+                recorderEngineRef.current?.updatePipConfig(next);
+                return next;
+              });
+            }}
+            isRecording={true}
+          />
+        )}
 
       {/* Live Compact HUD during Active Recording */}
       {(recordingState === 'recording' || recordingState === 'paused') && (
@@ -345,16 +378,6 @@ export default function App() {
           onUpdateVideoSettings={(updates) => setVideoSettings((prev) => ({ ...prev, ...updates }))}
           onUpdateAudioSettings={(updates) => setAudioSettings((prev) => ({ ...prev, ...updates }))}
           onClose={() => setIsSettingsOpen(false)}
-        />
-      )}
-
-      {/* Technical Architecture & Documentation Modal */}
-      {isDocsOpen && (
-        <TechDocsModal
-          onClose={() => {
-            setIsDocsOpen(false);
-            if (activeView === 'docs') setActiveView('studio');
-          }}
         />
       )}
     </div>

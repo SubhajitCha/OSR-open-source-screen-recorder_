@@ -1,17 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import {
-  ExternalLink,
-  RefreshCw,
-  Layers,
-  HardDrive,
-  AlertCircle,
-  Terminal,
-  Monitor,
-  Video,
-  Mic,
-  ChevronDown,
-  ChevronUp,
-} from 'lucide-react';
+  LinkSquare01Icon,
+  RefreshIcon,
+  Layers01Icon,
+  HardDriveIcon,
+  AlertCircleIcon,
+  CodeIcon,
+  Video01Icon,
+  Mic01Icon,
+  ArrowDown01Icon,
+  ArrowUp01Icon,
+} from 'hugeicons-react';
 import { probeBrowserCapabilities } from '../services/browserCapabilities';
 import { BrowserCapabilityReport } from '../types';
 
@@ -313,9 +312,9 @@ export const ServicesStatusPage: React.FC = () => {
             id="btn-run-diagnostics"
             disabled={isRunningSelfTest}
             onClick={handleRunSelfTest}
-            className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-white bg-red-600 hover:bg-red-500 rounded-xl shadow-md shadow-red-200 transition-all active:scale-95 disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-white bg-red-600 hover:bg-red-500 rounded-xl shadow-md shadow-red-200 transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${isRunningSelfTest ? 'animate-spin' : ''}`} />
+            <RefreshIcon className={`w-3.5 h-3.5 ${isRunningSelfTest ? 'animate-spin' : ''}`} />
             <span>{isRunningSelfTest ? 'Probing...' : 'Run Diagnostics Self-Test'}</span>
           </button>
         </div>
@@ -326,7 +325,7 @@ export const ServicesStatusPage: React.FC = () => {
         <div className="p-5 rounded-3xl bg-gray-900 text-gray-100 font-mono text-xs border border-gray-800 shadow-inner space-y-2">
           <div className="flex items-center justify-between border-b border-gray-800 pb-2 mb-2 text-gray-400">
             <span className="flex items-center gap-2">
-              <Terminal className="w-4 h-4 text-green-400" />
+              <CodeIcon className="w-4 h-4 text-green-400" />
               Live Diagnostic Output Stream
             </span>
             <span className="text-[10px] text-green-400 font-bold">ALL HEALTH CHECKS GREEN</span>
@@ -367,13 +366,13 @@ export const ServicesStatusPage: React.FC = () => {
                 <div className="w-1/3 flex items-center gap-3">
                   <div className="w-8 h-8 rounded-xl bg-gray-100 border border-gray-200 flex items-center justify-center text-gray-700 flex-shrink-0">
                     {service.category === 'Capture' ? (
-                      <Video className="w-4 h-4 text-red-500" />
+                      <Video01Icon className="w-4 h-4 text-red-500" />
                     ) : service.category === 'Audio DSP' ? (
-                      <Mic className="w-4 h-4 text-blue-500" />
+                      <Mic01Icon className="w-4 h-4 text-blue-500" />
                     ) : service.category === 'Storage' ? (
-                      <HardDrive className="w-4 h-4 text-amber-500" />
+                      <HardDriveIcon className="w-4 h-4 text-amber-500" />
                     ) : (
-                      <Layers className="w-4 h-4 text-green-500" />
+                      <Layers01Icon className="w-4 h-4 text-green-500" />
                     )}
                   </div>
                   <div className="min-w-0">
@@ -412,7 +411,7 @@ export const ServicesStatusPage: React.FC = () => {
                       e.stopPropagation();
                       toggleExpand(service.id);
                     }}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl border transition-all ${
+                    className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl border transition-all cursor-pointer ${
                       isExpanded
                         ? 'bg-gray-900 text-white border-gray-900'
                         : 'bg-white text-gray-700 hover:bg-gray-100 border-gray-200'
@@ -420,9 +419,9 @@ export const ServicesStatusPage: React.FC = () => {
                   >
                     <span>Details</span>
                     {isExpanded ? (
-                      <ChevronUp className="w-3.5 h-3.5" />
+                      <ArrowUp01Icon className="w-3.5 h-3.5" />
                     ) : (
-                      <ChevronDown className="w-3.5 h-3.5" />
+                      <ArrowDown01Icon className="w-3.5 h-3.5" />
                     )}
                   </button>
                 </div>
@@ -460,7 +459,7 @@ export const ServicesStatusPage: React.FC = () => {
                         {service.commonErrors.map((err, eIdx) => (
                           <div key={eIdx} className="p-2.5 rounded-xl bg-amber-50/70 border border-amber-200/70 text-xs space-y-0.5">
                             <div className="font-semibold text-amber-900 flex items-center gap-1.5">
-                              <AlertCircle className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
+                              <AlertCircleIcon className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
                               <span>{err.error}</span>
                             </div>
                             <p className="text-[11px] text-amber-800/90 pl-5">{err.solution}</p>
@@ -484,7 +483,7 @@ export const ServicesStatusPage: React.FC = () => {
                         className="flex items-center gap-1 text-red-600 hover:text-red-700 font-bold transition-colors"
                       >
                         <span>MDN Documentation</span>
-                        <ExternalLink className="w-3 h-3" />
+                        <LinkSquare01Icon className="w-3 h-3" />
                       </a>
 
                       <a
@@ -494,7 +493,7 @@ export const ServicesStatusPage: React.FC = () => {
                         className="flex items-center gap-1 text-gray-500 hover:text-gray-800 transition-colors"
                       >
                         <span>W3C Official Spec</span>
-                        <ExternalLink className="w-3 h-3" />
+                        <LinkSquare01Icon className="w-3 h-3" />
                       </a>
                     </div>
                   </div>

@@ -1,26 +1,19 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
-  Download,
-  Save,
-  Trash2,
-  Play,
-  Pause,
-  Scissors,
-  Camera,
-  Share2,
-  Check,
-  Film,
-  Sparkles,
-  Clock,
-  HardDrive,
-  Tag,
-  Bookmark,
-  FileVideo,
-  ChevronRight,
-  RotateCcw,
-  Maximize2,
-  Minimize2,
-} from 'lucide-react';
+  Download01Icon,
+  FloppyDiskIcon,
+  PlayIcon,
+  PauseIcon,
+  ScissorIcon,
+  Camera01Icon,
+  Tick01Icon,
+  Film01Icon,
+  HardDriveIcon,
+  Bookmark01Icon,
+  RotateLeft01Icon,
+  Maximize01Icon,
+  Minimize01Icon,
+} from 'hugeicons-react';
 import confetti from 'canvas-confetti';
 import { SavedRecording, VideoBookmark } from '../types';
 import { saveRecordingToDB, generateThumbnailFromBlob, formatBytes } from '../services/db';
@@ -176,7 +169,7 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
 
   const handleTakeSnapshot = async () => {
     try {
-      const { dataUrl, blob } = await captureVideoSnapshot(currentBlob, currentTime);
+      const { blob } = await captureVideoSnapshot(currentBlob, currentTime);
       downloadBlob(blob, `${title.replace(/\s+/g, '_')}_frame_${Math.round(currentTime)}s.png`);
       setSnapshotMsg('Snapshot downloaded as PNG');
       setTimeout(() => setSnapshotMsg(null), 3000);
@@ -238,7 +231,7 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-gray-200 shadow-sm">
         <div className="flex items-center gap-3">
           <div className="flex items-center justify-center w-11 h-11 rounded-2xl bg-gray-100 text-gray-900 border border-gray-200">
-            <Film className="w-6 h-6 text-red-500" />
+            <Film01Icon className="w-6 h-6 text-red-500" />
           </div>
           <div>
             <div className="flex items-center gap-2">
@@ -257,9 +250,9 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
           <button
             id="btn-record-another"
             onClick={onRecordAnother}
-            className="flex items-center gap-2 px-4 py-2 text-xs font-semibold text-gray-700 hover:text-gray-900 bg-white hover:bg-gray-50 border border-gray-200 rounded-xl transition-all shadow-sm"
+            className="flex items-center gap-2 px-4 py-2 text-xs font-semibold text-gray-700 hover:text-gray-900 bg-white hover:bg-gray-50 border border-gray-200 rounded-xl transition-all shadow-sm cursor-pointer"
           >
-            <RotateCcw className="w-4 h-4 text-gray-500" />
+            <RotateLeft01Icon className="w-4 h-4 text-gray-500" />
             <span>Record Another</span>
           </button>
 
@@ -267,13 +260,13 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
             id="btn-save-to-library"
             disabled={isSaved}
             onClick={handleSaveToIndexedDB}
-            className={`flex items-center gap-2 px-5 py-2 text-xs font-bold rounded-xl transition-all shadow-md ${
+            className={`flex items-center gap-2 px-5 py-2 text-xs font-bold rounded-xl transition-all shadow-md cursor-pointer ${
               isSaved
                 ? 'bg-green-600 text-white'
                 : 'bg-red-600 hover:bg-red-500 text-white shadow-red-200'
             }`}
           >
-            {isSaved ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
+            {isSaved ? <Tick01Icon className="w-4 h-4" /> : <FloppyDiskIcon className="w-4 h-4" />}
             <span>{isSaved ? 'Saved to Library!' : 'Save to Library'}</span>
           </button>
         </div>
@@ -323,9 +316,9 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
                 <div className="flex items-center gap-3">
                   <button
                     onClick={handleTogglePlay}
-                    className="p-2 rounded-xl bg-red-600 hover:bg-red-500 text-white transition-transform active:scale-95 shadow-sm"
+                    className="p-2 rounded-xl bg-red-600 hover:bg-red-500 text-white transition-transform active:scale-95 shadow-sm cursor-pointer"
                   >
-                    {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 fill-current" />}
+                    {isPlaying ? <PauseIcon className="w-4 h-4" /> : <PlayIcon className="w-4 h-4 fill-current" />}
                   </button>
 
                   <span className="font-mono text-white font-medium">
@@ -341,7 +334,7 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
                       <button
                         key={s}
                         onClick={() => handleChangeSpeed(s)}
-                        className={`px-2 py-0.5 text-[11px] font-mono rounded ${
+                        className={`px-2 py-0.5 text-[11px] font-mono rounded cursor-pointer ${
                           playbackSpeed === s ? 'bg-red-600 text-white font-bold' : 'text-gray-300 hover:text-white'
                         }`}
                       >
@@ -354,22 +347,22 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
                   <button
                     onClick={handleTakeSnapshot}
                     title="Extract PNG Snapshot at current frame"
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-black/50 hover:bg-black/70 border border-white/20 rounded-lg text-white transition-colors"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-black/50 hover:bg-black/70 border border-white/20 rounded-lg text-white transition-colors cursor-pointer"
                   >
-                    <Camera className="w-3.5 h-3.5 text-gray-200" />
+                    <Camera01Icon className="w-3.5 h-3.5 text-gray-200" />
                     <span>Snapshot</span>
                   </button>
 
                   {/* Trimmer Mode Toggle */}
                   <button
                     onClick={() => setIsTrimmingMode(!isTrimmingMode)}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border transition-colors ${
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border transition-colors cursor-pointer ${
                       isTrimmingMode
                         ? 'bg-red-600 border-red-500 text-white'
                         : 'bg-black/50 hover:bg-black/70 border-white/20 text-white'
                     }`}
                   >
-                    <Scissors className="w-3.5 h-3.5" />
+                    <ScissorIcon className="w-3.5 h-3.5" />
                     <span>Trim</span>
                   </button>
 
@@ -377,9 +370,9 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
                   <button
                     onClick={handleToggleFullscreen}
                     title="Toggle Fullscreen"
-                    className="flex items-center gap-1.5 px-2.5 py-1.5 bg-black/50 hover:bg-black/70 border border-white/20 rounded-lg text-white transition-colors"
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 bg-black/50 hover:bg-black/70 border border-white/20 rounded-lg text-white transition-colors cursor-pointer"
                   >
-                    {isFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+                    {isFullscreen ? <Minimize01Icon className="w-3.5 h-3.5" /> : <Maximize01Icon className="w-3.5 h-3.5" />}
                   </button>
                 </div>
               </div>
@@ -388,7 +381,7 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
 
           {snapshotMsg && (
             <div className="p-3.5 rounded-2xl bg-green-50 border border-green-200 text-xs text-green-800 flex items-center gap-2">
-              <Check className="w-4 h-4 text-green-600" />
+              <Tick01Icon className="w-4 h-4 text-green-600" />
               <span>{snapshotMsg}</span>
             </div>
           )}
@@ -397,7 +390,7 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
           {initialBookmarks.length > 0 && (
             <div className="p-4 rounded-3xl bg-white border border-gray-200 shadow-sm space-y-2">
               <span className="text-xs font-bold uppercase tracking-wider text-gray-500 flex items-center gap-1.5">
-                <Bookmark className="w-3.5 h-3.5 text-red-500" />
+                <Bookmark01Icon className="w-3.5 h-3.5 text-red-500" />
                 Keyframe Bookmarks ({initialBookmarks.length})
               </span>
               <div className="flex flex-wrap gap-2">
@@ -405,7 +398,7 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
                   <button
                     key={bm.id}
                     onClick={() => handleSeek(bm.timestamp)}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gray-50 hover:bg-gray-100 border border-gray-200 text-xs text-gray-700 transition-colors"
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gray-50 hover:bg-gray-100 border border-gray-200 text-xs text-gray-700 transition-colors cursor-pointer"
                   >
                     <span className="font-mono text-red-600 font-bold">{formatTime(bm.timestamp)}</span>
                     <span className="text-gray-600">{bm.label}</span>
@@ -420,7 +413,7 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
             <div className="p-5 rounded-3xl bg-white border border-gray-200 shadow-sm space-y-4 animate-in fade-in duration-200">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2">
-                  <Scissors className="w-4 h-4 text-red-500" />
+                  <ScissorIcon className="w-4 h-4 text-red-500" />
                   Client-Side Video Trimmer
                 </h3>
                 <span className="text-xs font-mono text-gray-500">
@@ -477,7 +470,7 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
               <div className="flex items-center justify-between pt-2">
                 <button
                   onClick={() => setIsTrimmingMode(false)}
-                  className="px-4 py-1.5 text-xs text-gray-500 hover:text-gray-800"
+                  className="px-4 py-1.5 text-xs text-gray-500 hover:text-gray-800 cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -485,13 +478,13 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
                 <button
                   disabled={isProcessingTrim}
                   onClick={handleApplyTrim}
-                  className="flex items-center gap-2 px-5 py-2 text-xs font-bold text-white bg-red-600 hover:bg-red-500 rounded-xl shadow-md shadow-red-200 disabled:opacity-50"
+                  className="flex items-center gap-2 px-5 py-2 text-xs font-bold text-white bg-red-600 hover:bg-red-500 rounded-xl shadow-md shadow-red-200 disabled:opacity-50 cursor-pointer"
                 >
                   {isProcessingTrim ? (
                     <span>Processing {trimProgress}%...</span>
                   ) : (
                     <>
-                      <Scissors className="w-3.5 h-3.5" />
+                      <ScissorIcon className="w-3.5 h-3.5" />
                       <span>Trim Video Now</span>
                     </>
                   )}
@@ -528,9 +521,9 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
             <button
               id="btn-direct-disk-save"
               onClick={handleDirectSave}
-              className="w-full flex items-center justify-center gap-2.5 px-5 py-3 rounded-xl bg-gray-900 hover:bg-gray-800 text-white font-bold text-xs shadow-sm transition-all active:scale-98"
+              className="w-full flex items-center justify-center gap-2.5 px-5 py-3 rounded-xl bg-gray-900 hover:bg-gray-800 text-white font-bold text-xs shadow-sm transition-all active:scale-98 cursor-pointer"
             >
-              <HardDrive className="w-4 h-4 text-green-400" />
+              <HardDriveIcon className="w-4 h-4 text-green-400" />
               <span>Save Directly to Computer Disk</span>
             </button>
 
@@ -541,9 +534,9 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
                 const ext = mimeType.includes('mp4') ? 'mp4' : 'webm';
                 downloadBlob(currentBlob, `${title.replace(/\s+/g, '_')}.${ext}`);
               }}
-              className="w-full flex items-center justify-center gap-2.5 px-5 py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs shadow-md shadow-red-200 transition-all active:scale-98"
+              className="w-full flex items-center justify-center gap-2.5 px-5 py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs shadow-md shadow-red-200 transition-all active:scale-98 cursor-pointer"
             >
-              <Download className="w-4 h-4" />
+              <Download01Icon className="w-4 h-4" />
               <span>Download File ({mimeType.includes('mp4') ? 'MP4' : 'WebM'})</span>
             </button>
           </div>

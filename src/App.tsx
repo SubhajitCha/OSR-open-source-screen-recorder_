@@ -27,6 +27,7 @@ import { ServicesStatusPage } from './components/ServicesStatusPage';
 import { CountdownModal } from './components/CountdownModal';
 import { SettingsModal } from './components/SettingsModal';
 import { TechDocsPage } from './components/TechDocsPage';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 
 export default function App() {
   // Navigation & Views
@@ -488,6 +489,9 @@ export default function App() {
           </button>
         </div>
       )}
+      
+      {/* Vercel Speed Insights */}
+      <SpeedInsights />
     </div>
   );
 }

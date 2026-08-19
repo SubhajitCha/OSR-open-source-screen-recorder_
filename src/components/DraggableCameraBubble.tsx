@@ -1,0 +1,265 @@
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import {
+  PipConfig,
+  PipShape,
+  PipSize,
+} from '../types';
+import {
+  Move,
+  Maximize2,
+  Minimize2,
+  RefreshCw,
+  ExternalLink,
+  Circle,
+  Square,
+  Sparkles,
+  X,
+} from 'lucide-react';
+
+interface DraggableCameraBubbleProps {
+  stream: MediaStream | null;
+  pipConfig: PipConfig;
+  onUpdatePipConfig: (updates: Partial<PipConfig>) => void;
+  isRecording?: boolean;
+}
+
+export const DraggableCameraBubble: React.FC<DraggableCameraBubbleProps> = ({
+  stream,
+  pipConfig,
+  onUpdatePipConfig,
+  isRecording = false,
+}) => {
+  const [position, setPosition] = useState<{ x: number; y: number }>({
+    x: window.innerWidth - 240,
+    y: window.innerHeight - 240,
+  });
+  const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [dragOffset, setDragOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [isHovered, setIsHovered] = useState<boolean>(false);
+  const [isOsPipActive, setIsOsPipActive] = useState<boolean>(false);
+
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  // Set video stream
+  useEffect(() => {
+    if (videoRef.current && stream) {
+      videoRef.current.srcObject = stream;
+      videoRef.current.play().catch((e) => console.warn('Bubble play error:', e));
+    }
+  }, [stream]);
+
+  // Determine size pixel dimensions
+  const getDimensions = () => {
+    if (pipConfig.size === 'small') return { width: 140, height: 140 };
+    if (pipConfig.size === 'large') return { width: 260, height: 260 };
+    return { width: 190, height: 190 }; // medium
+  };
+
+  const { width, height } = getDimensions();
+
+  // Mouse Drag handlers
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest('button')) return;
+    setIsDragging(true);
+    setDragOffset({
+      x: e.clientX - position.x,
+      y: e.clientY - position.y,
+    });
+  };
+
+  const handleMouseMove = useCallback(
+    (e: MouseEvent) => {
+      if (!isDragging) return;
+
+      const maxX = window.innerWidth - width - 16;
+      const maxY = window.innerHeight - height - 16;
+
+      const newX = Math.max(16, Math.min(e.clientX - dragOffset.x, maxX));
+      const newY = Math.max(16, Math.min(e.clientY - dragOffset.y, maxY));
+
+      setPosition({ x: newX, y: newY });
+
+      // Convert to percentages for Compositor (0 - 100%)
+      const pctX = Math.round((newX / (window.innerWidth - width)) * 100);
+      const pctY = Math.round((newY / (window.innerHeight - height)) * 100);
+
+      onUpdatePipConfig({
+        position: 'custom',
+        customX: Math.max(0, Math.min(100, pctX)),
+        customY: Math.max(0, Math.min(100, pctY)),
+      });
+    },
+    [isDragging, dragOffset, width, height, onUpdatePipConfig]
+  );
+
+  const handleMouseUp = useCallback(() => {
+    setIsDragging(false);
+  }, []);
+
+  useEffect(() => {
+    if (isDragging) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+    } else {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    }
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging, handleMouseMove, handleMouseUp]);
+
+  // Launch True OS-Level Floating Picture-in-Picture window (Floats across all desktop apps & screens)
+  const handleRequestOsPip = async () => {
+    try {
+      if (videoRef.current) {
+        if (document.pictureInPictureElement) {
+          await document.exitPictureInPicture();
+          setIsOsPipActive(false);
+        } else {
+          await videoRef.current.requestPictureInPicture();
+          setIsOsPipActive(true);
+        }
+      }
+    } catch (err) {
+      console.warn('OS Picture-in-Picture request failed:', err);
+    }
+  };
+
+  // Exit PiP listener
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const onLeavePip = () => setIsOsPipActive(false);
+    video.addEventListener('leavepictureinpicture', onLeavePip);
+    return () => video.removeEventListener('leavepictureinpicture', onLeavePip);
+  }, []);
+
+  if (!stream) return null;
+
+  return (
+    <div
+      ref={containerRef}
+      id="floating-camera-bubble"
+      onMouseDown={handleMouseDown}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      style={{
+        left: `${position.x}px`,
+        top: `${position.y}px`,
+        width: `${width}px`,
+        height: `${height}px`,
+      }}
+      className={`fixed z-50 cursor-grab active:cursor-grabbing select-none transition-shadow ${
+        isDragging ? 'shadow-2xl scale-[1.02]' : 'shadow-xl'
+      }`}
+    >
+      {/* Container with specified shape */}
+      <div
+        className={`w-full h-full relative overflow-hidden bg-gray-900 border-4 border-white shadow-xl ${
+          pipConfig.shape === 'circle'
+            ? 'rounded-full'
+            : pipConfig.shape === 'rounded'
+            ? 'rounded-3xl'
+            : 'rounded-xl'
+        }`}
+      >
+        <video
+          ref={videoRef}
+          autoPlay
+          muted
+          playsInline
+          className={`w-full h-full object-cover pointer-events-none ${
+            pipConfig.mirror ? '-scale-x-100' : ''
+          }`}
+        />
+
+        {/* Drag handle & action overlays on hover */}
+        {isHovered && (
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex flex-col items-center justify-between p-2.5 transition-opacity">
+            {/* Top Toolbar */}
+            <div className="flex items-center gap-1 bg-black/60 backdrop-blur-md px-2 py-1 rounded-full border border-white/20">
+              <span className="text-[10px] text-white font-semibold flex items-center gap-1">
+                <Move className="w-3 h-3 text-red-400" />
+                Drag
+              </span>
+
+              {/* OS Float PiP everywhere button */}
+              {document.pictureInPictureEnabled && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRequestOsPip();
+                  }}
+                  title="Float across ALL desktop apps & screens (OS PiP)"
+                  className="p-1 text-white hover:text-red-400 transition-colors"
+                >
+                  <ExternalLink className="w-3 h-3" />
+                </button>
+              )}
+            </div>
+
+            {/* Bottom Controls: Shape, Mirror, Size */}
+            <div className="flex items-center gap-1 bg-black/60 backdrop-blur-md p-1 rounded-full border border-white/20">
+              {/* Shape Toggle */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const nextShape: PipShape =
+                    pipConfig.shape === 'circle' ? 'rounded' : pipConfig.shape === 'rounded' ? 'square' : 'circle';
+                  onUpdatePipConfig({ shape: nextShape });
+                }}
+                title="Change Shape"
+                className="p-1 text-white hover:text-red-400"
+              >
+                {pipConfig.shape === 'circle' ? (
+                  <Circle className="w-3 h-3" />
+                ) : (
+                  <Square className="w-3 h-3" />
+                )}
+              </button>
+
+              {/* Mirror Toggle */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onUpdatePipConfig({ mirror: !pipConfig.mirror });
+                }}
+                title="Mirror Camera"
+                className={`p-1 ${pipConfig.mirror ? 'text-red-400' : 'text-white'}`}
+              >
+                <RefreshCw className="w-3 h-3" />
+              </button>
+
+              {/* Size Toggle */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const nextSize: PipSize =
+                    pipConfig.size === 'small' ? 'medium' : pipConfig.size === 'medium' ? 'large' : 'small';
+                  onUpdatePipConfig({ size: nextSize });
+                }}
+                title="Toggle Size"
+                className="p-1 text-white hover:text-red-400"
+              >
+                {pipConfig.size === 'large' ? (
+                  <Minimize2 className="w-3 h-3" />
+                ) : (
+                  <Maximize2 className="w-3 h-3" />
+                )}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Live Recording Pulsing Dot if active */}
+        {isRecording && (
+          <div className="absolute top-2.5 right-2.5 w-3 h-3 bg-red-500 rounded-full ring-2 ring-white animate-pulse" />
+        )}
+      </div>
+    </div>
+  );
+};

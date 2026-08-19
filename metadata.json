@@ -1,0 +1,6 @@
+{
+  "name": "ScreenStream Open Recorder",
+  "description": "Free, open-source, privacy-first web screen recorder with webcam PIP, microphone & system audio mixing, keyboard shortcuts, IndexedDB offline history, and zero server uploads.",
+  "requestFramePermissions": ["camera", "microphone", "display-capture"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

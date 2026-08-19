@@ -17,13 +17,22 @@ export function createStreamCompositor(
   const ctx = canvas.getContext('2d', {
     alpha: false,
     desynchronized: true,
+    willReadFrequently: false,
   });
+
+  if (ctx) {
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'medium';
+  }
 
   let pipConfig = { ...initialPipConfig };
   let animationFrameId: number | null = null;
   let intervalTickerId: number | null = null;
   let isRunning = true;
   let lastFrameTime = performance.now();
+
+  let canvasWidth = 1920;
+  let canvasHeight = 1080;
 
   // Screen video element
   const screenVideo = document.createElement('video');
@@ -48,8 +57,21 @@ export function createStreamCompositor(
   }
 
   // Default canvas dimensions
-  canvas.width = 1920;
-  canvas.height = 1080;
+  canvas.width = canvasWidth;
+  canvas.height = canvasHeight;
+
+  const updateCanvasDimensions = (newWidth: number, newHeight: number) => {
+    if (newWidth > 0 && newHeight > 0 && (canvasWidth !== newWidth || canvasHeight !== newHeight)) {
+      canvasWidth = newWidth;
+      canvasHeight = newHeight;
+      canvas.width = newWidth;
+      canvas.height = newHeight;
+      if (ctx) {
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'medium';
+      }
+    }
+  };
 
   const render = () => {
     if (!isRunning || !ctx) return;
@@ -57,35 +79,28 @@ export function createStreamCompositor(
 
     // 1. Detect actual dimensions from screenVideo if available
     if (screenVideo.videoWidth && screenVideo.videoHeight) {
-      if (canvas.width !== screenVideo.videoWidth || canvas.height !== screenVideo.videoHeight) {
-        canvas.width = screenVideo.videoWidth;
-        canvas.height = screenVideo.videoHeight;
-      }
-      // Draw screen background
-      ctx.drawImage(screenVideo, 0, 0, canvas.width, canvas.height);
+      updateCanvasDimensions(screenVideo.videoWidth, screenVideo.videoHeight);
+      ctx.drawImage(screenVideo, 0, 0, canvasWidth, canvasHeight);
     } else if (webcamVideo.videoWidth && webcamVideo.videoHeight && !screenStream) {
       // Webcam only mode
-      if (canvas.width !== webcamVideo.videoWidth || canvas.height !== webcamVideo.videoHeight) {
-        canvas.width = webcamVideo.videoWidth;
-        canvas.height = webcamVideo.videoHeight;
-      }
+      updateCanvasDimensions(webcamVideo.videoWidth, webcamVideo.videoHeight);
       ctx.save();
       if (pipConfig.mirror) {
-        ctx.translate(canvas.width, 0);
+        ctx.translate(canvasWidth, 0);
         ctx.scale(-1, 1);
       }
-      ctx.drawImage(webcamVideo, 0, 0, canvas.width, canvas.height);
+      ctx.drawImage(webcamVideo, 0, 0, canvasWidth, canvasHeight);
       ctx.restore();
     } else {
       // Blank dark placeholder while loading
       ctx.fillStyle = '#0f172a';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillRect(0, 0, canvasWidth, canvasHeight);
     }
 
     // 2. Draw Picture-in-Picture webcam overlay if enabled and screen is also present
     if (pipConfig.enabled && screenStream && webcamStream && webcamVideo.videoWidth && webcamVideo.videoHeight) {
-      const cw = canvas.width;
-      const ch = canvas.height;
+      const cw = canvasWidth;
+      const ch = canvasHeight;
 
       // Calculate size
       let pipWidth = 320;
@@ -120,12 +135,6 @@ export function createStreamCompositor(
 
       ctx.save();
 
-      // Soft Shadow
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.40)';
-      ctx.shadowBlur = 18;
-      ctx.shadowOffsetX = 0;
-      ctx.shadowOffsetY = 6;
-
       if (pipConfig.shape === 'circle') {
         const radius = Math.min(pipWidth, pipHeight) / 2;
         const centerX = x + pipWidth / 2;
@@ -146,7 +155,7 @@ export function createStreamCompositor(
         ctx.drawImage(webcamVideo, x, y, pipWidth, pipHeight);
         ctx.restore();
 
-        // White border
+        // Crisp Border
         if (pipConfig.borderWidth > 0) {
           ctx.lineWidth = pipConfig.borderWidth * 2;
           ctx.strokeStyle = pipConfig.borderColor || '#ffffff';

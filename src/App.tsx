@@ -126,6 +126,10 @@ export default function App() {
   }, []);
 
   const handleStartRecordingSequence = () => {
+    if (recordingState !== 'idle') {
+      console.warn('Cannot start recording; current state is:', recordingState);
+      return;
+    }
     if (videoSettings.countdownSeconds > 0) {
       setRecordingState('countdown');
     } else {
@@ -134,6 +138,9 @@ export default function App() {
   };
 
   const executeStartRecording = async () => {
+    if (recordingState === 'recording' || recordingState === 'paused') {
+      return;
+    }
     try {
       const engine = initRecorderEngine();
       setDurationSeconds(0);
@@ -319,8 +326,12 @@ export default function App() {
             videoSettings={videoSettings}
             onUpdateVideoSettings={(updates) => setVideoSettings((prev) => ({ ...prev, ...updates }))}
             onStartRecording={handleStartRecordingSequence}
+            onStopRecording={handleStopRecording}
+            onTogglePause={handleTogglePause}
             onOpenSettings={() => setIsSettingsOpen(true)}
             onOpenDocs={() => setActiveView('docs')}
+            recordingState={recordingState}
+            durationSeconds={durationSeconds}
           />
         )}
       </main>

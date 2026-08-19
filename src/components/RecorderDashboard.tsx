@@ -27,6 +27,10 @@ import {
   ResolutionPreset,
   FrameRatePreset,
 } from '../types';
+import {
+  StopIcon,
+  PauseIcon,
+} from 'hugeicons-react';
 
 interface RecorderDashboardProps {
   mode: RecordingMode;
@@ -38,8 +42,12 @@ interface RecorderDashboardProps {
   videoSettings: VideoSettings;
   onUpdateVideoSettings: (updates: Partial<VideoSettings>) => void;
   onStartRecording: () => void;
+  onStopRecording?: () => void;
+  onTogglePause?: () => void;
   onOpenSettings: () => void;
   onOpenDocs: () => void;
+  recordingState?: 'idle' | 'countdown' | 'recording' | 'paused' | 'review';
+  durationSeconds?: number;
 }
 
 export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
@@ -52,12 +60,27 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
   videoSettings,
   onUpdateVideoSettings,
   onStartRecording,
+  onStopRecording,
+  onTogglePause,
   onOpenSettings,
   onOpenDocs,
+  recordingState = 'idle',
+  durationSeconds = 0,
 }) => {
+  const isRecording = recordingState === 'recording' || recordingState === 'paused';
   const [isAdvancedTargetOpen, setIsAdvancedTargetOpen] = useState<boolean>(false);
   const [isDraggingStagePip, setIsDraggingStagePip] = useState<boolean>(false);
   const stageRef = useRef<HTMLDivElement | null>(null);
+
+  const formatTimer = (totalSeconds: number) => {
+    const mins = Math.floor(totalSeconds / 60);
+    const secs = totalSeconds % 60;
+    const hrs = Math.floor(mins / 60);
+    const remMins = mins % 60;
+    return `${hrs.toString().padStart(2, '0')}:${remMins
+      .toString()
+      .padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
 
   // Drag handler for positioning camera on the preview stage
   const handleStageMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -227,9 +250,13 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
             >
               {/* Top status badges */}
               <div className="absolute top-3 left-3 flex gap-2 z-10">
-                <div className="bg-black/50 backdrop-blur-md px-2.5 py-0.5 rounded-full flex items-center gap-1.5 border border-white/10">
-                  <div className="w-1.5 h-1.5 bg-red-500 rounded-full" />
-                  <span className="text-[11px] text-white font-mono">00:00:00</span>
+                <div className={`px-2.5 py-0.5 rounded-full flex items-center gap-1.5 border backdrop-blur-md ${
+                  isRecording ? 'bg-red-950/80 border-red-500/50 text-red-100' : 'bg-black/50 border-white/10 text-white'
+                }`}>
+                  <div className={`w-1.5 h-1.5 rounded-full ${isRecording ? 'bg-red-500 animate-ping' : 'bg-red-500'}`} />
+                  <span className="text-[11px] font-mono font-bold">
+                    {isRecording ? formatTimer(durationSeconds) : '00:00:00'}
+                  </span>
                 </div>
                 <div className="bg-black/50 backdrop-blur-md px-2.5 py-0.5 rounded-full border border-white/10">
                   <span className="text-[11px] text-white font-mono">
@@ -238,74 +265,95 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
                 </div>
               </div>
 
-              {/* Stage preview center icon */}
-              <div className="text-center p-6 space-y-2 pointer-events-none">
-                <div className="w-12 h-12 border-2 border-white/20 rounded-full flex items-center justify-center mx-auto">
-                  {mode === 'screen_cam' ? (
-                    <Layers01Icon className="w-5 h-5 text-white/50" />
-                  ) : mode === 'cam_only' ? (
-                    <Video01Icon className="w-5 h-5 text-white/50" />
-                  ) : mode === 'audio_only' ? (
-                    <RadioIcon className="w-5 h-5 text-white/50" />
-                  ) : (
-                    <ComputerIcon className="w-5 h-5 text-white/50" />
-                  )}
+              {isRecording ? (
+                /* Active Recording Live Monitor */
+                <div className="text-center p-6 space-y-3 pointer-events-none animate-in fade-in duration-300">
+                  <div className="w-14 h-14 rounded-2xl bg-red-500/20 border border-red-500/40 flex items-center justify-center mx-auto text-red-500 shadow-lg shadow-red-950/50 animate-pulse">
+                    <span className="w-4 h-4 rounded-full bg-red-500 animate-ping" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-white tracking-tight flex items-center justify-center gap-2">
+                      <span>Live Recording In Progress</span>
+                    </h4>
+                    <p className="text-gray-400 text-xs mt-1 max-w-sm mx-auto">
+                      {mode === 'screen_cam'
+                        ? 'Your single interactive camera bubble is live on your screen. You can drag and position it freely.'
+                        : 'Capturing high-quality stream with zero latency.'}
+                    </p>
+                  </div>
                 </div>
-                <p className="text-white/70 text-xs font-semibold">
-                  {mode === 'screen_cam'
-                    ? 'Screen + Moveable Camera PIP Ready'
-                    : mode === 'cam_only'
-                    ? 'Webcam Capture Ready'
-                    : mode === 'audio_only'
-                    ? 'Opus Audio Capture Ready'
-                    : 'Display Screen Capture Ready'}
-                </p>
-                <p className="text-white/40 text-[11px]">
-                  Permissions will be requested when you click Start Recording
-                </p>
-              </div>
+              ) : (
+                /* Idle Stage setup preview */
+                <>
+                  <div className="text-center p-6 space-y-2 pointer-events-none">
+                    <div className="w-12 h-12 border-2 border-white/20 rounded-full flex items-center justify-center mx-auto">
+                      {mode === 'screen_cam' ? (
+                        <Layers01Icon className="w-5 h-5 text-white/50" />
+                      ) : mode === 'cam_only' ? (
+                        <Video01Icon className="w-5 h-5 text-white/50" />
+                      ) : mode === 'audio_only' ? (
+                        <RadioIcon className="w-5 h-5 text-white/50" />
+                      ) : (
+                        <ComputerIcon className="w-5 h-5 text-white/50" />
+                      )}
+                    </div>
+                    <p className="text-white/70 text-xs font-semibold">
+                      {mode === 'screen_cam'
+                        ? 'Screen + Moveable Camera PIP Ready'
+                        : mode === 'cam_only'
+                        ? 'Webcam Capture Ready'
+                        : mode === 'audio_only'
+                        ? 'Opus Audio Capture Ready'
+                        : 'Display Screen Capture Ready'}
+                    </p>
+                    <p className="text-white/40 text-[11px]">
+                      Permissions will be requested when you click Start Recording
+                    </p>
+                  </div>
 
-              {/* Moveable PIP overlay box on the stage */}
-              {mode === 'screen_cam' && (
-                <div
-                  onMouseDown={() => setIsDraggingStagePip(true)}
-                  style={{
-                    right:
-                      pipConfig.position === 'custom' && pipConfig.customX !== undefined
-                        ? 'auto'
-                        : pipConfig.position === 'top-left' || pipConfig.position === 'bottom-left'
-                        ? 'auto'
-                        : '18px',
-                    left:
-                      pipConfig.position === 'custom' && pipConfig.customX !== undefined
-                        ? `calc(${pipConfig.customX}% - 36px)`
-                        : pipConfig.position === 'top-left' || pipConfig.position === 'bottom-left'
-                        ? '18px'
-                        : 'auto',
-                    top:
-                      pipConfig.position === 'custom' && pipConfig.customY !== undefined
-                        ? `calc(${pipConfig.customY}% - 36px)`
-                        : pipConfig.position === 'top-left' || pipConfig.position === 'top-right'
-                        ? '18px'
-                        : 'auto',
-                    bottom:
-                      pipConfig.position === 'custom' && pipConfig.customY !== undefined
-                        ? 'auto'
-                        : pipConfig.position === 'bottom-left' || pipConfig.position === 'bottom-right'
-                        ? '18px'
-                        : 'auto',
-                  }}
-                  className={`absolute border-2 border-white bg-red-500/40 backdrop-blur-md flex flex-col items-center justify-center text-[10px] text-white font-bold shadow-2xl cursor-grab active:cursor-grabbing transition-all ${
-                    pipConfig.shape === 'circle'
-                      ? 'rounded-full w-20 h-20'
-                      : pipConfig.shape === 'rounded'
-                      ? 'rounded-2xl w-24 h-16'
-                      : 'rounded-lg w-24 h-16'
-                  }`}
-                >
-                  <Video01Icon className="w-3.5 h-3.5" />
-                  <span className="text-[9px]">Camera PIP</span>
-                </div>
+                  {/* Moveable PIP overlay placement setup box (ONLY when idle) */}
+                  {mode === 'screen_cam' && (
+                    <div
+                      onMouseDown={() => setIsDraggingStagePip(true)}
+                      style={{
+                        right:
+                          pipConfig.position === 'custom' && pipConfig.customX !== undefined
+                            ? 'auto'
+                            : pipConfig.position === 'top-left' || pipConfig.position === 'bottom-left'
+                            ? 'auto'
+                            : '18px',
+                        left:
+                          pipConfig.position === 'custom' && pipConfig.customX !== undefined
+                            ? `calc(${pipConfig.customX}% - 36px)`
+                            : pipConfig.position === 'top-left' || pipConfig.position === 'bottom-left'
+                            ? '18px'
+                            : 'auto',
+                        top:
+                          pipConfig.position === 'custom' && pipConfig.customY !== undefined
+                            ? `calc(${pipConfig.customY}% - 36px)`
+                            : pipConfig.position === 'top-left' || pipConfig.position === 'top-right'
+                            ? '18px'
+                            : 'auto',
+                        bottom:
+                          pipConfig.position === 'custom' && pipConfig.customY !== undefined
+                            ? 'auto'
+                            : pipConfig.position === 'bottom-left' || pipConfig.position === 'bottom-right'
+                            ? '18px'
+                            : 'auto',
+                      }}
+                      className={`absolute border-2 border-white bg-red-500/40 backdrop-blur-md flex flex-col items-center justify-center text-[10px] text-white font-bold shadow-2xl cursor-grab active:cursor-grabbing transition-all ${
+                        pipConfig.shape === 'circle'
+                          ? 'rounded-full w-20 h-20'
+                          : pipConfig.shape === 'rounded'
+                          ? 'rounded-2xl w-24 h-16'
+                          : 'rounded-lg w-24 h-16'
+                      }`}
+                    >
+                      <Video01Icon className="w-3.5 h-3.5" />
+                      <span className="text-[9px]">Camera PIP</span>
+                    </div>
+                  )}
+                </>
               )}
             </div>
 
@@ -561,23 +609,75 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
               </div>
             </div>
 
-            {/* Main Start / Stop Recording Button with Clear Key Mapping */}
-            <div className="pt-2">
-              <button
-                id="btn-start-recording-main"
-                onClick={onStartRecording}
-                className="w-full flex items-center justify-between px-5 py-3.5 bg-red-600 hover:bg-red-500 active:scale-98 text-white rounded-2xl font-bold text-sm shadow-lg shadow-red-200 hover:shadow-red-300 transition-all duration-200 cursor-pointer"
-              >
-                <div className="flex items-center gap-2.5">
-                  <PlayIcon className="w-4 h-4 fill-current" />
-                  <span>Start Recording</span>
-                </div>
+            {/* Main Start / Stop / Pause Recording Button with Clear Key Mapping */}
+            <div className="pt-2 space-y-2">
+              {isRecording ? (
+                <div className="space-y-2">
+                  <button
+                    id="btn-stop-recording-main"
+                    onClick={onStopRecording}
+                    className="w-full flex items-center justify-between px-5 py-3.5 bg-red-600 hover:bg-red-700 active:scale-98 text-white rounded-2xl font-bold text-sm shadow-lg shadow-red-200 transition-all duration-200 cursor-pointer animate-pulse"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <StopIcon className="w-4 h-4 fill-current text-white" />
+                      <span>Stop Recording ({formatTimer(durationSeconds)})</span>
+                    </div>
 
-                <div className="flex items-center gap-1.5 bg-red-700/80 px-2.5 py-1 rounded-lg text-[11px] text-red-100 font-mono">
-                  <span>Alt + R</span>
-                  <span className="text-[10px] text-red-200">(Start / Stop Rec)</span>
+                    <div className="flex items-center gap-1.5 bg-red-800/80 px-2.5 py-1 rounded-lg text-[11px] text-red-100 font-mono">
+                      <span>Alt + R</span>
+                      <span className="text-[10px] text-red-200">(Stop)</span>
+                    </div>
+                  </button>
+
+                  {onTogglePause && (
+                    <button
+                      id="btn-toggle-pause-dashboard"
+                      onClick={onTogglePause}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl font-semibold text-xs border border-gray-200 transition-all cursor-pointer"
+                    >
+                      {recordingState === 'paused' ? (
+                        <>
+                          <PlayIcon className="w-3.5 h-3.5 fill-current text-red-600" />
+                          <span>Resume Recording (Alt + P)</span>
+                        </>
+                      ) : (
+                        <>
+                          <PauseIcon className="w-3.5 h-3.5 text-gray-700" />
+                          <span>Pause Recording (Alt + P)</span>
+                        </>
+                      )}
+                    </button>
+                  )}
                 </div>
-              </button>
+              ) : recordingState === 'countdown' ? (
+                <button
+                  id="btn-countdown-active-main"
+                  onClick={onStopRecording}
+                  className="w-full flex items-center justify-between px-5 py-3.5 bg-amber-500 hover:bg-amber-600 active:scale-98 text-white rounded-2xl font-bold text-sm shadow-lg shadow-amber-200 transition-all duration-200 cursor-pointer"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-white animate-ping" />
+                    <span>Countdown in progress... (Click to cancel)</span>
+                  </div>
+                  <span className="text-xs bg-amber-600/80 px-2 py-0.5 rounded-md font-mono">Esc</span>
+                </button>
+              ) : (
+                <button
+                  id="btn-start-recording-main"
+                  onClick={onStartRecording}
+                  className="w-full flex items-center justify-between px-5 py-3.5 bg-red-600 hover:bg-red-500 active:scale-98 text-white rounded-2xl font-bold text-sm shadow-lg shadow-red-200 hover:shadow-red-300 transition-all duration-200 cursor-pointer"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <PlayIcon className="w-4 h-4 fill-current" />
+                    <span>Start Recording</span>
+                  </div>
+
+                  <div className="flex items-center gap-1.5 bg-red-700/80 px-2.5 py-1 rounded-lg text-[11px] text-red-100 font-mono">
+                    <span>Alt + R</span>
+                    <span className="text-[10px] text-red-200">(Start / Stop Rec)</span>
+                  </div>
+                </button>
+              )}
             </div>
           </div>
         </aside>

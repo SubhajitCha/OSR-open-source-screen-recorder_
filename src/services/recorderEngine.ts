@@ -84,8 +84,9 @@ export class RecorderEngine {
 
           if (needCamera) {
             constraints.video = {
-              width: { ideal: 1280 },
-              height: { ideal: 720 },
+              width: { ideal: 1280, max: 1920 },
+              height: { ideal: 720, max: 1080 },
+              frameRate: { ideal: videoSettings.fps || 60, max: videoSettings.fps || 60 },
               facingMode: 'user',
             };
           }

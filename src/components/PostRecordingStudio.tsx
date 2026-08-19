@@ -63,6 +63,7 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
   // Status indicators
   const [isSaved, setIsSaved] = useState<boolean>(false);
   const [snapshotMsg, setSnapshotMsg] = useState<string | null>(null);
+  const [showPlayRipple, setShowPlayRipple] = useState<boolean>(false);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const playerContainerRef = useRef<HTMLDivElement | null>(null);
@@ -104,6 +105,40 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
     return () => document.removeEventListener('fullscreenchange', onFsChange);
   }, []);
 
+  // Keyboard shortcut listener (Space = play/pause, Arrow Left/Right = seek)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore if user is currently typing in an input or textarea
+      if (
+        document.activeElement instanceof HTMLInputElement ||
+        document.activeElement instanceof HTMLTextAreaElement
+      ) {
+        return;
+      }
+
+      if (e.code === 'Space') {
+        e.preventDefault();
+        handleTogglePlay();
+      } else if (e.code === 'ArrowLeft') {
+        e.preventDefault();
+        if (videoRef.current) {
+          handleSeek(Math.max(0, videoRef.current.currentTime - 5));
+        }
+      } else if (e.code === 'ArrowRight') {
+        e.preventDefault();
+        if (videoRef.current) {
+          handleSeek(Math.min(currentDuration, videoRef.current.currentTime + 5));
+        }
+      } else if (e.code === 'KeyF') {
+        e.preventDefault();
+        handleToggleFullscreen();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [currentDuration]);
+
   const handleToggleFullscreen = () => {
     if (!playerContainerRef.current && !videoRef.current) return;
     const target = playerContainerRef.current || videoRef.current;
@@ -122,9 +157,14 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
 
   const handleTogglePlay = () => {
     if (!videoRef.current) return;
+    setShowPlayRipple(true);
+    setTimeout(() => setShowPlayRipple(false), 500);
+
     if (videoRef.current.paused) {
-      videoRef.current.play();
-      setIsPlaying(true);
+      videoRef.current
+        .play()
+        .then(() => setIsPlaying(true))
+        .catch((e) => console.warn('Play error:', e));
     } else {
       videoRef.current.pause();
       setIsPlaying(false);
@@ -278,26 +318,75 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
         <div className="lg:col-span-8 space-y-4">
           <div
             ref={playerContainerRef}
-            className="relative aspect-video w-full rounded-3xl bg-gray-900 border border-gray-200 shadow-md overflow-hidden group flex items-center justify-center"
+            id="video-player-stage"
+            onClick={handleTogglePlay}
+            className="relative aspect-video w-full rounded-3xl bg-gray-950 border border-gray-200 shadow-md overflow-hidden group flex items-center justify-center cursor-pointer select-none"
           >
+            {/* Background Poster if video is not yet ready */}
+            {posterUrl && (
+              <img
+                src={posterUrl}
+                alt="Recording Preview"
+                className={`absolute inset-0 w-full h-full object-contain pointer-events-none transition-opacity duration-300 ${
+                  isPlaying ? 'opacity-0' : 'opacity-100'
+                }`}
+              />
+            )}
+
             <video
               ref={videoRef}
               src={videoUrl}
               poster={posterUrl}
+              preload="auto"
               onTimeUpdate={handleTimeUpdate}
               onEnded={() => setIsPlaying(false)}
               onLoadedMetadata={(e) => {
                 const v = e.currentTarget;
                 if (v.currentTime === 0) {
-                  v.currentTime = 0.001;
+                  v.currentTime = 0.05;
                 }
               }}
-              className="w-full h-full object-contain"
+              onLoadedData={(e) => {
+                const v = e.currentTarget;
+                if (v.currentTime === 0) {
+                  v.currentTime = 0.05;
+                }
+              }}
+              onCanPlay={(e) => {
+                const v = e.currentTarget;
+                if (v.currentTime === 0) {
+                  v.currentTime = 0.05;
+                }
+              }}
+              className="w-full h-full object-contain relative z-0"
               playsInline
             />
 
-            {/* Custom Overlay Controls */}
-            <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/80 via-black/40 to-transparent space-y-2">
+            {/* Centered Large Play Button Overlay when Paused */}
+            {!isPlaying && (
+              <div
+                className="absolute inset-0 flex items-center justify-center bg-black/25 group-hover:bg-black/35 transition-all z-10"
+              >
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-red-600/90 hover:bg-red-600 text-white flex items-center justify-center shadow-2xl hover:scale-105 active:scale-95 transition-all duration-200 backdrop-blur-xs ring-4 ring-white/20">
+                  <PlayIcon className="w-8 h-8 sm:w-10 sm:h-10 fill-current ml-1" />
+                </div>
+              </div>
+            )}
+
+            {/* Quick Play/Pause Ripple Indicator */}
+            {showPlayRipple && isPlaying && (
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20 animate-out fade-out zoom-out-90 duration-300">
+                <div className="w-16 h-16 rounded-full bg-black/60 text-white flex items-center justify-center backdrop-blur-md">
+                  <PlayIcon className="w-8 h-8 fill-current ml-0.5" />
+                </div>
+              </div>
+            )}
+
+            {/* Custom Overlay Controls - Stop click propagation so clicks on controls don't toggle video */}
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/85 via-black/50 to-transparent space-y-2 z-20 cursor-default"
+            >
               {/* Progress Scrubber */}
               <div className="flex items-center gap-2">
                 <input
@@ -316,6 +405,7 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
                 <div className="flex items-center gap-3">
                   <button
                     onClick={handleTogglePlay}
+                    title={isPlaying ? 'Pause (Space)' : 'Play (Space)'}
                     className="p-2 rounded-xl bg-red-600 hover:bg-red-500 text-white transition-transform active:scale-95 shadow-sm cursor-pointer"
                   >
                     {isPlaying ? <PauseIcon className="w-4 h-4" /> : <PlayIcon className="w-4 h-4 fill-current" />}
@@ -369,7 +459,7 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
                   {/* Fullscreen Toggle */}
                   <button
                     onClick={handleToggleFullscreen}
-                    title="Toggle Fullscreen"
+                    title="Toggle Fullscreen (F)"
                     className="flex items-center gap-1.5 px-2.5 py-1.5 bg-black/50 hover:bg-black/70 border border-white/20 rounded-lg text-white transition-colors cursor-pointer"
                   >
                     {isFullscreen ? <Minimize01Icon className="w-3.5 h-3.5" /> : <Maximize01Icon className="w-3.5 h-3.5" />}

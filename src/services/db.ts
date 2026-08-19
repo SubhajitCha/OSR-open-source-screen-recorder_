@@ -174,64 +174,78 @@ export function formatBytes(bytes: number, decimals = 1): string {
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
 }
 
-export function generateThumbnailFromBlob(videoBlob: Blob, seekTime = 0.5): Promise<string> {
+export function generateThumbnailFromBlob(videoBlob: Blob, seekTime = 0.1): Promise<string> {
   return new Promise((resolve) => {
     const video = document.createElement('video');
     const url = URL.createObjectURL(videoBlob);
     video.src = url;
     video.muted = true;
     video.playsInline = true;
-    video.crossOrigin = 'anonymous';
+    video.preload = 'auto';
 
     let resolved = false;
 
     const cleanup = () => {
       URL.revokeObjectURL(url);
+      video.remove();
     };
 
-    video.onloadedmetadata = () => {
-      video.currentTime = Math.min(seekTime, video.duration > 0 ? video.duration / 2 : 0);
-    };
-
-    video.onseeked = () => {
+    const tryCapture = () => {
       if (resolved) return;
-      resolved = true;
       try {
-        const canvas = document.createElement('canvas');
-        const width = 480;
-        const scale = width / (video.videoWidth || 640);
-        const height = (video.videoHeight || 360) * scale;
-        canvas.width = width;
-        canvas.height = height;
+        if (video.videoWidth > 0 && video.videoHeight > 0) {
+          const canvas = document.createElement('canvas');
+          const width = 640;
+          const height = Math.round((video.videoHeight / video.videoWidth) * width) || 360;
+          canvas.width = width;
+          canvas.height = height;
 
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.drawImage(video, 0, 0, width, height);
-          const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-          cleanup();
-          resolve(dataUrl);
-          return;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(video, 0, 0, width, height);
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+            resolved = true;
+            cleanup();
+            resolve(dataUrl);
+            return;
+          }
         }
       } catch (err) {
         console.warn('Could not generate thumbnail from frame:', err);
       }
-      cleanup();
-      resolve(createPlaceholderThumbnail());
+    };
+
+    video.onloadeddata = () => {
+      try {
+        video.currentTime = Math.max(0.05, seekTime);
+      } catch {
+        tryCapture();
+      }
+    };
+
+    video.onseeked = () => {
+      tryCapture();
     };
 
     video.onerror = () => {
-      cleanup();
-      resolve(createPlaceholderThumbnail());
-    };
-
-    // Safety timeout
-    setTimeout(() => {
       if (!resolved) {
         resolved = true;
         cleanup();
         resolve(createPlaceholderThumbnail());
       }
-    }, 3000);
+    };
+
+    // Safety timeout - attempt capture then fallback
+    setTimeout(() => {
+      if (!resolved) {
+        tryCapture();
+        if (!resolved) {
+          resolved = true;
+          cleanup();
+          resolve(createPlaceholderThumbnail());
+        }
+      }
+    }, 1500);
   });
 }
 

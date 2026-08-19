@@ -255,7 +255,7 @@ export const RecordingsLibrary: React.FC<RecordingsLibraryProps> = ({ onOpenStud
                 onClick={() => setActivePlayback(rec)}
                 className="relative aspect-video w-full bg-gray-900 cursor-pointer overflow-hidden"
               >
-                {rec.thumbnailUrl ? (
+                {rec.thumbnailUrl && rec.thumbnailUrl.trim() !== '' ? (
                   <img
                     src={rec.thumbnailUrl}
                     alt={rec.title}
@@ -419,12 +419,14 @@ export const RecordingsLibrary: React.FC<RecordingsLibraryProps> = ({ onOpenStud
             </div>
 
             <div className="flex-1 p-6 flex flex-col items-center justify-center bg-gray-900">
-              <video
-                src={URL.createObjectURL(activePlayback.blob)}
-                controls
-                autoPlay
-                className="w-full max-h-[60vh] object-contain rounded-2xl border-[4px] border-white/20"
-              />
+              {activePlayback.blob && (
+                <video
+                  src={URL.createObjectURL(activePlayback.blob)}
+                  controls
+                  autoPlay
+                  className="w-full max-h-[60vh] object-contain rounded-2xl border-[4px] border-white/20"
+                />
+              )}
             </div>
 
             <div className="flex items-center justify-between px-6 py-3 border-t border-gray-200 bg-white text-xs">

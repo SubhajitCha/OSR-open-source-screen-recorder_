@@ -43,8 +43,8 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
 }) => {
   const [currentBlob, setCurrentBlob] = useState<Blob>(initialBlob);
   const [currentDuration, setCurrentDuration] = useState<number>(initialDuration);
-  const [videoUrl, setVideoUrl] = useState<string>('');
-  const [posterUrl, setPosterUrl] = useState<string>('');
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [posterUrl, setPosterUrl] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [playbackSpeed, setPlaybackSpeed] = useState<number>(1);
@@ -327,40 +327,43 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
               <img
                 src={posterUrl}
                 alt="Recording Preview"
+                referrerPolicy="no-referrer"
                 className={`absolute inset-0 w-full h-full object-contain pointer-events-none transition-opacity duration-300 ${
                   isPlaying ? 'opacity-0' : 'opacity-100'
                 }`}
               />
             )}
 
-            <video
-              ref={videoRef}
-              src={videoUrl}
-              poster={posterUrl}
-              preload="auto"
-              onTimeUpdate={handleTimeUpdate}
-              onEnded={() => setIsPlaying(false)}
-              onLoadedMetadata={(e) => {
-                const v = e.currentTarget;
-                if (v.currentTime === 0) {
-                  v.currentTime = 0.05;
-                }
-              }}
-              onLoadedData={(e) => {
-                const v = e.currentTarget;
-                if (v.currentTime === 0) {
-                  v.currentTime = 0.05;
-                }
-              }}
-              onCanPlay={(e) => {
-                const v = e.currentTarget;
-                if (v.currentTime === 0) {
-                  v.currentTime = 0.05;
-                }
-              }}
-              className="w-full h-full object-contain relative z-0"
-              playsInline
-            />
+            {videoUrl && (
+              <video
+                ref={videoRef}
+                src={videoUrl}
+                poster={posterUrl || undefined}
+                preload="auto"
+                onTimeUpdate={handleTimeUpdate}
+                onEnded={() => setIsPlaying(false)}
+                onLoadedMetadata={(e) => {
+                  const v = e.currentTarget;
+                  if (v.currentTime === 0) {
+                    v.currentTime = 0.05;
+                  }
+                }}
+                onLoadedData={(e) => {
+                  const v = e.currentTarget;
+                  if (v.currentTime === 0) {
+                    v.currentTime = 0.05;
+                  }
+                }}
+                onCanPlay={(e) => {
+                  const v = e.currentTarget;
+                  if (v.currentTime === 0) {
+                    v.currentTime = 0.05;
+                  }
+                }}
+                className="w-full h-full object-contain relative z-0"
+                playsInline
+              />
+            )}
 
             {/* Centered Large Play Button Overlay when Paused */}
             {!isPlaying && (

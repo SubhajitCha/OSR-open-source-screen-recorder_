@@ -8,11 +8,13 @@ import {
   Camera01Icon,
   Tick01Icon,
   Film01Icon,
-  HardDriveIcon,
   Bookmark01Icon,
   RotateLeft01Icon,
   Maximize01Icon,
   Minimize01Icon,
+  FileEditIcon,
+  Clock01Icon,
+  HardDriveIcon,
 } from 'hugeicons-react';
 import confetti from 'canvas-confetti';
 import { SavedRecording, VideoBookmark } from '../types';
@@ -20,7 +22,6 @@ import { saveRecordingToDB, generateThumbnailFromBlob, formatBytes } from '../se
 import {
   captureVideoSnapshot,
   downloadBlob,
-  saveWithFileSystemApi,
   trimVideoClientSide,
 } from '../services/videoTrimmer';
 
@@ -51,7 +52,6 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [title, setTitle] = useState<string>(`Recording ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`);
   const [notes, setNotes] = useState<string>('');
-  const [tagsInput, setTagsInput] = useState<string>('screencast, demo');
 
   // Trimming states
   const [isTrimmingMode, setIsTrimmingMode] = useState<boolean>(false);
@@ -82,9 +82,9 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
     // Trigger celebratory confetti
     try {
       confetti({
-        particleCount: 50,
-        spread: 60,
-        origin: { y: 0.7 },
+        particleCount: 45,
+        spread: 55,
+        origin: { y: 0.65 },
         colors: ['#ef4444', '#10b981', '#3b82f6'],
       });
     } catch {
@@ -211,30 +211,20 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
     try {
       const { blob } = await captureVideoSnapshot(currentBlob, currentTime);
       downloadBlob(blob, `${title.replace(/\s+/g, '_')}_frame_${Math.round(currentTime)}s.png`);
-      setSnapshotMsg('Snapshot downloaded as PNG');
+      setSnapshotMsg('Snapshot frame downloaded as PNG');
       setTimeout(() => setSnapshotMsg(null), 3000);
     } catch (err) {
       console.error('Snapshot failed:', err);
     }
   };
 
-  const handleDirectSave = async () => {
-    const ext = mimeType.includes('mp4') ? 'mp4' : 'webm';
-    const filename = `${title.replace(/[^a-zA-Z0-9_-]/g, '_')}.${ext}`;
-    await saveWithFileSystemApi(currentBlob, filename);
-  };
-
   const handleSaveToIndexedDB = async () => {
     try {
       const thumbnail = await generateThumbnailFromBlob(currentBlob, 0.5);
-      const tags = tagsInput
-        .split(',')
-        .map((t) => t.trim())
-        .filter(Boolean);
 
       const recordingItem: SavedRecording = {
         id: 'rec_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
-        title,
+        title: title.trim() || 'Untitled Recording',
         blob: currentBlob,
         mimeType,
         duration: currentDuration,
@@ -246,7 +236,7 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
         fps: 60,
         bookmarks: initialBookmarks,
         notes,
-        tags,
+        tags: [],
       };
 
       await saveRecordingToDB(recordingItem);
@@ -266,32 +256,50 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
   };
 
   return (
-    <div id="post-recording-studio" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      {/* Studio Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-gray-200 shadow-sm">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center w-11 h-11 rounded-2xl bg-gray-100 text-gray-900 border border-gray-200">
-            <Film01Icon className="w-6 h-6 text-red-500" />
+    <div id="post-recording-studio" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      {/* RECORDING DETAILS & ACTION BAR (Replaces redundant "Recording Review" card) */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 sm:p-6 rounded-3xl border border-gray-200 shadow-sm">
+        <div className="flex items-center gap-3.5 min-w-0 flex-1">
+          <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-red-50 text-red-600 border border-red-100 shrink-0">
+            <Film01Icon className="w-6 h-6" />
           </div>
-          <div>
+
+          <div className="min-w-0 flex-1 space-y-1">
             <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold text-gray-900">Recording Review</h1>
-              <span className="px-2 py-0.5 text-xs font-semibold text-green-700 bg-green-50 border border-green-200 rounded-full">
-                Ready in Memory
+              <input
+                id="recording-title-header-input"
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Name your recording..."
+                className="text-base sm:text-lg font-bold text-gray-900 bg-transparent border-b border-dashed border-gray-300 hover:border-gray-400 focus:border-red-500 focus:outline-none px-1 py-0.5 w-full max-w-md transition-colors"
+              />
+              <FileEditIcon className="w-4 h-4 text-gray-400 shrink-0 pointer-events-none" />
+            </div>
+
+            {/* Quick Specs Badges */}
+            <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
+              <span className="inline-flex items-center gap-1 font-mono font-semibold text-gray-700 bg-gray-100 px-2.5 py-0.5 rounded-lg">
+                <Clock01Icon className="w-3 h-3 text-gray-500" />
+                {formatTime(currentDuration)}
+              </span>
+              <span className="inline-flex items-center gap-1 font-mono font-semibold text-gray-700 bg-gray-100 px-2.5 py-0.5 rounded-lg">
+                <HardDriveIcon className="w-3 h-3 text-gray-500" />
+                {formatBytes(currentBlob.size)}
+              </span>
+              <span className="font-semibold text-gray-700 bg-gray-100 px-2.5 py-0.5 rounded-lg uppercase text-[11px]">
+                {mimeType.includes('mp4') ? 'MP4 Video' : 'WebM Video'}
               </span>
             </div>
-            <p className="text-xs text-gray-500">
-              Preview, trim, extract snapshots, and save directly to disk or local storage
-            </p>
           </div>
         </div>
 
-        {/* Unified Primary Actions Trio: Record Another, Save to Library, Download */}
-        <div className="flex flex-wrap items-center gap-2.5">
+        {/* Unified Action Trio: Record Again, Save to Library, Download */}
+        <div className="flex flex-wrap items-center gap-2.5 shrink-0">
           <button
             id="btn-record-another"
             onClick={onRecordAnother}
-            className="flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-gray-700 hover:text-gray-900 bg-white hover:bg-gray-50 border border-gray-200 rounded-xl transition-all shadow-xs cursor-pointer active:scale-95"
+            className="flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-gray-700 hover:text-gray-900 bg-white hover:bg-gray-50 border border-gray-200 rounded-xl transition-all shadow-xs cursor-pointer active:scale-95"
           >
             <RotateLeft01Icon className="w-4 h-4 text-gray-500" />
             <span>Record Again</span>
@@ -301,10 +309,10 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
             id="btn-save-to-library"
             disabled={isSaved}
             onClick={handleSaveToIndexedDB}
-            className={`flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl transition-all shadow-sm cursor-pointer active:scale-95 ${
+            className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold rounded-xl transition-all shadow-sm cursor-pointer active:scale-95 ${
               isSaved
                 ? 'bg-emerald-600 text-white'
-                : 'bg-gray-900 hover:bg-gray-800 text-white shadow-gray-200'
+                : 'bg-gray-900 hover:bg-gray-800 text-white'
             }`}
           >
             {isSaved ? <Tick01Icon className="w-4 h-4" /> : <FloppyDiskIcon className="w-4 h-4" />}
@@ -317,7 +325,7 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
               const ext = mimeType.includes('mp4') ? 'mp4' : 'webm';
               downloadBlob(currentBlob, `${title.replace(/\s+/g, '_')}.${ext}`);
             }}
-            className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-red-600 hover:bg-red-500 rounded-xl transition-all shadow-md shadow-red-200 cursor-pointer active:scale-95"
+            className="flex items-center gap-2 px-5 py-2.5 text-xs font-bold text-white bg-red-600 hover:bg-red-500 rounded-xl transition-all shadow-md shadow-red-200 cursor-pointer active:scale-95"
           >
             <Download01Icon className="w-4 h-4" />
             <span>Download ({mimeType.includes('mp4') ? 'MP4' : 'WebM'})</span>
@@ -325,9 +333,9 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
         </div>
       </div>
 
-      {/* Main Grid: Player on left, Metadata & Export on right */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Left: Video Player & Trimmer Controls */}
+      {/* Main Grid: Player on left, Notes & Details on right */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Left Column: Interactive Video Player & Trimmer (8 cols) */}
         <div className="lg:col-span-8 space-y-4">
           <div
             ref={playerContainerRef}
@@ -380,9 +388,7 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
 
             {/* Centered Large Play Button Overlay when Paused */}
             {!isPlaying && (
-              <div
-                className="absolute inset-0 flex items-center justify-center bg-black/25 group-hover:bg-black/35 transition-all z-10"
-              >
+              <div className="absolute inset-0 flex items-center justify-center bg-black/25 group-hover:bg-black/35 transition-all z-10">
                 <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-red-600/90 hover:bg-red-600 text-white flex items-center justify-center shadow-2xl hover:scale-105 active:scale-95 transition-all duration-200 backdrop-blur-xs ring-4 ring-white/20">
                   <PlayIcon className="w-8 h-8 sm:w-10 sm:h-10 fill-current ml-1" />
                 </div>
@@ -398,7 +404,7 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
               </div>
             )}
 
-            {/* Custom Overlay Controls - Stop click propagation so clicks on controls don't toggle video */}
+            {/* Custom Overlay Controls */}
             <div
               onClick={(e) => e.stopPropagation()}
               className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/85 via-black/50 to-transparent space-y-2 z-20 cursor-default"
@@ -600,28 +606,48 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
           )}
         </div>
 
-        {/* Right: Metadata, Tagging & Instant Export */}
-        <div className="lg:col-span-4 space-y-6">
-          {/* Export & Actions Card */}
-          <div className="p-6 rounded-3xl bg-white border border-gray-200 shadow-sm space-y-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400">
-              Actions & Export
+        {/* Right Column: Title, Notes & Quick Specs (4 cols) */}
+        <div className="lg:col-span-4 space-y-5">
+          {/* Recording Title & Notes Card */}
+          <div className="p-5 sm:p-6 rounded-3xl bg-white border border-gray-200 shadow-sm space-y-4">
+            <h3 className="text-[11px] font-bold uppercase tracking-wider text-gray-400">
+              Recording Details & Notes
             </h3>
 
-            <div className="p-3.5 rounded-2xl bg-gray-50 border border-gray-200 space-y-2 text-xs">
-              <div className="flex justify-between text-gray-500">
-                <span>File Size:</span>
-                <span className="font-mono text-gray-900 font-semibold">{formatBytes(currentBlob.size)}</span>
-              </div>
-              <div className="flex justify-between text-gray-500">
-                <span>Duration:</span>
-                <span className="font-mono text-gray-900 font-semibold">{formatTime(currentDuration)}</span>
-              </div>
-              <div className="flex justify-between text-gray-500">
-                <span>MIME Format:</span>
-                <span className="font-mono text-gray-900 font-semibold">{mimeType.split(';')[0]}</span>
-              </div>
+            {/* Title Input */}
+            <div>
+              <label className="text-xs font-bold text-gray-800 block mb-1.5">
+                Recording Title
+              </label>
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Add a descriptive title..."
+                className="w-full px-3.5 py-2.5 text-xs bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:border-red-500 focus:bg-white transition-all font-medium"
+              />
             </div>
+
+            {/* Notes Textarea (No tags, clean and focused) */}
+            <div>
+              <label className="text-xs font-bold text-gray-800 block mb-1.5">
+                Notes & Agenda Summary
+              </label>
+              <textarea
+                rows={5}
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Write key takeaways, timestamps, action items, or meeting context..."
+                className="w-full px-3.5 py-2.5 text-xs bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:border-red-500 focus:bg-white transition-all resize-none leading-relaxed"
+              />
+            </div>
+          </div>
+
+          {/* Quick Actions & Specifications Card */}
+          <div className="p-5 sm:p-6 rounded-3xl bg-white border border-gray-200 shadow-sm space-y-4">
+            <h3 className="text-[11px] font-bold uppercase tracking-wider text-gray-400">
+              Quick Actions
+            </h3>
 
             {/* Single Unified Download Button */}
             <button
@@ -633,16 +659,16 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
               className="w-full flex items-center justify-center gap-2.5 px-5 py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs shadow-md shadow-red-200 transition-all active:scale-98 cursor-pointer"
             >
               <Download01Icon className="w-4 h-4" />
-              <span>Download File ({mimeType.includes('mp4') ? 'MP4' : 'WebM'})</span>
+              <span>Download Video ({mimeType.includes('mp4') ? 'MP4' : 'WebM'})</span>
             </button>
 
-            {/* Grouped Secondary Actions: Save to Library & Record Again */}
-            <div className="grid grid-cols-2 gap-2 pt-1">
+            {/* Secondary Actions */}
+            <div className="grid grid-cols-2 gap-2.5">
               <button
                 id="btn-sidebar-save"
                 disabled={isSaved}
                 onClick={handleSaveToIndexedDB}
-                className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl font-bold text-xs transition-all shadow-xs cursor-pointer active:scale-98 ${
+                className={`flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl font-bold text-xs transition-all shadow-xs cursor-pointer active:scale-98 ${
                   isSaved
                     ? 'bg-emerald-600 text-white'
                     : 'bg-gray-900 hover:bg-gray-800 text-white'
@@ -655,59 +681,11 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
               <button
                 id="btn-sidebar-record-again"
                 onClick={onRecordAnother}
-                className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 font-semibold text-xs transition-all shadow-xs cursor-pointer active:scale-98"
+                className="flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 font-semibold text-xs transition-all shadow-xs cursor-pointer active:scale-98"
               >
                 <RotateLeft01Icon className="w-4 h-4 text-gray-500" />
                 <span>Record Again</span>
               </button>
-            </div>
-          </div>
-
-          {/* Metadata & Tagging Card */}
-          <div className="p-6 rounded-3xl bg-white border border-gray-200 shadow-sm space-y-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400">
-              Recording Details & Organization
-            </h3>
-
-            {/* Title Input */}
-            <div>
-              <label className="text-xs font-semibold text-gray-700 block mb-1.5">
-                Recording Title
-              </label>
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="w-full px-3 py-2 text-xs bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:border-red-500"
-              />
-            </div>
-
-            {/* Tags Input */}
-            <div>
-              <label className="text-xs font-semibold text-gray-700 block mb-1.5">
-                Tags (Comma separated)
-              </label>
-              <input
-                type="text"
-                value={tagsInput}
-                onChange={(e) => setTagsInput(e.target.value)}
-                placeholder="demo, tutorial, meeting"
-                className="w-full px-3 py-2 text-xs bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:border-red-500"
-              />
-            </div>
-
-            {/* Notes Textarea */}
-            <div>
-              <label className="text-xs font-semibold text-gray-700 block mb-1.5">
-                Notes & Summary
-              </label>
-              <textarea
-                rows={3}
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="Add context or meeting agenda notes..."
-                className="w-full px-3 py-2 text-xs bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:border-red-500 resize-none"
-              />
             </div>
           </div>
         </div>

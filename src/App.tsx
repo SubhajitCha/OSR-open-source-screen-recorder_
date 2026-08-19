@@ -1,5 +1,11 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
+  AlertCircleIcon,
+  Tick01Icon,
+  InformationCircleIcon,
+  Cancel01Icon,
+} from 'hugeicons-react';
+import {
   AudioSettings,
   PipConfig,
   RecordingMode,
@@ -27,6 +33,21 @@ export default function App() {
   const [activeView, setActiveView] = useState<ActiveView>('studio');
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
   const [recordingsCount, setRecordingsCount] = useState<number>(0);
+
+  // In-App Toast Notification State
+  const [toast, setToast] = useState<{
+    id: string;
+    type: 'error' | 'success' | 'info';
+    message: string;
+  } | null>(null);
+
+  const showToast = useCallback((message: string, type: 'error' | 'success' | 'info' = 'info') => {
+    const id = Math.random().toString(36).substring(2, 8);
+    setToast({ id, type, message });
+    setTimeout(() => {
+      setToast((current) => (current?.id === id ? null : current));
+    }, 5000);
+  }, []);
 
   // Recording State
   const [recordingState, setRecordingState] = useState<'idle' | 'countdown' | 'recording' | 'paused' | 'review'>('idle');
@@ -113,8 +134,9 @@ export default function App() {
           }
         },
         onError: (err) => {
-          console.error('Recorder Engine Error:', err);
-          alert(`Recording Error: ${err.message || 'Capture interrupted'}`);
+          console.warn('Recorder Engine Error:', err);
+          const msg = err.message || 'Screen share was not provided or was cancelled.';
+          showToast(msg, 'error');
           setActiveWebcamStream(null);
           isStartingRecordingRef.current = false;
           setRecordingState('idle');
@@ -125,7 +147,7 @@ export default function App() {
       });
     }
     return recorderEngineRef.current;
-  }, []);
+  }, [showToast]);
 
   const executeStartRecording = useCallback(async () => {
     if (isStartingRecordingRef.current) {
@@ -150,14 +172,17 @@ export default function App() {
         setActiveWebcamStream(result.webcamStream);
       }
       setRecordingState('recording');
-    } catch (err) {
-      console.warn('Failed to start recording:', err);
+    } catch (err: unknown) {
+      const errObj = err as { message?: string };
+      const msg = errObj?.message || 'Screen share was not provided or was cancelled.';
+      console.warn('Failed to start recording:', msg);
+      showToast(msg, 'error');
       setActiveWebcamStream(null);
       setRecordingState('idle');
     } finally {
       isStartingRecordingRef.current = false;
     }
-  }, [recordingState, mode, audioSettings, videoSettings, pipConfig, initRecorderEngine]);
+  }, [recordingState, mode, audioSettings, videoSettings, pipConfig, initRecorderEngine, showToast]);
 
   const handleStartRecordingSequence = useCallback(() => {
     if (isStartingRecordingRef.current || recordingState !== 'idle') {
@@ -199,7 +224,7 @@ export default function App() {
   };
 
   const handleTakeSnapshotDuringRecording = async () => {
-    alert('Frame snapshot captured! You can review and download all snapshots in the post-recording studio.');
+    showToast('Frame snapshot captured!', 'success');
   };
 
   const handleStopRecording = async () => {
@@ -401,6 +426,67 @@ export default function App() {
           onUpdateAudioSettings={(updates) => setAudioSettings((prev) => ({ ...prev, ...updates }))}
           onClose={() => setIsSettingsOpen(false)}
         />
+      )}
+
+      {/* Floating In-App Toast Notification */}
+      {toast && (
+        <div
+          id="app-toast-notification"
+          className="fixed top-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl shadow-xl border backdrop-blur-md max-w-md w-full mx-4 animate-in slide-in-from-top-4 fade-in duration-200 transition-all select-none"
+          style={{
+            backgroundColor:
+              toast.type === 'error'
+                ? 'rgba(254, 242, 242, 0.96)'
+                : toast.type === 'success'
+                ? 'rgba(240, 253, 244, 0.96)'
+                : 'rgba(248, 250, 252, 0.96)',
+            borderColor:
+              toast.type === 'error'
+                ? '#fca5a5'
+                : toast.type === 'success'
+                ? '#86efac'
+                : '#cbd5e1',
+          }}
+        >
+          <div
+            className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
+              toast.type === 'error'
+                ? 'bg-red-500 text-white'
+                : toast.type === 'success'
+                ? 'bg-emerald-500 text-white'
+                : 'bg-blue-500 text-white'
+            }`}
+          >
+            {toast.type === 'error' ? (
+              <AlertCircleIcon className="w-4 h-4" />
+            ) : toast.type === 'success' ? (
+              <Tick01Icon className="w-4 h-4" />
+            ) : (
+              <InformationCircleIcon className="w-4 h-4" />
+            )}
+          </div>
+
+          <div className="flex-1 min-w-0">
+            <p
+              className={`text-xs font-semibold leading-snug ${
+                toast.type === 'error'
+                  ? 'text-red-950'
+                  : toast.type === 'success'
+                  ? 'text-emerald-950'
+                  : 'text-slate-900'
+              }`}
+            >
+              {toast.message}
+            </p>
+          </div>
+
+          <button
+            onClick={() => setToast(null)}
+            className="p-1 text-gray-400 hover:text-gray-700 rounded-lg transition-colors cursor-pointer shrink-0"
+          >
+            <Cancel01Icon className="w-4 h-4" />
+          </button>
+        </div>
       )}
     </div>
   );

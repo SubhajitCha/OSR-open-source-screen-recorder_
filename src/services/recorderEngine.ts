@@ -75,8 +75,18 @@ export class RecorderEngine {
               }
             };
           }
-        } catch (err) {
-          throw new Error('Screen capture permission was cancelled or not granted.');
+        } catch (err: unknown) {
+          const domErr = err as { name?: string; message?: string };
+          if (
+            domErr?.name === 'NotAllowedError' ||
+            domErr?.name === 'AbortError' ||
+            domErr?.message?.includes('Permission') ||
+            domErr?.message?.includes('denied') ||
+            domErr?.message?.includes('cancel')
+          ) {
+            throw new Error('Screen share was not provided or was cancelled.');
+          }
+          throw new Error(domErr?.message || 'Screen capture permission was cancelled or not granted.');
         }
       }
 

@@ -44,9 +44,6 @@ export const Navbar: React.FC<NavbarProps> = ({
               <h1 className="text-base font-bold text-gray-900 tracking-tight group-hover:text-red-600 transition-colors">
                 Screen Recorder
               </h1>
-              <span className="text-[11px] font-medium text-gray-400 italic">
-                Open Source
-              </span>
             </div>
           </div>
         </div>
@@ -57,7 +54,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             id="nav-tab-studio"
             disabled={isRecording}
             onClick={() => onSelectView('studio')}
-            className={`flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+            className={`flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
               activeView === 'studio'
                 ? 'bg-white text-gray-900 shadow-sm border border-gray-200/60'
                 : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200/60'
@@ -71,7 +68,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             id="nav-tab-library"
             disabled={isRecording}
             onClick={() => onSelectView('library')}
-            className={`flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+            className={`flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
               activeView === 'library'
                 ? 'bg-white text-gray-900 shadow-sm border border-gray-200/60'
                 : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200/60'
@@ -87,24 +84,10 @@ export const Navbar: React.FC<NavbarProps> = ({
           </button>
 
           <button
-            id="nav-tab-services"
-            disabled={isRecording}
-            onClick={() => onSelectView('services')}
-            className={`flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all ${
-              activeView === 'services'
-                ? 'bg-white text-gray-900 shadow-sm border border-gray-200/60'
-                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200/60'
-            } ${isRecording ? 'opacity-50 cursor-not-allowed' : ''}`}
-          >
-            <Activity01Icon className="w-4 h-4 text-green-600" />
-            <span>Services</span>
-          </button>
-
-          <button
             id="nav-tab-docs"
             disabled={isRecording}
             onClick={() => onSelectView('docs')}
-            className={`flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+            className={`flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
               activeView === 'docs'
                 ? 'bg-white text-gray-900 shadow-sm border border-gray-200/60'
                 : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200/60'
@@ -117,29 +100,27 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Right utility elements */}
         <div className="flex items-center gap-3">
-          {/* Status Indicator linking to Services */}
+          {/* Services Healthy Interactive Button */}
           <button
-            onClick={() => !isRecording && onSelectView('services')}
-            className="hidden sm:flex items-center gap-2 px-2.5 py-1 text-xs font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition-colors"
+            id="btn-nav-services-health"
+            disabled={isRecording}
+            onClick={() => onSelectView('services')}
+            title="Click to view all running engine services and system health"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 text-xs font-semibold transition-all cursor-pointer shadow-xs active:scale-95 disabled:opacity-50"
           >
-            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
             <span>Services: Healthy</span>
           </button>
-
-          <div className="hidden sm:block h-5 w-[1px] bg-gray-200" />
-
-          {/* Privacy badge */}
-          <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gray-100 border border-gray-200 text-gray-600 text-xs font-medium">
-            <SecurityCheckIcon className="w-3.5 h-3.5 text-green-600" />
-            <span>100% Local</span>
-          </div>
 
           {/* Settings button */}
           <button
             id="btn-nav-settings"
             onClick={onOpenSettings}
             title="Recording & Audio Settings"
-            className="p-2 text-gray-500 hover:text-gray-900 rounded-xl bg-gray-100 hover:bg-gray-200 border border-gray-200 transition-colors"
+            className="p-2 text-gray-500 hover:text-gray-900 rounded-xl bg-gray-100 hover:bg-gray-200 border border-gray-200 transition-colors cursor-pointer"
           >
             <Settings01Icon className="w-4 h-4" />
           </button>

@@ -69,6 +69,7 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
 }) => {
   const isRecording = recordingState === 'recording' || recordingState === 'paused';
   const [isAdvancedTargetOpen, setIsAdvancedTargetOpen] = useState<boolean>(false);
+  const [showMicVolumeSlider, setShowMicVolumeSlider] = useState<boolean>(false);
   const [isDraggingStagePip, setIsDraggingStagePip] = useState<boolean>(false);
   const stageRef = useRef<HTMLDivElement | null>(null);
 
@@ -129,7 +130,7 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
         </div>
       </div>
 
-      {/* COMPACT INPUT SOURCE SELECTION BAR */}
+      {/* COMPACT INPUT SOURCE SELECTION BAR: ONLY TWO CAPTURE MODES */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <h3 className="text-[10px] uppercase tracking-widest text-gray-400 font-bold">
@@ -138,25 +139,25 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
           <span className="text-[11px] text-gray-400">Permissions requested upon recording start</span>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {/* Card: Screen + Webcam */}
           <button
             id="mode-btn-screen-cam"
             onClick={() => onSelectMode('screen_cam')}
-            className={`flex items-center gap-3 p-3 rounded-2xl border text-left transition-all ${
+            className={`flex items-center gap-3.5 p-3.5 rounded-2xl border text-left transition-all cursor-pointer ${
               mode === 'screen_cam'
-                ? 'bg-red-50/60 border-red-500 shadow-sm ring-1 ring-red-500/20'
+                ? 'bg-red-50/70 border-red-500 shadow-sm ring-1 ring-red-500/20'
                 : 'bg-white border-gray-200 hover:border-gray-300 shadow-xs'
             }`}
           >
-            <div className={`p-2 rounded-xl ${
-              mode === 'screen_cam' ? 'bg-red-500 text-white' : 'bg-gray-100 text-gray-700'
+            <div className={`p-2.5 rounded-xl ${
+              mode === 'screen_cam' ? 'bg-red-500 text-white shadow-sm shadow-red-500/20' : 'bg-gray-100 text-gray-700'
             }`}>
-              <Layers01Icon className="w-4 h-4" />
+              <Layers01Icon className="w-5 h-5" />
             </div>
             <div className="min-w-0">
-              <span className="text-xs font-bold text-gray-900 block truncate">Screen + Cam</span>
-              <span className="text-[10px] text-gray-500 block truncate">Moveable Single PIP</span>
+              <span className="text-xs font-bold text-gray-900 block truncate">Screen + Camera</span>
+              <span className="text-[11px] text-gray-500 block truncate">Display capture with moveable camera bubble</span>
             </div>
           </button>
 
@@ -164,62 +165,20 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
           <button
             id="mode-btn-screen"
             onClick={() => onSelectMode('screen')}
-            className={`flex items-center gap-3 p-3 rounded-2xl border text-left transition-all ${
+            className={`flex items-center gap-3.5 p-3.5 rounded-2xl border text-left transition-all cursor-pointer ${
               mode === 'screen'
-                ? 'bg-red-50/60 border-red-500 shadow-sm ring-1 ring-red-500/20'
+                ? 'bg-red-50/70 border-red-500 shadow-sm ring-1 ring-red-500/20'
                 : 'bg-white border-gray-200 hover:border-gray-300 shadow-xs'
             }`}
           >
-            <div className={`p-2 rounded-xl ${
-              mode === 'screen' ? 'bg-red-500 text-white' : 'bg-gray-100 text-gray-700'
+            <div className={`p-2.5 rounded-xl ${
+              mode === 'screen' ? 'bg-red-500 text-white shadow-sm shadow-red-500/20' : 'bg-gray-100 text-gray-700'
             }`}>
-              <ComputerIcon className="w-4 h-4" />
+              <ComputerIcon className="w-5 h-5" />
             </div>
             <div className="min-w-0">
               <span className="text-xs font-bold text-gray-900 block truncate">Screen Only</span>
-              <span className="text-[10px] text-gray-500 block truncate">Display / Window / Tab</span>
-            </div>
-          </button>
-
-          {/* Card: Camera Only */}
-          <button
-            id="mode-btn-cam-only"
-            onClick={() => onSelectMode('cam_only')}
-            className={`flex items-center gap-3 p-3 rounded-2xl border text-left transition-all ${
-              mode === 'cam_only'
-                ? 'bg-red-50/60 border-red-500 shadow-sm ring-1 ring-red-500/20'
-                : 'bg-white border-gray-200 hover:border-gray-300 shadow-xs'
-            }`}
-          >
-            <div className={`p-2 rounded-xl ${
-              mode === 'cam_only' ? 'bg-red-500 text-white' : 'bg-gray-100 text-gray-700'
-            }`}>
-              <Video01Icon className="w-4 h-4" />
-            </div>
-            <div className="min-w-0">
-              <span className="text-xs font-bold text-gray-900 block truncate">Camera Only</span>
-              <span className="text-[10px] text-gray-500 block truncate">Webcam & Vlogs</span>
-            </div>
-          </button>
-
-          {/* Card: Audio Only */}
-          <button
-            id="mode-btn-audio-only"
-            onClick={() => onSelectMode('audio_only')}
-            className={`flex items-center gap-3 p-3 rounded-2xl border text-left transition-all ${
-              mode === 'audio_only'
-                ? 'bg-red-50/60 border-red-500 shadow-sm ring-1 ring-red-500/20'
-                : 'bg-white border-gray-200 hover:border-gray-300 shadow-xs'
-            }`}
-          >
-            <div className={`p-2 rounded-xl ${
-              mode === 'audio_only' ? 'bg-red-500 text-white' : 'bg-gray-100 text-gray-700'
-            }`}>
-              <RadioIcon className="w-4 h-4" />
-            </div>
-            <div className="min-w-0">
-              <span className="text-xs font-bold text-gray-900 block truncate">Audio Only</span>
-              <span className="text-[10px] text-gray-500 block truncate">Voice & Podcast</span>
+              <span className="text-[11px] text-gray-500 block truncate">Entire screen, application window, or browser tab</span>
             </div>
           </button>
         </div>
@@ -438,8 +397,19 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
                     {audioSettings.includeMic ? <Mic01Icon className="w-3.5 h-3.5" /> : <MicOff01Icon className="w-3.5 h-3.5" />}
                   </div>
                   <div>
-                    <span className="text-xs font-bold text-gray-900 block">Microphone Audio</span>
-                    <span className="text-[10px] text-gray-500">Voice narration</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-gray-900 block">Microphone Audio</span>
+                      {audioSettings.includeMic && (
+                        <button
+                          type="button"
+                          onClick={() => setShowMicVolumeSlider(!showMicVolumeSlider)}
+                          className="text-[10px] font-semibold text-gray-500 hover:text-gray-800 bg-gray-100 hover:bg-gray-200 px-1.5 py-0.5 rounded cursor-pointer transition-colors"
+                        >
+                          {showMicVolumeSlider ? 'Hide Slider' : `${Math.round(audioSettings.micVolume * 100)}% Volume`}
+                        </button>
+                      )}
+                    </div>
+                    <span className="text-[10px] text-gray-500">Voice narration & commentary</span>
                   </div>
                 </div>
 
@@ -455,10 +425,11 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
                 </div>
               </div>
 
-              {audioSettings.includeMic && (
-                <div className="p-2.5 bg-gray-50 rounded-xl border border-gray-100 space-y-1.5">
+              {/* Microphone Volume Slider - HIDDEN BY DEFAULT */}
+              {audioSettings.includeMic && showMicVolumeSlider && (
+                <div className="p-2.5 bg-gray-50 rounded-xl border border-gray-100 space-y-1.5 animate-in fade-in duration-200">
                   <div className="flex items-center justify-between text-[11px] text-gray-600">
-                    <span>Microphone Volume</span>
+                    <span>Microphone Gain / Volume</span>
                     <span className="font-mono font-bold text-gray-900">{Math.round(audioSettings.micVolume * 100)}%</span>
                   </div>
                   <input
@@ -475,8 +446,8 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
             </div>
 
             {/* System Audio Toggle */}
-            {mode !== 'audio_only' && mode !== 'cam_only' && (
-              <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+            <div className="pt-2.5 border-t border-gray-100 space-y-1.5">
+              <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
                   <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${
                     audioSettings.includeSystemAudio ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-400'
@@ -485,7 +456,7 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
                   </div>
                   <div>
                     <span className="text-xs font-bold text-gray-900 block">System Audio</span>
-                    <span className="text-[10px] text-gray-500">Desktop & tab sound</span>
+                    <span className="text-[10px] text-gray-500">Desktop, music, video & tab sound</span>
                   </div>
                 </div>
 
@@ -500,7 +471,13 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
                   }`} />
                 </div>
               </div>
-            )}
+
+              {audioSettings.includeSystemAudio && (
+                <p className="text-[10px] text-gray-400 leading-tight pl-9">
+                  Note: When the browser screen share prompt opens, check the <strong className="text-gray-600">"Share audio"</strong> or <strong className="text-gray-600">"Also share tab audio"</strong> checkbox in the dialog.
+                </p>
+              )}
+            </div>
           </div>
 
           {/* SESSION TARGET & INLINE PREFERENCES CARD */}

@@ -286,28 +286,41 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        {/* Unified Primary Actions Trio: Record Another, Save to Library, Download */}
+        <div className="flex flex-wrap items-center gap-2.5">
           <button
             id="btn-record-another"
             onClick={onRecordAnother}
-            className="flex items-center gap-2 px-4 py-2 text-xs font-semibold text-gray-700 hover:text-gray-900 bg-white hover:bg-gray-50 border border-gray-200 rounded-xl transition-all shadow-sm cursor-pointer"
+            className="flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-gray-700 hover:text-gray-900 bg-white hover:bg-gray-50 border border-gray-200 rounded-xl transition-all shadow-xs cursor-pointer active:scale-95"
           >
             <RotateLeft01Icon className="w-4 h-4 text-gray-500" />
-            <span>Record Another</span>
+            <span>Record Again</span>
           </button>
 
           <button
             id="btn-save-to-library"
             disabled={isSaved}
             onClick={handleSaveToIndexedDB}
-            className={`flex items-center gap-2 px-5 py-2 text-xs font-bold rounded-xl transition-all shadow-md cursor-pointer ${
+            className={`flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl transition-all shadow-sm cursor-pointer active:scale-95 ${
               isSaved
-                ? 'bg-green-600 text-white'
-                : 'bg-red-600 hover:bg-red-500 text-white shadow-red-200'
+                ? 'bg-emerald-600 text-white'
+                : 'bg-gray-900 hover:bg-gray-800 text-white shadow-gray-200'
             }`}
           >
             {isSaved ? <Tick01Icon className="w-4 h-4" /> : <FloppyDiskIcon className="w-4 h-4" />}
-            <span>{isSaved ? 'Saved to Library!' : 'Save to Library'}</span>
+            <span>{isSaved ? 'Saved to Library' : 'Save to Library'}</span>
+          </button>
+
+          <button
+            id="btn-primary-download"
+            onClick={() => {
+              const ext = mimeType.includes('mp4') ? 'mp4' : 'webm';
+              downloadBlob(currentBlob, `${title.replace(/\s+/g, '_')}.${ext}`);
+            }}
+            className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-red-600 hover:bg-red-500 rounded-xl transition-all shadow-md shadow-red-200 cursor-pointer active:scale-95"
+          >
+            <Download01Icon className="w-4 h-4" />
+            <span>Download ({mimeType.includes('mp4') ? 'MP4' : 'WebM'})</span>
           </button>
         </div>
       </div>
@@ -589,10 +602,10 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
 
         {/* Right: Metadata, Tagging & Instant Export */}
         <div className="lg:col-span-4 space-y-6">
-          {/* Export Options Card */}
+          {/* Export & Actions Card */}
           <div className="p-6 rounded-3xl bg-white border border-gray-200 shadow-sm space-y-4">
             <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400">
-              Export & Direct Save
+              Actions & Export
             </h3>
 
             <div className="p-3.5 rounded-2xl bg-gray-50 border border-gray-200 space-y-2 text-xs">
@@ -610,19 +623,9 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
               </div>
             </div>
 
-            {/* Direct Disk Save Button */}
+            {/* Single Unified Download Button */}
             <button
-              id="btn-direct-disk-save"
-              onClick={handleDirectSave}
-              className="w-full flex items-center justify-center gap-2.5 px-5 py-3 rounded-xl bg-gray-900 hover:bg-gray-800 text-white font-bold text-xs shadow-sm transition-all active:scale-98 cursor-pointer"
-            >
-              <HardDriveIcon className="w-4 h-4 text-green-400" />
-              <span>Save Directly to Computer Disk</span>
-            </button>
-
-            {/* Standard Browser Download Button */}
-            <button
-              id="btn-standard-download"
+              id="btn-sidebar-download"
               onClick={() => {
                 const ext = mimeType.includes('mp4') ? 'mp4' : 'webm';
                 downloadBlob(currentBlob, `${title.replace(/\s+/g, '_')}.${ext}`);
@@ -632,6 +635,32 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
               <Download01Icon className="w-4 h-4" />
               <span>Download File ({mimeType.includes('mp4') ? 'MP4' : 'WebM'})</span>
             </button>
+
+            {/* Grouped Secondary Actions: Save to Library & Record Again */}
+            <div className="grid grid-cols-2 gap-2 pt-1">
+              <button
+                id="btn-sidebar-save"
+                disabled={isSaved}
+                onClick={handleSaveToIndexedDB}
+                className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl font-bold text-xs transition-all shadow-xs cursor-pointer active:scale-98 ${
+                  isSaved
+                    ? 'bg-emerald-600 text-white'
+                    : 'bg-gray-900 hover:bg-gray-800 text-white'
+                }`}
+              >
+                {isSaved ? <Tick01Icon className="w-4 h-4" /> : <FloppyDiskIcon className="w-4 h-4" />}
+                <span>{isSaved ? 'Saved' : 'Save to Library'}</span>
+              </button>
+
+              <button
+                id="btn-sidebar-record-again"
+                onClick={onRecordAnother}
+                className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 font-semibold text-xs transition-all shadow-xs cursor-pointer active:scale-98"
+              >
+                <RotateLeft01Icon className="w-4 h-4 text-gray-500" />
+                <span>Record Again</span>
+              </button>
+            </div>
           </div>
 
           {/* Metadata & Tagging Card */}

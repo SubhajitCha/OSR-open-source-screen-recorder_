@@ -184,7 +184,7 @@ export const DraggableCameraBubble: React.FC<DraggableCameraBubbleProps> = ({
     >
       {/* Container with specified shape */}
       <div
-        className={`w-full h-full relative overflow-hidden bg-gray-900 border-[3.5px] border-white shadow-2xl ${
+        className={`w-full h-full relative overflow-hidden bg-slate-950 border-[3.5px] border-white shadow-2xl ${
           pipConfig.shape === 'circle'
             ? 'rounded-full'
             : pipConfig.shape === 'rounded'
@@ -193,15 +193,15 @@ export const DraggableCameraBubble: React.FC<DraggableCameraBubbleProps> = ({
         }`}
       >
         {isOsPipActive ? (
-          <div className="w-full h-full flex flex-col items-center justify-center p-3 text-center bg-gray-900 text-white select-none">
-            <LinkSquare01Icon className="w-6 h-6 text-red-500 mb-1" />
+          <div className="w-full h-full flex flex-col items-center justify-center p-3 text-center bg-slate-950 text-white select-none">
+            <LinkSquare01Icon className="w-6 h-6 text-blue-500 mb-1" />
             <span className="text-[10px] font-bold">Floating in OS Window</span>
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 handleRequestOsPip();
               }}
-              className="mt-1 px-2 py-0.5 bg-red-600 hover:bg-red-500 rounded text-[9px] font-semibold text-white cursor-pointer"
+              className="mt-1 px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded-full text-[9px] font-bold text-white cursor-pointer"
             >
               Dock Back
             </button>
@@ -222,9 +222,9 @@ export const DraggableCameraBubble: React.FC<DraggableCameraBubbleProps> = ({
         {isHovered && (
           <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex flex-col items-center justify-between p-2 transition-opacity">
             {/* Top Toolbar */}
-            <div className="flex items-center gap-1 bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/20 shadow-md">
+            <div className="flex items-center gap-1 bg-slate-950/80 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/20 shadow-md">
               <span className="text-[10px] text-white font-semibold flex items-center gap-1">
-                <MoveIcon className="w-3 h-3 text-red-400" />
+                <MoveIcon className="w-3 h-3 text-blue-400" />
                 Move
               </span>
 
@@ -236,7 +236,7 @@ export const DraggableCameraBubble: React.FC<DraggableCameraBubbleProps> = ({
                     handleRequestOsPip();
                   }}
                   title="Float across ALL desktop apps & screens (OS PiP)"
-                  className="p-1 text-white hover:text-red-400 transition-colors ml-1 cursor-pointer"
+                  className="p-1 text-white hover:text-blue-400 transition-colors ml-1 cursor-pointer"
                 >
                   <LinkSquare01Icon className="w-3 h-3" />
                 </button>
@@ -244,7 +244,7 @@ export const DraggableCameraBubble: React.FC<DraggableCameraBubbleProps> = ({
             </div>
 
             {/* Bottom Controls: Shape, Mirror, Size */}
-            <div className="flex items-center gap-1.5 bg-black/70 backdrop-blur-md px-2 py-1 rounded-full border border-white/20 shadow-md">
+            <div className="flex items-center gap-1.5 bg-slate-950/80 backdrop-blur-md px-2 py-1 rounded-full border border-white/20 shadow-md">
               {/* Shape Toggle */}
               <button
                 onClick={(e) => {
@@ -254,7 +254,7 @@ export const DraggableCameraBubble: React.FC<DraggableCameraBubbleProps> = ({
                   onUpdatePipConfig({ shape: nextShape });
                 }}
                 title="Change Shape (Circle / Rounded / Square)"
-                className="p-1 text-white hover:text-red-400 transition-colors cursor-pointer"
+                className="p-1 text-white hover:text-blue-400 transition-colors cursor-pointer"
               >
                 {pipConfig.shape === 'circle' ? (
                   <CircleIcon className="w-3.5 h-3.5" />
@@ -270,7 +270,7 @@ export const DraggableCameraBubble: React.FC<DraggableCameraBubbleProps> = ({
                   onUpdatePipConfig({ mirror: !pipConfig.mirror });
                 }}
                 title="Mirror Camera"
-                className={`p-1 transition-colors cursor-pointer ${pipConfig.mirror ? 'text-red-400' : 'text-white hover:text-gray-300'}`}
+                className={`p-1 transition-colors cursor-pointer ${pipConfig.mirror ? 'text-blue-400' : 'text-white hover:text-slate-300'}`}
               >
                 <RefreshIcon className="w-3.5 h-3.5" />
               </button>
@@ -284,7 +284,7 @@ export const DraggableCameraBubble: React.FC<DraggableCameraBubbleProps> = ({
                   onUpdatePipConfig({ size: nextSize });
                 }}
                 title="Toggle Size (Small / Medium / Large)"
-                className="p-1 text-white hover:text-red-400 transition-colors cursor-pointer"
+                className="p-1 text-white hover:text-blue-400 transition-colors cursor-pointer"
               >
                 {pipConfig.size === 'large' ? (
                   <Minimize01Icon className="w-3.5 h-3.5" />

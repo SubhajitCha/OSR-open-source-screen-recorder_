@@ -50,6 +50,8 @@ export class RecorderEngine {
       this.bookmarks = [];
       this.bytesRecorded = 0;
       this.totalPausedDuration = 0;
+      this.startTime = 0;
+      this.pausedTime = 0;
 
       // 1. Acquire Screen Stream if needed
       if (mode === 'screen' || mode === 'screen_cam') {
@@ -150,13 +152,8 @@ export class RecorderEngine {
       if (mode === 'audio_only') {
         finalVideoStream = new MediaStream();
       } else if (mode === 'cam_only') {
-        // Direct webcam stream
         finalVideoStream = this.webcamStream || new MediaStream();
       } else if (mode === 'screen' || mode === 'screen_cam') {
-        // Direct screen stream - captures the user's screen which already includes the live,
-        // interactive on-screen DraggableCameraBubble.
-        // This delivers native 60fps hardware-accelerated video with zero canvas lag
-        // and guarantees exactly ONE camera bubble without duplicate PIP overlays.
         finalVideoStream = this.screenStream || new MediaStream();
       } else {
         finalVideoStream = this.screenStream || this.webcamStream || new MediaStream();
@@ -267,16 +264,17 @@ export class RecorderEngine {
       const mimeType = this.mediaRecorder.mimeType || 'video/webm';
       const durationSeconds = Math.max(1, Math.round((Date.now() - this.startTime - this.totalPausedDuration) / 1000));
       const durationMs = Math.max(1000, Date.now() - this.startTime - this.totalPausedDuration);
+      const capturedChunks = [...this.recordedChunks];
+      const bookmarks = [...this.bookmarks];
 
-      this.mediaRecorder.onstop = async () => {
-        let fullBlob = new Blob(this.recordedChunks, { type: mimeType });
+      const finalize = async () => {
+        let fullBlob = new Blob(capturedChunks, { type: mimeType });
         try {
-          // Patch WebM header with accurate duration so video seeks instantly and never freezes in VLC/WMP/Chrome
+          // Patch WebM header with accurate duration so video seeks instantly and never freezes
           fullBlob = await fixWebmDuration(fullBlob, durationMs);
         } catch {
           // ignore
         }
-        const bookmarks = [...this.bookmarks];
         this.cleanupStreams();
         this.callbacks.onStateChange('stopped');
         resolve({
@@ -288,26 +286,17 @@ export class RecorderEngine {
       };
 
       if (this.mediaRecorder.state !== 'inactive') {
-        this.mediaRecorder.stop();
+        this.mediaRecorder.onstop = () => {
+          finalize();
+        };
+        try {
+          this.mediaRecorder.stop();
+        } catch (e) {
+          console.warn('Error stopping mediaRecorder:', e);
+          finalize();
+        }
       } else {
-        let fullBlob = new Blob(this.recordedChunks, { type: mimeType });
-        fixWebmDuration(fullBlob, durationMs)
-          .then((fixed) => {
-            resolve({
-              blob: fixed,
-              duration: durationSeconds,
-              mimeType,
-              bookmarks: [...this.bookmarks],
-            });
-          })
-          .catch(() => {
-            resolve({
-              blob: fullBlob,
-              duration: durationSeconds,
-              mimeType,
-              bookmarks: [...this.bookmarks],
-            });
-          });
+        finalize();
       }
     });
   }
@@ -369,6 +358,33 @@ export class RecorderEngine {
 
   public cleanupStreams(): void {
     this.stopTimer();
+    this.isRecording = false;
+    this.isPaused = false;
+    this.isStarting = false;
+
+    if (this.screenStream) {
+      this.screenStream.getTracks().forEach((track) => {
+        track.onended = null;
+        track.stop();
+      });
+      this.screenStream = null;
+    }
+
+    if (this.webcamStream) {
+      this.webcamStream.getTracks().forEach((track) => {
+        track.onended = null;
+        track.stop();
+      });
+      this.webcamStream = null;
+    }
+
+    if (this.micStream) {
+      this.micStream.getTracks().forEach((track) => {
+        track.onended = null;
+        track.stop();
+      });
+      this.micStream = null;
+    }
 
     if (this.compositor) {
       this.compositor.cleanup();
@@ -380,19 +396,21 @@ export class RecorderEngine {
       this.audioMixer = null;
     }
 
-    if (this.screenStream) {
-      this.screenStream.getTracks().forEach((track) => track.stop());
-      this.screenStream = null;
-    }
-
-    if (this.webcamStream) {
-      this.webcamStream.getTracks().forEach((track) => track.stop());
-      this.webcamStream = null;
-    }
-
-    if (this.micStream) {
-      this.micStream.getTracks().forEach((track) => track.stop());
-      this.micStream = null;
+    if (this.mediaRecorder) {
+      this.mediaRecorder.ondataavailable = null;
+      this.mediaRecorder.onstart = null;
+      this.mediaRecorder.onpause = null;
+      this.mediaRecorder.onresume = null;
+      this.mediaRecorder.onstop = null;
+      this.mediaRecorder.onerror = null;
+      if (this.mediaRecorder.state !== 'inactive') {
+        try {
+          this.mediaRecorder.stop();
+        } catch {
+          // ignore
+        }
+      }
+      this.mediaRecorder = null;
     }
   }
 }

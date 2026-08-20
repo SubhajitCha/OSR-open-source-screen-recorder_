@@ -35,7 +35,7 @@ export const CountdownModal: React.FC<CountdownModalProps> = ({
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(currentCount === 1 ? 880 : 520, ctx.currentTime);
+      osc.frequency.setValueAtTime(currentCount === 1 ? 880 : 580, ctx.currentTime);
       gain.gain.setValueAtTime(0.08, ctx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.18);
       osc.connect(gain);
@@ -65,7 +65,7 @@ export const CountdownModal: React.FC<CountdownModalProps> = ({
   }, [onCancel]);
 
   // Progress circle calculation
-  const radius = 54;
+  const radius = 58;
   const circumference = 2 * Math.PI * radius;
   const progressRatio = currentCount / totalSeconds;
   const strokeDashoffset = circumference * (1 - progressRatio);
@@ -73,80 +73,72 @@ export const CountdownModal: React.FC<CountdownModalProps> = ({
   return (
     <div
       id="countdown-modal-overlay"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/75 backdrop-blur-md transition-all duration-300 select-none animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-md transition-all duration-300 select-none animate-in fade-in duration-200"
     >
-      <div className="relative flex flex-col items-center justify-center p-8 sm:p-10 text-center bg-white/95 backdrop-blur-xl border border-gray-200/80 rounded-3xl shadow-2xl max-w-sm w-full mx-4 overflow-hidden">
-        {/* Subtle decorative background glow */}
-        <div className="absolute -top-24 -left-24 w-48 h-48 bg-red-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-red-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="relative flex flex-col items-center justify-center p-8 sm:p-10 text-center bg-white/95 backdrop-blur-xl border border-slate-200/80 rounded-3xl shadow-2xl max-w-sm w-full mx-4 overflow-hidden">
+        {/* Screenity Decorative ambient glow */}
+        <div className="absolute -top-24 -left-24 w-48 h-48 bg-blue-500/15 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-indigo-500/15 rounded-full blur-3xl pointer-events-none" />
 
         {/* Top badge */}
-        <div className="flex items-center gap-1.5 px-3 py-1 mb-6 rounded-full bg-red-50 border border-red-200 text-red-600 text-xs font-bold tracking-wide">
+        <div className="flex items-center gap-1.5 px-3.5 py-1 mb-6 rounded-full bg-blue-50 border border-blue-200/80 text-blue-600 text-xs font-bold tracking-wide">
           <SparklesIcon className="w-3.5 h-3.5 animate-spin" />
-          <span>PREPARING RECORDER</span>
+          <span>STARTING IN</span>
         </div>
 
         {/* Circular Progress & Number Container */}
         <div className="relative flex items-center justify-center w-40 h-40 mb-6">
           {/* Animated SVG Ring */}
-          <svg className="w-full h-full transform -rotate-90" viewBox="0 0 128 128">
+          <svg className="w-full h-full transform -rotate-90" viewBox="0 0 140 140">
             <circle
-              cx="64"
-              cy="64"
+              cx="70"
+              cy="70"
               r={radius}
               stroke="currentColor"
               strokeWidth="6"
-              className="text-gray-100"
+              className="text-slate-100"
               fill="transparent"
             />
             <circle
-              cx="64"
-              cy="64"
+              cx="70"
+              cy="70"
               r={radius}
               stroke="currentColor"
               strokeWidth="6"
+              className="text-blue-600 transition-all duration-700 ease-out"
+              fill="transparent"
               strokeDasharray={circumference}
               strokeDashoffset={strokeDashoffset}
               strokeLinecap="round"
-              className="text-red-500 transition-all duration-1000 ease-linear"
-              fill="transparent"
             />
           </svg>
 
-          {/* Pulsating Number */}
+          {/* Center Countdown Digit with Smooth Spring */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <AnimatePresence mode="popLayout">
-              <motion.div
+            <AnimatePresence mode="wait">
+              <motion.span
                 key={currentCount}
                 initial={{ scale: 0.3, opacity: 0, y: 10 }}
                 animate={{ scale: 1, opacity: 1, y: 0 }}
-                exit={{ scale: 1.5, opacity: 0, y: -10 }}
-                transition={{
-                  type: 'spring',
-                  stiffness: 400,
-                  damping: 25,
-                }}
-                className="flex items-center justify-center w-24 h-24 rounded-full bg-red-50 border border-red-200 shadow-inner"
+                exit={{ scale: 1.4, opacity: 0, y: -10 }}
+                transition={{ type: 'spring', stiffness: 450, damping: 25 }}
+                className="text-6xl font-black tracking-tighter text-slate-900 font-mono"
               >
-                <span className="text-5xl font-black text-red-600 tracking-tight font-mono">
-                  {currentCount > 0 ? currentCount : 'GO!'}
-                </span>
-              </motion.div>
+                {currentCount}
+              </motion.span>
             </AnimatePresence>
           </div>
         </div>
 
-        <h3 className="text-base font-bold text-gray-900 mb-1">
-          Recording starts automatically
-        </h3>
-        <p className="text-xs text-gray-500 mb-6">
-          Stay on this tab or switch to the screen you wish to record.
+        {/* Action button */}
+        <p className="text-xs text-slate-500 mb-5 max-w-[200px]">
+          Get ready! Your screen and camera will start recording automatically.
         </p>
 
         <button
           id="btn-cancel-countdown"
           onClick={onCancel}
-          className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-gray-600 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-xl transition-all cursor-pointer"
+          className="flex items-center gap-1.5 px-5 py-2 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-full transition-all cursor-pointer border border-slate-200 active:scale-95"
         >
           <Cancel01Icon className="w-3.5 h-3.5" />
           <span>Cancel (Esc)</span>

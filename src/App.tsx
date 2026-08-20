@@ -161,11 +161,44 @@ export default function App() {
 
     isStartingRecordingRef.current = true;
     try {
-      const engine = initRecorderEngine();
+      // Always cleanup previous engine and instantiate a fresh one
+      if (recorderEngineRef.current) {
+        recorderEngineRef.current.cleanupStreams();
+        recorderEngineRef.current = null;
+      }
+
       setDurationSeconds(0);
       setBytesRecorded(0);
       setBitrateMbps(0);
       setMicMuted(false);
+      setLastRecordingData(null);
+
+      const engine = new RecorderEngine({
+        onTimeUpdate: (dur) => setDurationSeconds(Math.round(dur)),
+        onDataChunk: (bytes, bitrate) => {
+          setBytesRecorded(bytes);
+          setBitrateMbps(bitrate);
+        },
+        onStateChange: (state) => {
+          if (state === 'recording') setRecordingState('recording');
+          else if (state === 'paused') setRecordingState('paused');
+          else if (state === 'stopped') {
+            // Handled in stopRecording promise
+          }
+        },
+        onError: (err) => {
+          console.warn('Recorder Engine Error:', err);
+          const msg = err.message || 'Screen share was not provided or was cancelled.';
+          showToast(msg, 'error');
+          setActiveWebcamStream(null);
+          isStartingRecordingRef.current = false;
+          setRecordingState('idle');
+        },
+        onBookmarkAdded: () => {
+          // bookmark added
+        },
+      });
+      recorderEngineRef.current = engine;
 
       const result = await engine.startRecording(mode, audioSettings, videoSettings, pipConfig);
       if (result && result.webcamStream) {
@@ -182,7 +215,7 @@ export default function App() {
     } finally {
       isStartingRecordingRef.current = false;
     }
-  }, [recordingState, mode, audioSettings, videoSettings, pipConfig, initRecorderEngine, showToast]);
+  }, [recordingState, mode, audioSettings, videoSettings, pipConfig, showToast]);
 
   const handleStartRecordingSequence = useCallback(() => {
     if (isStartingRecordingRef.current || recordingState !== 'idle') {
@@ -312,13 +345,24 @@ export default function App() {
             mimeType={lastRecordingData.mimeType}
             bookmarks={lastRecordingData.bookmarks}
             onRecordAnother={() => {
+              if (recorderEngineRef.current) {
+                recorderEngineRef.current.cleanupStreams();
+                recorderEngineRef.current = null;
+              }
               setLastRecordingData(null);
               setActiveWebcamStream(null);
+              setDurationSeconds(0);
+              setBytesRecorded(0);
+              setBitrateMbps(0);
               setRecordingState('idle');
               setActiveView('studio');
               refreshLibraryCount();
             }}
             onSavedToLibrary={() => {
+              if (recorderEngineRef.current) {
+                recorderEngineRef.current.cleanupStreams();
+                recorderEngineRef.current = null;
+              }
               refreshLibraryCount();
               setActiveWebcamStream(null);
               setActiveView('library');
@@ -332,6 +376,7 @@ export default function App() {
               setActiveView('studio');
               setRecordingState('idle');
             }}
+            onRecordingDeleted={refreshLibraryCount}
           />
         ) : activeView === 'services' ? (
           /* VIEW 3: Open Source Services Status & Diagnostics */

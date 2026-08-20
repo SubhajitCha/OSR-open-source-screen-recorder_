@@ -83,6 +83,14 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
   const playerContainerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
+    setCurrentBlob(initialBlob);
+    setCurrentDuration(initialDuration);
+    setTrimStart(0);
+    setTrimEnd(initialDuration);
+    setIsSaved(false);
+  }, [initialBlob, initialDuration]);
+
+  useEffect(() => {
     const url = URL.createObjectURL(currentBlob);
     setVideoUrl(url);
 

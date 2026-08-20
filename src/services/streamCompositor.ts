@@ -102,7 +102,7 @@ export function createStreamCompositor(
       const cw = canvasWidth;
       const ch = canvasHeight;
 
-      // Calculate size
+      // Calculate size based on canvas width
       let pipWidth = 320;
       if (pipConfig.size === 'small') pipWidth = cw * 0.15;
       else if (pipConfig.size === 'medium') pipWidth = cw * 0.22;
@@ -110,7 +110,7 @@ export function createStreamCompositor(
 
       // Constrain pip size
       pipWidth = Math.max(160, Math.min(pipWidth, cw * 0.45));
-      const pipHeight = (pipWidth * webcamVideo.videoHeight) / webcamVideo.videoWidth;
+      const pipHeight = pipConfig.shape === 'circle' ? pipWidth : (pipWidth * webcamVideo.videoHeight) / webcamVideo.videoWidth;
 
       const padding = 28;
       let x = cw - pipWidth - padding;
@@ -129,30 +129,56 @@ export function createStreamCompositor(
         x = cw - pipWidth - padding;
         y = ch - pipHeight - padding;
       } else if (pipConfig.position === 'custom' && pipConfig.customX !== undefined && pipConfig.customY !== undefined) {
-        x = (pipConfig.customX / 100) * (cw - pipWidth);
-        y = (pipConfig.customY / 100) * (ch - pipHeight);
+        x = Math.max(padding, Math.min(cw - pipWidth - padding, (pipConfig.customX / 100) * (cw - pipWidth)));
+        y = Math.max(padding, Math.min(ch - pipHeight - padding, (pipConfig.customY / 100) * (ch - pipHeight)));
       }
 
       ctx.save();
 
+      // Shadow behind bubble
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
+      ctx.shadowBlur = 24;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 6;
+
+      const vw = webcamVideo.videoWidth || 1;
+      const vh = webcamVideo.videoHeight || 1;
+      const vAspect = vw / vh;
+      const targetAspect = pipWidth / pipHeight;
+
+      let drawW = pipWidth;
+      let drawH = pipHeight;
+      let offsetX = x;
+      let offsetY = y;
+
+      if (vAspect > targetAspect) {
+        drawW = pipHeight * vAspect;
+        offsetX = x - (drawW - pipWidth) / 2;
+      } else {
+        drawH = pipWidth / vAspect;
+        offsetY = y - (drawH - pipHeight) / 2;
+      }
+
       if (pipConfig.shape === 'circle') {
-        const radius = Math.min(pipWidth, pipHeight) / 2;
-        const centerX = x + pipWidth / 2;
-        const centerY = y + pipHeight / 2;
+        const radius = pipWidth / 2;
+        const centerX = x + radius;
+        const centerY = y + radius;
 
         ctx.beginPath();
         ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
         ctx.closePath();
         ctx.clip();
 
-        // Draw webcam within circle
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+
         ctx.save();
         if (pipConfig.mirror) {
           ctx.translate(centerX, centerY);
           ctx.scale(-1, 1);
           ctx.translate(-centerX, -centerY);
         }
-        ctx.drawImage(webcamVideo, x, y, pipWidth, pipHeight);
+        ctx.drawImage(webcamVideo, offsetX, offsetY, drawW, drawH);
         ctx.restore();
 
         // Crisp Border
@@ -162,11 +188,14 @@ export function createStreamCompositor(
           ctx.stroke();
         }
       } else if (pipConfig.shape === 'rounded') {
-        const cornerRadius = 24;
+        const cornerRadius = Math.round(pipWidth * 0.12);
         ctx.beginPath();
         ctx.roundRect(x, y, pipWidth, pipHeight, cornerRadius);
         ctx.closePath();
         ctx.clip();
+
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
 
         ctx.save();
         if (pipConfig.mirror) {
@@ -174,7 +203,7 @@ export function createStreamCompositor(
           ctx.scale(-1, 1);
           ctx.translate(-(x + pipWidth / 2), -(y + pipHeight / 2));
         }
-        ctx.drawImage(webcamVideo, x, y, pipWidth, pipHeight);
+        ctx.drawImage(webcamVideo, offsetX, offsetY, drawW, drawH);
         ctx.restore();
 
         if (pipConfig.borderWidth > 0) {
@@ -189,13 +218,16 @@ export function createStreamCompositor(
         ctx.closePath();
         ctx.clip();
 
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+
         ctx.save();
         if (pipConfig.mirror) {
           ctx.translate(x + pipWidth / 2, y + pipHeight / 2);
           ctx.scale(-1, 1);
           ctx.translate(-(x + pipWidth / 2), -(y + pipHeight / 2));
         }
-        ctx.drawImage(webcamVideo, x, y, pipWidth, pipHeight);
+        ctx.drawImage(webcamVideo, offsetX, offsetY, drawW, drawH);
         ctx.restore();
 
         if (pipConfig.borderWidth > 0) {

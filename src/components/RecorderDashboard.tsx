@@ -99,38 +99,33 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
 
   return (
     <div id="recorder-dashboard-container" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-      {/* Top Banner / Session Header styled like Screenity */}
+      {/* Top Banner / Session Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-3xl border border-slate-200 shadow-xs">
         <div>
-          <div className="flex items-center gap-2.5 mb-1">
-            <span className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-pulse" />
-            <h2 className="text-lg font-bold text-slate-900 tracking-tight">
-              Screen Recording Studio
+          <div className="flex items-center gap-2 mb-1">
+            <span className="w-2 h-2 rounded-full bg-blue-600" />
+            <h2 className="text-sm font-semibold text-slate-900 tracking-tight">
+              Open Source Recorder
             </h2>
-            <span className="text-[10px] font-bold text-blue-600 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full">
-              Screenity Style
-            </span>
           </div>
           <p className="text-xs text-slate-500">
-            Open-source browser capture with moveable camera PIP, multi-track audio mixing, and offline storage.
+            Browser capture engine with composited camera PIP, multi-track audio mixing, and private offline storage.
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          <button
-            onClick={onOpenDocs}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200/70 border border-slate-200/80 rounded-full transition-all cursor-pointer"
-          >
-            <InformationCircleIcon className="w-3.5 h-3.5 text-slate-500" />
-            <span>Architecture Docs</span>
-          </button>
-          <button
-            onClick={onOpenSettings}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200/70 border border-slate-200/80 rounded-full transition-all cursor-pointer"
-          >
-            <Settings01Icon className="w-3.5 h-3.5 text-slate-500" />
-            <span>Preferences</span>
-          </button>
+        {/* Studio Specs & Pipeline Indicators */}
+        <div className="flex items-center flex-wrap gap-2">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-200/80 text-[11px] font-medium text-slate-600 shadow-xs">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            <span>100% Client-Side</span>
+          </div>
+          <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-200/80 text-[11px] font-medium text-slate-600 shadow-xs">
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+            <span>60 FPS Compositor</span>
+          </div>
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100/90 border border-slate-200 text-[11px] font-mono text-slate-600 shadow-xs">
+            <span>Shortcut: <strong className="text-slate-800 font-semibold">Alt + R</strong></span>
+          </div>
         </div>
       </div>
 
@@ -198,21 +193,24 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
             onMouseMove={handleStageMouseMove}
             onMouseUp={() => setIsDraggingStagePip(false)}
             onMouseLeave={() => setIsDraggingStagePip(false)}
-            className="relative aspect-video w-full rounded-3xl bg-slate-950 border border-slate-200/80 overflow-hidden shadow-md flex flex-col justify-between p-6 select-none"
+            className="relative aspect-video w-full rounded-3xl bg-[#0F141C] border border-slate-800/90 overflow-hidden shadow-xl flex flex-col justify-between p-6 select-none ring-1 ring-white/5"
           >
-            {/* Stage Background subtle grid pattern */}
+            {/* Top ambient studio spotlight */}
+            <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-48 bg-gradient-to-b from-blue-500/10 via-indigo-500/5 to-transparent blur-3xl pointer-events-none" />
+
+            {/* Stage Background fine grid pattern */}
             <div
-              className="absolute inset-0 opacity-15 pointer-events-none"
+              className="absolute inset-0 opacity-20 pointer-events-none"
               style={{
                 backgroundImage:
-                  'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.4) 1px, transparent 0)',
+                  'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.25) 1px, transparent 0)',
                 backgroundSize: '24px 24px',
               }}
             />
 
             {/* Stage Header Info */}
             <div className="relative z-10 flex items-center justify-between">
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900/80 backdrop-blur-md border border-slate-800 text-slate-200 text-xs">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#181F2C]/90 backdrop-blur-md border border-slate-700/60 text-slate-200 text-xs shadow-sm">
                 <span className={`w-2 h-2 rounded-full ${isRecording ? 'bg-red-500 animate-ping' : 'bg-emerald-400'}`} />
                 <span className="font-mono font-medium">
                   {videoSettings.resolution === 'native' ? 'Native Screen' : videoSettings.resolution.toUpperCase()} · {videoSettings.fps} FPS
@@ -220,7 +218,7 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
               </div>
 
               <div className="flex items-center gap-2">
-                <span className="text-[11px] font-mono text-slate-400 bg-slate-900/80 backdrop-blur-md px-2.5 py-1 rounded-full border border-slate-800">
+                <span className="text-[11px] font-mono text-slate-400 bg-[#181F2C]/90 backdrop-blur-md px-2.5 py-1 rounded-full border border-slate-700/60">
                   Codec: {videoSettings.codec.split(';')[0]}
                 </span>
               </div>
@@ -228,7 +226,7 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
 
             {/* Stage Center Graphic / Target Representation */}
             <div className="relative z-10 flex flex-col items-center justify-center text-center p-6 space-y-2">
-              <div className="w-14 h-14 rounded-2xl bg-slate-900/90 border border-slate-800 flex items-center justify-center text-blue-400 shadow-xl">
+              <div className="w-14 h-14 rounded-2xl bg-[#161C28] border border-slate-700/70 flex items-center justify-center text-blue-400 shadow-xl">
                 {mode === 'screen_cam' ? (
                   <Layers01Icon className="w-7 h-7" />
                 ) : (
@@ -264,30 +262,43 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
                     : 'auto',
                   transform: pipConfig.position === 'custom' ? 'translate(-50%, -50%)' : 'none',
                 }}
-                className={`absolute z-20 cursor-grab active:cursor-grabbing transition-shadow ${
-                  pipConfig.size === 'small' ? 'w-20 h-20' : pipConfig.size === 'large' ? 'w-32 h-32' : 'w-24 h-24'
+                className={`absolute z-20 cursor-grab active:cursor-grabbing transition-all ${
+                  pipConfig.size === 'small' ? 'w-24 h-24' : pipConfig.size === 'large' ? 'w-36 h-36' : 'w-28 h-28'
                 } ${
                   pipConfig.shape === 'circle'
                     ? 'rounded-full'
                     : pipConfig.shape === 'rounded'
                     ? 'rounded-2xl'
                     : 'rounded-xl'
-                } bg-slate-900/90 border-2 border-blue-500 shadow-xl flex flex-col items-center justify-center text-white overflow-hidden group`}
+                } bg-gradient-to-b from-slate-800/90 via-slate-900/95 to-slate-950/95 border border-white/20 ring-2 ring-blue-500/50 shadow-2xl shadow-blue-950/60 backdrop-blur-md flex flex-col items-center justify-center text-white overflow-hidden group hover:ring-blue-400`}
               >
-                <Video01Icon className="w-5 h-5 text-blue-400 mb-1" />
-                <span className="text-[9px] font-bold text-slate-300">Camera PIP</span>
-                <span className="text-[8px] text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity">Drag here</span>
+                {/* Lens Aperture Effect Ring */}
+                <div className="absolute inset-1 rounded-[inherit] border border-white/10 opacity-70 pointer-events-none" />
+                <div className="absolute top-2 right-2.5 w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-xs" />
+
+                {/* Subtle Lens Reflection Glass Arc */}
+                <div className="absolute -top-6 -right-6 w-16 h-16 rounded-full bg-white/10 blur-sm pointer-events-none" />
+
+                <div className="relative z-10 flex flex-col items-center justify-center p-2 text-center">
+                  <div className="p-2 rounded-xl bg-blue-500/20 text-blue-300 border border-blue-400/30 mb-1 group-hover:scale-105 transition-transform">
+                    <Video01Icon className="w-4 h-4 text-blue-300" />
+                  </div>
+                  <span className="text-[10px] font-bold text-slate-200 tracking-tight">Camera PIP</span>
+                  <span className="text-[8px] text-blue-300/90 opacity-0 group-hover:opacity-100 transition-opacity font-mono mt-0.5">
+                    Drag anywhere
+                  </span>
+                </div>
               </div>
             )}
 
             {/* Stage Bottom Bar */}
             <div className="relative z-10 flex items-center justify-between text-xs text-slate-400">
               <div className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-                <span>Zero Server Uploads · 100% Private Offline Storage</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                <span className="text-slate-400">Zero Server Uploads · 100% Private Offline Storage</span>
               </div>
-              <span className="font-mono text-[11px] text-slate-500">
-                {isRecording ? formatTimer(durationSeconds) : 'Ready to record'}
+              <span className="font-mono text-[11px] text-slate-400">
+                {isRecording ? formatTimer(durationSeconds) : ''}
               </span>
             </div>
           </div>
@@ -296,64 +307,121 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
         {/* Sidebar Controls (4 Columns) */}
         <aside className="lg:col-span-4 space-y-4">
           <div className="bg-white p-5 rounded-3xl border border-slate-200 shadow-xs space-y-5">
-            {/* Audio Sources Configuration */}
-            <div className="space-y-3">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                Audio Mixing
-              </h4>
-
-              {/* Microphone Toggle */}
-              <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-100">
-                <div className="flex items-center gap-2.5">
-                  <div className={`p-2 rounded-xl ${audioSettings.includeMic ? 'bg-blue-100 text-blue-600' : 'bg-slate-200 text-slate-400'}`}>
-                    {audioSettings.includeMic ? <Mic01Icon className="w-4 h-4" /> : <MicOff01Icon className="w-4 h-4" />}
-                  </div>
-                  <div>
-                    <span className="text-xs font-bold text-slate-900 block">Microphone</span>
-                    <span className="text-[11px] text-slate-500">Voice narration</span>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => onUpdateAudioSettings({ includeMic: !audioSettings.includeMic })}
-                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                    audioSettings.includeMic ? 'bg-blue-600' : 'bg-slate-200'
-                  }`}
-                >
-                  <span
-                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
-                      audioSettings.includeMic ? 'translate-x-5' : 'translate-x-0'
-                    }`}
-                  />
-                </button>
+            {/* Subtle Modern Audio Mixing Channel Strip */}
+            <div className="space-y-2.5">
+              <div className="flex items-center justify-between">
+                <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  Audio Mixing
+                </h4>
+                <span className="text-[10px] text-slate-400 font-mono">2 Channels</span>
               </div>
 
-              {/* System Audio Toggle */}
-              <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-100">
-                <div className="flex items-center gap-2.5">
-                  <div className={`p-2 rounded-xl ${audioSettings.includeSystemAudio ? 'bg-blue-100 text-blue-600' : 'bg-slate-200 text-slate-400'}`}>
-                    {audioSettings.includeSystemAudio ? <VolumeHighIcon className="w-4 h-4" /> : <VolumeMute01Icon className="w-4 h-4" />}
+              <div className="p-2.5 rounded-2xl bg-slate-50/80 border border-slate-200/70 space-y-2">
+                {/* Microphone Channel */}
+                <div className="p-2 rounded-xl bg-white border border-slate-200/60 shadow-xs space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => onUpdateAudioSettings({ includeMic: !audioSettings.includeMic })}
+                        className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                          audioSettings.includeMic ? 'bg-blue-50 text-blue-600' : 'bg-slate-100 text-slate-400'
+                        }`}
+                        title={audioSettings.includeMic ? 'Mute Microphone' : 'Enable Microphone'}
+                      >
+                        {audioSettings.includeMic ? <Mic01Icon className="w-3.5 h-3.5" /> : <MicOff01Icon className="w-3.5 h-3.5" />}
+                      </button>
+                      <div>
+                        <span className="text-xs font-semibold text-slate-800 block leading-tight">Microphone</span>
+                        <span className="text-[10px] text-slate-400 leading-none">Voice narration</span>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => onUpdateAudioSettings({ includeMic: !audioSettings.includeMic })}
+                      className={`relative inline-flex h-4.5 w-8 shrink-0 cursor-pointer rounded-full border border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                        audioSettings.includeMic ? 'bg-blue-600' : 'bg-slate-300'
+                      }`}
+                    >
+                      <span
+                        className={`pointer-events-none inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow-xs ring-0 transition duration-200 ease-in-out ${
+                          audioSettings.includeMic ? 'translate-x-3.5' : 'translate-x-0.5'
+                        } mt-0.5`}
+                      />
+                    </button>
                   </div>
-                  <div>
-                    <span className="text-xs font-bold text-slate-900 block">System Audio</span>
-                    <span className="text-[11px] text-slate-500">Tab / Desktop sound</span>
-                  </div>
+
+                  {audioSettings.includeMic && (
+                    <div className="flex items-center gap-2 pt-1 border-t border-slate-100">
+                      <span className="text-[9px] font-mono text-slate-400 w-8">Gain</span>
+                      <input
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.05"
+                        value={audioSettings.micVolume}
+                        onChange={(e) => onUpdateAudioSettings({ micVolume: parseFloat(e.target.value) })}
+                        className="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                      />
+                      <span className="text-[9px] font-mono text-slate-500 w-7 text-right">
+                        {Math.round(audioSettings.micVolume * 100)}%
+                      </span>
+                    </div>
+                  )}
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => onUpdateAudioSettings({ includeSystemAudio: !audioSettings.includeSystemAudio })}
-                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                    audioSettings.includeSystemAudio ? 'bg-blue-600' : 'bg-slate-200'
-                  }`}
-                >
-                  <span
-                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
-                      audioSettings.includeSystemAudio ? 'translate-x-5' : 'translate-x-0'
-                    }`}
-                  />
-                </button>
+                {/* System Audio Channel */}
+                <div className="p-2 rounded-xl bg-white border border-slate-200/60 shadow-xs space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => onUpdateAudioSettings({ includeSystemAudio: !audioSettings.includeSystemAudio })}
+                        className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                          audioSettings.includeSystemAudio ? 'bg-blue-50 text-blue-600' : 'bg-slate-100 text-slate-400'
+                        }`}
+                        title={audioSettings.includeSystemAudio ? 'Mute System Audio' : 'Enable System Audio'}
+                      >
+                        {audioSettings.includeSystemAudio ? <VolumeHighIcon className="w-3.5 h-3.5" /> : <VolumeMute01Icon className="w-3.5 h-3.5" />}
+                      </button>
+                      <div>
+                        <span className="text-xs font-semibold text-slate-800 block leading-tight">System Audio</span>
+                        <span className="text-[10px] text-slate-400 leading-none">Desktop / tab playback</span>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => onUpdateAudioSettings({ includeSystemAudio: !audioSettings.includeSystemAudio })}
+                      className={`relative inline-flex h-4.5 w-8 shrink-0 cursor-pointer rounded-full border border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                        audioSettings.includeSystemAudio ? 'bg-blue-600' : 'bg-slate-300'
+                      }`}
+                    >
+                      <span
+                        className={`pointer-events-none inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow-xs ring-0 transition duration-200 ease-in-out ${
+                          audioSettings.includeSystemAudio ? 'translate-x-3.5' : 'translate-x-0.5'
+                        } mt-0.5`}
+                      />
+                    </button>
+                  </div>
+
+                  {audioSettings.includeSystemAudio && (
+                    <div className="flex items-center gap-2 pt-1 border-t border-slate-100">
+                      <span className="text-[9px] font-mono text-slate-400 w-8">Level</span>
+                      <input
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.05"
+                        value={audioSettings.systemVolume}
+                        onChange={(e) => onUpdateAudioSettings({ systemVolume: parseFloat(e.target.value) })}
+                        className="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                      />
+                      <span className="text-[9px] font-mono text-slate-500 w-7 text-right">
+                        {Math.round(audioSettings.systemVolume * 100)}%
+                      </span>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -363,6 +431,37 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
                 <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">
                   Camera Frame
                 </h4>
+
+                {/* Position Preset Selector */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-semibold text-slate-700">Placement</span>
+                    <span className="text-[10px] text-slate-400 font-mono capitalize">
+                      {pipConfig.position === 'custom' ? 'Custom Drag' : pipConfig.position.replace('-', ' ')}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-4 gap-1 p-0.5 bg-slate-100 rounded-2xl border border-slate-200/60">
+                    {[
+                      { id: 'top-left', label: 'TL' },
+                      { id: 'top-right', label: 'TR' },
+                      { id: 'bottom-left', label: 'BL' },
+                      { id: 'bottom-right', label: 'BR' },
+                    ].map((pos) => (
+                      <button
+                        key={pos.id}
+                        onClick={() => onUpdatePipConfig({ position: pos.id as PipPosition, customX: undefined, customY: undefined })}
+                        className={`py-1 text-[11px] font-bold rounded-xl transition-all cursor-pointer ${
+                          pipConfig.position === pos.id
+                            ? 'bg-white text-blue-600 shadow-xs'
+                            : 'text-slate-500 hover:text-slate-900'
+                        }`}
+                        title={pos.id.replace('-', ' ')}
+                      >
+                        {pos.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
 
                 {/* Shape Selector */}
                 <div className="flex items-center justify-between text-xs">

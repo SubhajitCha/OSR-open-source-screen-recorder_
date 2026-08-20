@@ -149,19 +149,48 @@ export default function App() {
     return recorderEngineRef.current;
   }, [showToast]);
 
-  const executeStartRecording = useCallback(async () => {
+  const handleCountdownComplete = useCallback(() => {
+    try {
+      const engine = recorderEngineRef.current;
+      if (!engine) {
+        throw new Error('Recording engine was closed');
+      }
+      engine.startMediaRecorder();
+      setRecordingState('recording');
+    } catch (err: unknown) {
+      console.warn('Failed to start media recorder after countdown:', err);
+      if (recorderEngineRef.current) {
+        recorderEngineRef.current.cleanupStreams();
+        recorderEngineRef.current = null;
+      }
+      setActiveWebcamStream(null);
+      setRecordingState('idle');
+      showToast('Could not start recording', 'error');
+    }
+  }, [showToast]);
+
+  const handleCountdownCancel = useCallback(() => {
+    if (recorderEngineRef.current) {
+      recorderEngineRef.current.cleanupStreams();
+      recorderEngineRef.current = null;
+    }
+    setActiveWebcamStream(null);
+    setRecordingState('idle');
+  }, []);
+
+  const handleStartRecordingSequence = useCallback(async () => {
     if (isStartingRecordingRef.current) {
-      console.warn('executeStartRecording ignored: start sequence already in progress');
+      console.warn('handleStartRecordingSequence ignored: already starting');
       return;
     }
-    if (recordingState === 'recording' || recordingState === 'paused') {
-      console.warn('executeStartRecording ignored: already recording or paused');
+    if (recordingState === 'recording' || recordingState === 'paused' || recordingState === 'countdown') {
+      console.warn('Cannot start recording; current state is:', recordingState);
       return;
     }
 
     isStartingRecordingRef.current = true;
     try {
-      // Always cleanup previous engine and instantiate a fresh one
+      // 1. Always cleanup previous engine and instantiate a fresh one
       if (recorderEngineRef.current) {
         recorderEngineRef.current.cleanupStreams();
         recorderEngineRef.current = null;
@@ -200,34 +229,34 @@ export default function App() {
       });
       recorderEngineRef.current = engine;
 
-      const result = await engine.startRecording(mode, audioSettings, videoSettings, pipConfig);
+      // 2. Immediately prompt for screen share & camera within the active user gesture
+      const result = await engine.prepareStreams(mode, audioSettings, videoSettings, pipConfig);
       if (result && result.webcamStream) {
         setActiveWebcamStream(result.webcamStream);
       }
-      setRecordingState('recording');
+
+      // 3. If countdown configured, enter countdown; else start immediately
+      if (videoSettings.countdownSeconds > 0) {
+        setRecordingState('countdown');
+      } else {
+        engine.startMediaRecorder();
+        setRecordingState('recording');
+      }
     } catch (err: unknown) {
       const errObj = err as { message?: string };
       const msg = errObj?.message || 'Screen share was not provided or was cancelled.';
-      console.warn('Failed to start recording:', msg);
+      console.warn('Failed to start recording streams:', msg);
       showToast(msg, 'error');
+      if (recorderEngineRef.current) {
+        recorderEngineRef.current.cleanupStreams();
+        recorderEngineRef.current = null;
+      }
       setActiveWebcamStream(null);
       setRecordingState('idle');
     } finally {
       isStartingRecordingRef.current = false;
     }
   }, [recordingState, mode, audioSettings, videoSettings, pipConfig, showToast]);
-
-  const handleStartRecordingSequence = useCallback(() => {
-    if (isStartingRecordingRef.current || recordingState !== 'idle') {
-      console.warn('Cannot start recording; current state is:', recordingState, 'or starting in progress');
-      return;
-    }
-    if (videoSettings.countdownSeconds > 0) {
-      setRecordingState('countdown');
-    } else {
-      executeStartRecording();
-    }
-  }, [recordingState, videoSettings.countdownSeconds, executeStartRecording]);
 
   const handleTogglePause = () => {
     const engine = recorderEngineRef.current;
@@ -340,6 +369,7 @@ export default function App() {
         {/* VIEW 1: Post-Recording Review Studio */}
         {recordingState === 'review' && lastRecordingData ? (
           <PostRecordingStudio
+            key={`post-studio-${lastRecordingData.blob.size}-${lastRecordingData.duration}-${Date.now()}`}
             videoBlob={lastRecordingData.blob}
             duration={lastRecordingData.duration}
             mimeType={lastRecordingData.mimeType}
@@ -421,8 +451,8 @@ export default function App() {
       {recordingState === 'countdown' && (
         <CountdownModal
           seconds={videoSettings.countdownSeconds}
-          onComplete={executeStartRecording}
-          onCancel={() => setRecordingState('idle')}
+          onComplete={handleCountdownComplete}
+          onCancel={handleCountdownCancel}
         />
       )}
 

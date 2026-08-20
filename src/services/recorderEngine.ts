@@ -33,15 +33,15 @@ export class RecorderEngine {
 
   constructor(private callbacks: RecorderCallbacks) {}
 
-  public async startRecording(
+  public async prepareStreams(
     mode: RecordingMode,
     audioSettings: AudioSettings,
     videoSettings: VideoSettings,
     pipConfig: PipConfig
-  ): Promise<{ webcamStream: MediaStream | null }> {
+  ): Promise<{ webcamStream: MediaStream | null; screenStream: MediaStream | null }> {
     if (this.isStarting || this.isRecording) {
-      console.warn('RecorderEngine: startRecording called while already starting or recording.');
-      return { webcamStream: this.webcamStream };
+      console.warn('RecorderEngine: prepareStreams called while already starting or recording.');
+      return { webcamStream: this.webcamStream, screenStream: this.screenStream };
     }
     this.isStarting = true;
     try {
@@ -53,7 +53,7 @@ export class RecorderEngine {
       this.startTime = 0;
       this.pausedTime = 0;
 
-      // 1. Acquire Screen Stream if needed
+      // 1. Acquire Screen Stream if needed (Immediately in user click handler)
       if (mode === 'screen' || mode === 'screen_cam') {
         try {
           this.screenStream = await navigator.mediaDevices.getDisplayMedia({
@@ -146,13 +146,22 @@ export class RecorderEngine {
         audioSettings.systemVolume
       );
 
-      // 4. Setup Video Stream
+      // 4. Setup Video Stream & Compositor
       let finalVideoStream: MediaStream;
 
       if (mode === 'audio_only') {
         finalVideoStream = new MediaStream();
       } else if (mode === 'cam_only') {
         finalVideoStream = this.webcamStream || new MediaStream();
+      } else if (mode === 'screen_cam' && this.webcamStream && this.screenStream) {
+        // High-performance canvas compositor mixes screen + draggable camera PIP at 60 FPS
+        this.compositor = createStreamCompositor(
+          this.screenStream,
+          this.webcamStream,
+          pipConfig,
+          videoSettings.fps || 60
+        );
+        finalVideoStream = this.compositor.outputStream;
       } else if (mode === 'screen' || mode === 'screen_cam') {
         finalVideoStream = this.screenStream || new MediaStream();
       } else {
@@ -227,11 +236,9 @@ export class RecorderEngine {
         this.callbacks.onError(new Error('Recording error occurred'));
       };
 
-      // Start recording with 1-second timeslices
-      this.mediaRecorder.start(1000);
-
       return {
         webcamStream: this.webcamStream,
+        screenStream: this.screenStream,
       };
     } catch (err) {
       this.cleanupStreams();
@@ -240,6 +247,26 @@ export class RecorderEngine {
     } finally {
       this.isStarting = false;
     }
+  }
+
+  public startMediaRecorder(): void {
+    if (!this.mediaRecorder) {
+      throw new Error('No media streams prepared for recording.');
+    }
+    if (this.mediaRecorder.state === 'inactive') {
+      this.mediaRecorder.start(1000);
+    }
+  }
+
+  public async startRecording(
+    mode: RecordingMode,
+    audioSettings: AudioSettings,
+    videoSettings: VideoSettings,
+    pipConfig: PipConfig
+  ): Promise<{ webcamStream: MediaStream | null }> {
+    const res = await this.prepareStreams(mode, audioSettings, videoSettings, pipConfig);
+    this.startMediaRecorder();
+    return { webcamStream: res.webcamStream };
   }
 
   public pauseRecording(): void {

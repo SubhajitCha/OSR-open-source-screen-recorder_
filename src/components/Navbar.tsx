@@ -49,15 +49,12 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Breadcrumb Title */}
           <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold text-slate-500 group-hover:text-slate-700 transition-colors">
+            <span className="text-xs font-semibold text-slate-400 group-hover:text-slate-600 transition-colors">
               OSR
             </span>
-            <span className="text-slate-300 font-light">/</span>
-            <span className="text-sm font-bold text-slate-900 tracking-tight capitalize">
-              {activeView === 'studio' ? 'Screen Studio' : activeView === 'library' ? 'My Recordings' : activeView === 'docs' ? 'Architecture Docs' : 'Services'}
-            </span>
-            <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-blue-50 text-blue-600 border border-blue-200/80">
-              <Tick01Icon className="w-2.5 h-2.5 stroke-[2.5]" />
+            <span className="text-slate-200 font-light">/</span>
+            <span className="text-xs font-semibold text-slate-800 tracking-tight">
+              {activeView === 'studio' ? 'Open Source Recorder' : activeView === 'library' ? 'My Recordings' : activeView === 'docs' ? 'Architecture Docs' : 'Services Diagnostics'}
             </span>
           </div>
         </div>
@@ -112,21 +109,24 @@ export const Navbar: React.FC<NavbarProps> = ({
           </button>
         </nav>
 
-        {/* Right Nav: Interactive Services Diagnostic Button & Settings & Profile */}
+        {/* Right Nav: Interactive Services Diagnostic Button & Settings */}
         <div className="flex items-center gap-2.5">
           <button
             id="nav-services-status-btn"
             onClick={() => onSelectView('services')}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-full border transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold rounded-full border transition-all cursor-pointer ${
               activeView === 'services'
-                ? 'bg-emerald-50 text-emerald-800 border-emerald-300 ring-2 ring-emerald-200'
+                ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
                 : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200 shadow-xs'
             }`}
-            title="Inspect running offline web engines & services"
+            title="Inspect running offline web engines & diagnostics"
           >
+            <span className="text-slate-700 font-medium">Services</span>
+            <span className="flex h-2 w-2 relative">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
             <SecurityCheckIcon className="w-3.5 h-3.5 text-emerald-600" />
-            <span className="hidden sm:inline text-slate-600">Services:</span>
-            <span className="text-emerald-700 font-bold">Healthy</span>
           </button>
 
           <button
@@ -137,11 +137,6 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             <Settings01Icon className="w-4 h-4" />
           </button>
-
-          {/* User Profile avatar chip inspired by Screenity */}
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white font-bold text-xs flex items-center justify-center shadow-xs border border-white">
-            <span>OS</span>
-          </div>
         </div>
       </div>
     </header>

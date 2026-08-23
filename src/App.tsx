@@ -17,6 +17,7 @@ import {
 import { RecorderEngine } from './services/recorderEngine';
 import { getAllRecordings } from './services/db';
 import { getBestSupportedVideoMimeType } from './services/browserCapabilities';
+import { logbook } from './services/logbook';
 import { Navbar } from './components/Navbar';
 import { RecorderDashboard } from './components/RecorderDashboard';
 import { LiveRecordingOverlay } from './components/LiveRecordingOverlay';
@@ -27,6 +28,7 @@ import { ServicesStatusPage } from './components/ServicesStatusPage';
 import { CountdownModal } from './components/CountdownModal';
 import { SettingsModal } from './components/SettingsModal';
 import { TechDocsPage } from './components/TechDocsPage';
+import { LogbookPage } from './components/LogbookPage';
 
 export default function App() {
   // Navigation & Views
@@ -98,12 +100,24 @@ export default function App() {
     directSaveToFileSystem: false,
   });
 
-  // Auto-detect optimal video codec on mount
+  // Auto-detect optimal video codec and initialize logbook observer on mount
   useEffect(() => {
+    logbook.init();
     const bestCodec = getBestSupportedVideoMimeType();
     setVideoSettings((prev) => ({ ...prev, codec: bestCodec }));
     refreshLibraryCount();
   }, []);
+
+  // Sync runtime context with logbook observer
+  useEffect(() => {
+    logbook.updateContext({
+      activeView,
+      recordingState,
+      resolution: videoSettings.resolution,
+      codec: videoSettings.codec,
+      mode,
+    });
+  }, [activeView, recordingState, videoSettings.resolution, videoSettings.codec, mode]);
 
   const refreshLibraryCount = async () => {
     try {
@@ -366,10 +380,38 @@ export default function App() {
 
       {/* Main Content Area */}
       <main className="flex-1">
-        {/* VIEW 1: Post-Recording Review Studio */}
-        {recordingState === 'review' && lastRecordingData ? (
+        {activeView === 'library' ? (
+          /* VIEW 1: Recordings Library Gallery */
+          <RecordingsLibrary
+            onOpenStudio={() => {
+              setActiveView('studio');
+              setRecordingState('idle');
+            }}
+            onRecordingDeleted={refreshLibraryCount}
+          />
+        ) : activeView === 'services' ? (
+          /* VIEW 2: Open Source Services Status & Diagnostics */
+          <ServicesStatusPage />
+        ) : activeView === 'logbook' ? (
+          /* VIEW 3: Live Session Logbook & Inspect Observer */
+          <LogbookPage
+            onBackToStudio={() => {
+              setActiveView('studio');
+              setRecordingState('idle');
+            }}
+          />
+        ) : activeView === 'docs' ? (
+          /* VIEW 4: Technical Documentation & Architecture Page */
+          <TechDocsPage
+            onOpenStudio={() => {
+              setActiveView('studio');
+              setRecordingState('idle');
+            }}
+          />
+        ) : recordingState === 'review' && lastRecordingData ? (
+          /* VIEW 5: Post-Recording Review Studio */
           <PostRecordingStudio
-            key={`post-studio-${lastRecordingData.blob.size}-${lastRecordingData.duration}-${Date.now()}`}
+            key={`post-studio-${lastRecordingData.blob.size}-${lastRecordingData.duration}`}
             videoBlob={lastRecordingData.blob}
             duration={lastRecordingData.duration}
             mimeType={lastRecordingData.mimeType}
@@ -399,28 +441,8 @@ export default function App() {
               setRecordingState('idle');
             }}
           />
-        ) : activeView === 'library' ? (
-          /* VIEW 2: Recordings Library Gallery */
-          <RecordingsLibrary
-            onOpenStudio={() => {
-              setActiveView('studio');
-              setRecordingState('idle');
-            }}
-            onRecordingDeleted={refreshLibraryCount}
-          />
-        ) : activeView === 'services' ? (
-          /* VIEW 3: Open Source Services Status & Diagnostics */
-          <ServicesStatusPage />
-        ) : activeView === 'docs' ? (
-          /* VIEW 4: Technical Documentation & Architecture Page */
-          <TechDocsPage
-            onOpenStudio={() => {
-              setActiveView('studio');
-              setRecordingState('idle');
-            }}
-          />
         ) : (
-          /* VIEW 5: Main Studio Recorder Dashboard */
+          /* VIEW 6: Main Studio Recorder Dashboard */
           <RecorderDashboard
             mode={mode}
             onSelectMode={setMode}

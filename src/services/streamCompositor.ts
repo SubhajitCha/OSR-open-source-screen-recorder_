@@ -1,288 +1,274 @@
 import { PipConfig } from '../types';
 
 export interface CompositorController {
-  outputStream: MediaStream;
+  canvas: HTMLCanvasElement;
+  stream: MediaStream;
   updatePipConfig: (config: PipConfig) => void;
   cleanup: () => void;
 }
 
+/**
+ * High-Performance Lightweight Stream Compositor
+ * - Only used when Screen + Camera composite is strictly required.
+ * - Single precision requestAnimationFrame loop locked to the target FPS.
+ * - Eliminated CPU-heavy shadowBlur rasterization on high-frequency render loops.
+ * - Cached dimensions, path calculations, and optimized 2D context.
+ */
 export function createStreamCompositor(
-  screenStream: MediaStream | null,
-  webcamStream: MediaStream | null,
+  screenStream: MediaStream,
+  cameraStream: MediaStream | null,
   initialPipConfig: PipConfig,
-  targetFps = 60
+  targetFps: number = 30
 ): CompositorController {
-  const canvas = document.createElement('canvas');
-  // High performance context settings
-  const ctx = canvas.getContext('2d', {
-    alpha: false,
-    desynchronized: true,
-    willReadFrequently: false,
-  });
-
-  if (ctx) {
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = 'medium';
-  }
-
-  let pipConfig = { ...initialPipConfig };
-  let animationFrameId: number | null = null;
-  let intervalTickerId: number | null = null;
   let isRunning = true;
-  let lastFrameTime = performance.now();
+  let pipConfig = { ...initialPipConfig };
+  let animFrameId: number | null = null;
+  let lastFrameTime = 0;
+  const frameIntervalMs = 1000 / (targetFps || 30);
 
-  let canvasWidth = 1920;
-  let canvasHeight = 1080;
-
-  // Screen video element
+  // Hidden off-screen video elements for decoding frames
   const screenVideo = document.createElement('video');
   screenVideo.muted = true;
   screenVideo.playsInline = true;
   screenVideo.autoplay = true;
+  screenVideo.srcObject = screenStream;
 
-  if (screenStream) {
-    screenVideo.srcObject = screenStream;
-    screenVideo.play().catch((e) => console.warn('Screen video play error:', e));
+  let cameraVideo: HTMLVideoElement | null = null;
+  if (cameraStream) {
+    cameraVideo = document.createElement('video');
+    cameraVideo.muted = true;
+    cameraVideo.playsInline = true;
+    cameraVideo.autoplay = true;
+    cameraVideo.srcObject = cameraStream;
   }
 
-  // Webcam video element
-  const webcamVideo = document.createElement('video');
-  webcamVideo.muted = true;
-  webcamVideo.playsInline = true;
-  webcamVideo.autoplay = true;
+  // Optimized Canvas setup with desynchronized 2D context for ultra-low latency & CPU usage
+  const canvas = document.createElement('canvas');
+  canvas.width = 1920;
+  canvas.height = 1080;
+  
+  // desynchronized and willReadFrequently: false for GPU acceleration
+  const ctx = canvas.getContext('2d', {
+    alpha: false,
+    desynchronized: true,
+  });
 
-  if (webcamStream) {
-    webcamVideo.srcObject = webcamStream;
-    webcamVideo.play().catch((e) => console.warn('Webcam video play error:', e));
+  // Ensure video playback begins smoothly
+  const playPromise = screenVideo.play().catch(() => {});
+  if (cameraVideo) {
+    cameraVideo.play().catch(() => {});
   }
 
-  // Default canvas dimensions
-  canvas.width = canvasWidth;
-  canvas.height = canvasHeight;
+  // Pre-cached dimension and position calculations
+  let cachedPipSize = 0;
+  let cachedPipX = 0;
+  let cachedPipY = 0;
+  let needsPipRecalc = true;
 
-  const updateCanvasDimensions = (newWidth: number, newHeight: number) => {
-    if (newWidth > 0 && newHeight > 0 && (canvasWidth !== newWidth || canvasHeight !== newHeight)) {
-      canvasWidth = newWidth;
-      canvasHeight = newHeight;
-      canvas.width = newWidth;
-      canvas.height = newHeight;
-      if (ctx) {
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'medium';
-      }
+  const updatePipMetrics = (canvasWidth: number, canvasHeight: number) => {
+    let sizePx: number;
+    switch (pipConfig.size) {
+      case 'small':
+        sizePx = Math.round(canvasWidth * 0.14);
+        break;
+      case 'large':
+        sizePx = Math.round(canvasWidth * 0.24);
+        break;
+      case 'medium':
+      default:
+        sizePx = Math.round(canvasWidth * 0.18);
+        break;
     }
-  };
+    sizePx = Math.max(120, Math.min(sizePx, 480));
 
-  const render = () => {
-    if (!isRunning || !ctx) return;
-    lastFrameTime = performance.now();
+    const margin = Math.round(canvasWidth * 0.02);
+    let x = canvasWidth - sizePx - margin;
+    let y = canvasHeight - sizePx - margin;
 
-    // 1. Detect actual dimensions from screenVideo if available
-    if (screenVideo.videoWidth && screenVideo.videoHeight) {
-      updateCanvasDimensions(screenVideo.videoWidth, screenVideo.videoHeight);
-      ctx.drawImage(screenVideo, 0, 0, canvasWidth, canvasHeight);
-    } else if (webcamVideo.videoWidth && webcamVideo.videoHeight && !screenStream) {
-      // Webcam only mode
-      updateCanvasDimensions(webcamVideo.videoWidth, webcamVideo.videoHeight);
-      ctx.save();
-      if (pipConfig.mirror) {
-        ctx.translate(canvasWidth, 0);
-        ctx.scale(-1, 1);
-      }
-      ctx.drawImage(webcamVideo, 0, 0, canvasWidth, canvasHeight);
-      ctx.restore();
+    if (pipConfig.position === 'custom' && pipConfig.customX !== undefined && pipConfig.customY !== undefined) {
+      x = (pipConfig.customX / 100) * canvasWidth - sizePx / 2;
+      y = (pipConfig.customY / 100) * canvasHeight - sizePx / 2;
     } else {
-      // Blank dark placeholder while loading
-      ctx.fillStyle = '#0f172a';
-      ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+      switch (pipConfig.position) {
+        case 'top-left':
+          x = margin;
+          y = margin;
+          break;
+        case 'top-right':
+          x = canvasWidth - sizePx - margin;
+          y = margin;
+          break;
+        case 'bottom-left':
+          x = margin;
+          y = canvasHeight - sizePx - margin;
+          break;
+        case 'bottom-right':
+        default:
+          x = canvasWidth - sizePx - margin;
+          y = canvasHeight - sizePx - margin;
+          break;
+      }
     }
 
-    // 2. Draw Picture-in-Picture webcam overlay if enabled and screen is also present
-    if (pipConfig.enabled && screenStream && webcamStream && webcamVideo.videoWidth && webcamVideo.videoHeight) {
-      const cw = canvasWidth;
-      const ch = canvasHeight;
-
-      // Calculate size based on canvas width
-      let pipWidth = 320;
-      if (pipConfig.size === 'small') pipWidth = cw * 0.15;
-      else if (pipConfig.size === 'medium') pipWidth = cw * 0.22;
-      else if (pipConfig.size === 'large') pipWidth = cw * 0.30;
-
-      // Constrain pip size
-      pipWidth = Math.max(160, Math.min(pipWidth, cw * 0.45));
-      const pipHeight = pipConfig.shape === 'circle' ? pipWidth : (pipWidth * webcamVideo.videoHeight) / webcamVideo.videoWidth;
-
-      const padding = 28;
-      let x = cw - pipWidth - padding;
-      let y = ch - pipHeight - padding;
-
-      if (pipConfig.position === 'top-left') {
-        x = padding;
-        y = padding;
-      } else if (pipConfig.position === 'top-right') {
-        x = cw - pipWidth - padding;
-        y = padding;
-      } else if (pipConfig.position === 'bottom-left') {
-        x = padding;
-        y = ch - pipHeight - padding;
-      } else if (pipConfig.position === 'bottom-right') {
-        x = cw - pipWidth - padding;
-        y = ch - pipHeight - padding;
-      } else if (pipConfig.position === 'custom' && pipConfig.customX !== undefined && pipConfig.customY !== undefined) {
-        x = Math.max(padding, Math.min(cw - pipWidth - padding, (pipConfig.customX / 100) * (cw - pipWidth)));
-        y = Math.max(padding, Math.min(ch - pipHeight - padding, (pipConfig.customY / 100) * (ch - pipHeight)));
-      }
-
-      ctx.save();
-
-      // Shadow behind bubble
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
-      ctx.shadowBlur = 24;
-      ctx.shadowOffsetX = 0;
-      ctx.shadowOffsetY = 6;
-
-      const vw = webcamVideo.videoWidth || 1;
-      const vh = webcamVideo.videoHeight || 1;
-      const vAspect = vw / vh;
-      const targetAspect = pipWidth / pipHeight;
-
-      let drawW = pipWidth;
-      let drawH = pipHeight;
-      let offsetX = x;
-      let offsetY = y;
-
-      if (vAspect > targetAspect) {
-        drawW = pipHeight * vAspect;
-        offsetX = x - (drawW - pipWidth) / 2;
-      } else {
-        drawH = pipWidth / vAspect;
-        offsetY = y - (drawH - pipHeight) / 2;
-      }
-
-      if (pipConfig.shape === 'circle') {
-        const radius = pipWidth / 2;
-        const centerX = x + radius;
-        const centerY = y + radius;
-
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-        ctx.closePath();
-        ctx.clip();
-
-        ctx.shadowColor = 'transparent';
-        ctx.shadowBlur = 0;
-
-        ctx.save();
-        if (pipConfig.mirror) {
-          ctx.translate(centerX, centerY);
-          ctx.scale(-1, 1);
-          ctx.translate(-centerX, -centerY);
-        }
-        ctx.drawImage(webcamVideo, offsetX, offsetY, drawW, drawH);
-        ctx.restore();
-
-        // Crisp Border
-        if (pipConfig.borderWidth > 0) {
-          ctx.lineWidth = pipConfig.borderWidth * 2;
-          ctx.strokeStyle = pipConfig.borderColor || '#ffffff';
-          ctx.stroke();
-        }
-      } else if (pipConfig.shape === 'rounded') {
-        const cornerRadius = Math.round(pipWidth * 0.12);
-        ctx.beginPath();
-        ctx.roundRect(x, y, pipWidth, pipHeight, cornerRadius);
-        ctx.closePath();
-        ctx.clip();
-
-        ctx.shadowColor = 'transparent';
-        ctx.shadowBlur = 0;
-
-        ctx.save();
-        if (pipConfig.mirror) {
-          ctx.translate(x + pipWidth / 2, y + pipHeight / 2);
-          ctx.scale(-1, 1);
-          ctx.translate(-(x + pipWidth / 2), -(y + pipHeight / 2));
-        }
-        ctx.drawImage(webcamVideo, offsetX, offsetY, drawW, drawH);
-        ctx.restore();
-
-        if (pipConfig.borderWidth > 0) {
-          ctx.lineWidth = pipConfig.borderWidth * 2;
-          ctx.strokeStyle = pipConfig.borderColor || '#ffffff';
-          ctx.stroke();
-        }
-      } else {
-        // Square
-        ctx.beginPath();
-        ctx.rect(x, y, pipWidth, pipHeight);
-        ctx.closePath();
-        ctx.clip();
-
-        ctx.shadowColor = 'transparent';
-        ctx.shadowBlur = 0;
-
-        ctx.save();
-        if (pipConfig.mirror) {
-          ctx.translate(x + pipWidth / 2, y + pipHeight / 2);
-          ctx.scale(-1, 1);
-          ctx.translate(-(x + pipWidth / 2), -(y + pipHeight / 2));
-        }
-        ctx.drawImage(webcamVideo, offsetX, offsetY, drawW, drawH);
-        ctx.restore();
-
-        if (pipConfig.borderWidth > 0) {
-          ctx.lineWidth = pipConfig.borderWidth * 2;
-          ctx.strokeStyle = pipConfig.borderColor || '#ffffff';
-          ctx.stroke();
-        }
-      }
-
-      ctx.restore();
-    }
+    cachedPipSize = sizePx;
+    cachedPipX = Math.max(0, Math.min(canvasWidth - sizePx, x));
+    cachedPipY = Math.max(0, Math.min(canvasHeight - sizePx, y));
+    needsPipRecalc = false;
   };
 
-  // Main RAF rendering loop
-  const rafLoop = () => {
+  // Main Render Loop throttled strictly to target FPS to save CPU
+  const renderLoop = (timestamp: number) => {
     if (!isRunning) return;
-    render();
-    animationFrameId = requestAnimationFrame(rafLoop);
+
+    // Throttle rendering to target FPS
+    if (timestamp - lastFrameTime >= frameIntervalMs - 2) {
+      lastFrameTime = timestamp;
+
+      if (ctx) {
+        // Adjust canvas dimensions to match the screen track resolution dynamically
+        const videoTrack = screenStream.getVideoTracks()[0];
+        if (videoTrack && videoTrack.readyState === 'live') {
+          const settings = videoTrack.getSettings();
+          const targetW = settings.width || 1920;
+          const targetH = settings.height || 1080;
+          if (canvas.width !== targetW || canvas.height !== targetH) {
+            canvas.width = targetW;
+            canvas.height = targetH;
+            needsPipRecalc = true;
+          }
+        }
+
+        const width = canvas.width;
+        const height = canvas.height;
+
+        if (needsPipRecalc) {
+          updatePipMetrics(width, height);
+        }
+
+        // 1. Draw Primary Screen Video Frame
+        if (screenVideo.readyState >= 2) {
+          ctx.drawImage(screenVideo, 0, 0, width, height);
+        } else {
+          // Fallback dark canvas
+          ctx.fillStyle = '#0f172a';
+          ctx.fillRect(0, 0, width, height);
+        }
+
+        // 2. Draw Camera Overlay (Only if active and ready)
+        if (cameraVideo && cameraVideo.readyState >= 2) {
+          const size = cachedPipSize;
+          const x = cachedPipX;
+          const y = cachedPipY;
+          const shape = pipConfig.shape;
+          const mirror = pipConfig.mirror;
+
+          ctx.save();
+
+          // Create Lightweight Clip Path (No heavy shadowBlur on 60FPS loop)
+          ctx.beginPath();
+          if (shape === 'circle') {
+            const radius = size / 2;
+            ctx.arc(x + radius, y + radius, radius, 0, Math.PI * 2);
+          } else if (shape === 'rounded') {
+            const radius = Math.round(size * 0.16);
+            if (typeof ctx.roundRect === 'function') {
+              ctx.roundRect(x, y, size, size, radius);
+            } else {
+              ctx.rect(x, y, size, size);
+            }
+          } else {
+            ctx.rect(x, y, size, size);
+          }
+          ctx.closePath();
+          ctx.clip();
+
+          // Draw Cropped Camera Frame
+          const camW = cameraVideo.videoWidth || size;
+          const camH = cameraVideo.videoHeight || size;
+          const minDim = Math.min(camW, camH);
+          const srcX = (camW - minDim) / 2;
+          const srcY = (camH - minDim) / 2;
+
+          if (mirror) {
+            ctx.translate(x + size, y);
+            ctx.scale(-1, 1);
+            ctx.drawImage(cameraVideo, srcX, srcY, minDim, minDim, 0, 0, size, size);
+          } else {
+            ctx.drawImage(cameraVideo, srcX, srcY, minDim, minDim, x, y, size, size);
+          }
+
+          ctx.restore();
+
+          // Draw crisp accent border without expensive filter rasterization
+          ctx.save();
+          ctx.lineWidth = 3;
+          ctx.strokeStyle = '#38bdf8';
+          ctx.beginPath();
+          if (shape === 'circle') {
+            const radius = size / 2;
+            ctx.arc(x + radius, y + radius, radius - 1.5, 0, Math.PI * 2);
+          } else if (shape === 'rounded') {
+            const radius = Math.round(size * 0.16);
+            if (typeof ctx.roundRect === 'function') {
+              ctx.roundRect(x + 1.5, y + 1.5, size - 3, size - 3, radius);
+            } else {
+              ctx.strokeRect(x + 1.5, y + 1.5, size - 3, size - 3);
+            }
+          } else {
+            ctx.strokeRect(x + 1.5, y + 1.5, size - 3, size - 3);
+          }
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+    }
+
+    if (isRunning) {
+      animFrameId = requestAnimationFrame(renderLoop);
+    }
   };
 
-  rafLoop();
+  // Start the RAF rendering loop
+  animFrameId = requestAnimationFrame(renderLoop);
 
-  // Background watchdog ticker: if requestAnimationFrame stalls (e.g. user focused another window/app),
-  // this timer ensures the canvas is continuously rendered and captureStream never freezes or pauses
-  const frameIntervalMs = Math.round(1000 / targetFps);
-  intervalTickerId = window.setInterval(() => {
-    if (!isRunning) return;
-    const now = performance.now();
-    // If > 25ms has elapsed without a RAF frame, render immediately
-    if (now - lastFrameTime > Math.max(25, frameIntervalMs * 1.5)) {
-      render();
-    }
-  }, Math.max(16, frameIntervalMs));
-
-  const outputStream = canvas.captureStream(targetFps);
-
-  const updatePipConfig = (newConfig: PipConfig) => {
-    pipConfig = { ...newConfig };
-  };
-
-  const cleanup = () => {
-    isRunning = false;
-    if (animationFrameId !== null) {
-      cancelAnimationFrame(animationFrameId);
-    }
-    if (intervalTickerId !== null) {
-      clearInterval(intervalTickerId);
-    }
-    screenVideo.srcObject = null;
-    webcamVideo.srcObject = null;
-  };
+  // Capture canvas media stream
+  const compositeStream = canvas.captureStream(targetFps);
 
   return {
-    outputStream,
-    updatePipConfig,
-    cleanup,
+    canvas,
+    stream: compositeStream,
+    updatePipConfig: (newConfig: PipConfig) => {
+      pipConfig = { ...newConfig };
+      needsPipRecalc = true;
+    },
+    cleanup: () => {
+      isRunning = false;
+      if (animFrameId !== null) {
+        cancelAnimationFrame(animFrameId);
+        animFrameId = null;
+      }
+
+      // Stop offscreen video playback and release memory
+      try {
+        screenVideo.pause();
+        screenVideo.srcObject = null;
+        screenVideo.remove();
+      } catch (_) {}
+
+      if (cameraVideo) {
+        try {
+          cameraVideo.pause();
+          cameraVideo.srcObject = null;
+          cameraVideo.remove();
+        } catch (_) {}
+      }
+
+      // Stop canvas stream tracks
+      compositeStream.getTracks().forEach((track) => {
+        try {
+          track.stop();
+        } catch (_) {}
+      });
+    },
   };
 }

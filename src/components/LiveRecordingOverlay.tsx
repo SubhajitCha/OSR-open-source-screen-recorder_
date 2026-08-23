@@ -70,13 +70,14 @@ export const LiveRecordingOverlay: React.FC<LiveRecordingOverlayProps> = ({
       const data = audioMixer.getFrequencyData();
       if (data && data.length > 0) {
         let sum = 0;
-        for (let i = 0; i < Math.min(16, data.length); i++) {
+        const len = Math.min(8, data.length);
+        for (let i = 0; i < len; i++) {
           sum += data[i];
         }
-        const avg = sum / Math.min(16, data.length);
+        const avg = sum / len;
         setAudioActivePulse(avg > 15);
       }
-    }, 150);
+    }, 250);
 
     return () => clearInterval(interval);
   }, [audioMixer, isPaused, micMuted]);

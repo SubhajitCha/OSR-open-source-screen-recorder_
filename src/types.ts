@@ -1,4 +1,4 @@
-export type ActiveView = 'studio' | 'library' | 'docs' | 'services';
+export type ActiveView = 'studio' | 'library' | 'docs' | 'services' | 'logbook';
 
 export type RecordingMode = 'screen' | 'screen_cam' | 'cam_only' | 'audio_only';
 

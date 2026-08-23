@@ -2,6 +2,7 @@ import { AudioSettings, PipConfig, RecordingMode, VideoBookmark, VideoSettings }
 import { createAudioMixer, AudioMixerController } from './audioMixer';
 import { createStreamCompositor, CompositorController } from './streamCompositor';
 import { fixWebmDuration } from './webmDurationFixer';
+import { logbook } from './logbook';
 
 export interface RecorderCallbacks {
   onTimeUpdate: (durationSeconds: number) => void;
@@ -154,14 +155,14 @@ export class RecorderEngine {
       } else if (mode === 'cam_only') {
         finalVideoStream = this.webcamStream || new MediaStream();
       } else if (mode === 'screen_cam' && this.webcamStream && this.screenStream) {
-        // High-performance canvas compositor mixes screen + draggable camera PIP at 60 FPS
+        // High-performance canvas compositor mixes screen + draggable camera PIP at user-selected FPS
         this.compositor = createStreamCompositor(
           this.screenStream,
           this.webcamStream,
           pipConfig,
-          videoSettings.fps || 60
+          videoSettings.fps || 30
         );
-        finalVideoStream = this.compositor.outputStream;
+        finalVideoStream = this.compositor.stream;
       } else if (mode === 'screen' || mode === 'screen_cam') {
         finalVideoStream = this.screenStream || new MediaStream();
       } else {
@@ -207,12 +208,16 @@ export class RecorderEngine {
         this.startTime = Date.now();
         this.startTimer();
         this.callbacks.onStateChange('recording');
+        logbook.addLog('info', 'media', `MediaRecorder pipeline engaged (${mimeType})`, {
+          digest: `Hardware encoding stream active at ~${videoSettings.bitrateMbps} Mbps, ${videoSettings.fps} FPS.`,
+        });
       };
 
       this.mediaRecorder.onpause = () => {
         this.isPaused = true;
         this.pausedTime = Date.now();
         this.callbacks.onStateChange('paused');
+        logbook.addLog('info', 'media', 'Recording session paused by user');
       };
 
       this.mediaRecorder.onresume = () => {
@@ -222,6 +227,7 @@ export class RecorderEngine {
           this.pausedTime = 0;
         }
         this.callbacks.onStateChange('recording');
+        logbook.addLog('info', 'media', 'Recording session resumed');
       };
 
       this.mediaRecorder.onstop = () => {
@@ -229,10 +235,15 @@ export class RecorderEngine {
         this.isPaused = false;
         this.stopTimer();
         this.callbacks.onStateChange('stopped');
+        logbook.addLog('info', 'media', `MediaRecorder pipeline finalized (${this.recordedChunks.length} chunks buffered)`);
       };
 
       this.mediaRecorder.onerror = (e) => {
         console.error('MediaRecorder error:', e);
+        logbook.addLog('error', 'media', 'MediaRecorder emitted an internal pipeline error', {
+          data: e,
+          digest: 'MediaRecorder internal stream encoding failure or track discontinuity.',
+        });
         this.callbacks.onError(new Error('Recording error occurred'));
       };
 

@@ -1,16 +1,36 @@
 @import "tailwindcss";
 
+:root {
+  --font-system: system-ui, -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --ease-snappy: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 body {
-  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-family: var(--font-system);
   background-color: #F8FAFC;
   color: #0F172A;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 code, kbd, pre, .font-mono {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
-/* Screenity Smooth Transitions & Minimalist Scrollbars */
+/* Tactile feedback utilities for all buttons & interactive controls */
+button, [role="button"], .interactive-tactile {
+  transition-property: transform, box-shadow, background-color, border-color, opacity, color;
+  transition-duration: 160ms;
+  transition-timing-function: var(--ease-snappy);
+}
+
+button:active:not(:disabled), [role="button"]:active:not(:disabled) {
+  transform: scale(0.96);
+  transition-duration: 80ms;
+}
+
+/* Screenity Smooth Minimalist Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -33,3 +53,4 @@ code, kbd, pre, .font-mono {
 .glow-blue {
   box-shadow: 0 0 20px -3px rgba(37, 99, 235, 0.25);
 }
+

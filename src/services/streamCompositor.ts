@@ -66,53 +66,48 @@ export function createStreamCompositor(
   let needsPipRecalc = true;
 
   const updatePipMetrics = (canvasWidth: number, canvasHeight: number) => {
-    let sizePx: number;
-    switch (pipConfig.size) {
-      case 'small':
-        sizePx = Math.round(canvasWidth * 0.14);
-        break;
-      case 'large':
-        sizePx = Math.round(canvasWidth * 0.24);
-        break;
-      case 'medium':
-      default:
-        sizePx = Math.round(canvasWidth * 0.18);
-        break;
-    }
-    sizePx = Math.max(120, Math.min(sizePx, 480));
+    let sizeRatio = 0.22;
+    if (pipConfig.size === 'small') sizeRatio = 0.15;
+    else if (pipConfig.size === 'large') sizeRatio = 0.30;
 
-    const margin = Math.round(canvasWidth * 0.02);
-    let x = canvasWidth - sizePx - margin;
-    let y = canvasHeight - sizePx - margin;
+    const sizePx = Math.round(canvasWidth * sizeRatio);
+    const maxX = Math.max(0, canvasWidth - sizePx);
+    const maxY = Math.max(0, canvasHeight - sizePx);
+
+    const marginX = Math.round(canvasWidth * 0.03);
+    const marginY = Math.round(canvasHeight * 0.04);
+
+    let x = maxX - marginX;
+    let y = maxY - marginY;
 
     if (pipConfig.position === 'custom' && pipConfig.customX !== undefined && pipConfig.customY !== undefined) {
-      x = (pipConfig.customX / 100) * canvasWidth - sizePx / 2;
-      y = (pipConfig.customY / 100) * canvasHeight - sizePx / 2;
+      x = Math.round((Math.max(0, Math.min(100, pipConfig.customX)) / 100) * maxX);
+      y = Math.round((Math.max(0, Math.min(100, pipConfig.customY)) / 100) * maxY);
     } else {
       switch (pipConfig.position) {
         case 'top-left':
-          x = margin;
-          y = margin;
+          x = marginX;
+          y = marginY;
           break;
         case 'top-right':
-          x = canvasWidth - sizePx - margin;
-          y = margin;
+          x = maxX - marginX;
+          y = marginY;
           break;
         case 'bottom-left':
-          x = margin;
-          y = canvasHeight - sizePx - margin;
+          x = marginX;
+          y = maxY - marginY;
           break;
         case 'bottom-right':
         default:
-          x = canvasWidth - sizePx - margin;
-          y = canvasHeight - sizePx - margin;
+          x = maxX - marginX;
+          y = maxY - marginY;
           break;
       }
     }
 
     cachedPipSize = sizePx;
-    cachedPipX = Math.max(0, Math.min(canvasWidth - sizePx, x));
-    cachedPipY = Math.max(0, Math.min(canvasHeight - sizePx, y));
+    cachedPipX = Math.max(0, Math.min(maxX, x));
+    cachedPipY = Math.max(0, Math.min(maxY, y));
     needsPipRecalc = false;
   };
 

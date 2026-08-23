@@ -67,16 +67,79 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
       .padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
+  const sizeRatio = pipConfig.size === 'small' ? 0.15 : pipConfig.size === 'large' ? 0.30 : 0.22;
+  const sizePct = Math.round(sizeRatio * 100);
+
+  const getStagePipStyle = (): React.CSSProperties => {
+    const marginXPct = 3;
+    const marginYPct = 4;
+    const maxXPct = 100 - sizePct;
+    const maxYPct = 100 - sizePct;
+
+    if (pipConfig.position === 'custom' && pipConfig.customX !== undefined && pipConfig.customY !== undefined) {
+      const leftPct = (Math.max(0, Math.min(100, pipConfig.customX)) / 100) * maxXPct;
+      const topPct = (Math.max(0, Math.min(100, pipConfig.customY)) / 100) * maxYPct;
+      return {
+        left: `${leftPct}%`,
+        top: `${topPct}%`,
+        width: `${sizePct}%`,
+      };
+    }
+
+    switch (pipConfig.position) {
+      case 'top-left':
+        return {
+          left: `${marginXPct}%`,
+          top: `${marginYPct}%`,
+          width: `${sizePct}%`,
+        };
+      case 'top-right':
+        return {
+          left: `${maxXPct - marginXPct}%`,
+          top: `${marginYPct}%`,
+          width: `${sizePct}%`,
+        };
+      case 'bottom-left':
+        return {
+          left: `${marginXPct}%`,
+          top: `${maxYPct - marginYPct}%`,
+          width: `${sizePct}%`,
+        };
+      case 'bottom-right':
+      default:
+        return {
+          left: `${maxXPct - marginXPct}%`,
+          top: `${maxYPct - marginYPct}%`,
+          width: `${sizePct}%`,
+        };
+    }
+  };
+
   // Drag handler for positioning camera on the preview stage
   const handleStageMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!isDraggingStagePip || !stageRef.current) return;
     const rect = stageRef.current.getBoundingClientRect();
-    const x = Math.max(0, Math.min(100, Math.round(((e.clientX - rect.left) / rect.width) * 100)));
-    const y = Math.max(0, Math.min(100, Math.round(((e.clientY - rect.top) / rect.height) * 100)));
+    const pipWidth = rect.width * sizeRatio;
+    const pipHeight = rect.width * sizeRatio; // 1:1 aspect ratio
+
+    const maxLeft = rect.width - pipWidth;
+    const maxTop = rect.height - pipHeight;
+
+    if (maxLeft <= 0 || maxTop <= 0) return;
+
+    const mouseX = e.clientX - rect.left - pipWidth / 2;
+    const mouseY = e.clientY - rect.top - pipHeight / 2;
+
+    const clampedX = Math.max(0, Math.min(maxLeft, mouseX));
+    const clampedY = Math.max(0, Math.min(maxTop, mouseY));
+
+    const pctX = Math.round((clampedX / maxLeft) * 100);
+    const pctY = Math.round((clampedY / maxTop) * 100);
+
     onUpdatePipConfig({
       position: 'custom',
-      customX: x,
-      customY: y,
+      customX: pctX,
+      customY: pctY,
     });
   };
 
@@ -271,26 +334,8 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
             {mode === 'screen_cam' && (
               <div
                 onMouseDown={() => setIsDraggingStagePip(true)}
-                style={{
-                  left: pipConfig.position === 'custom' && pipConfig.customX !== undefined
-                    ? `${pipConfig.customX}%`
-                    : pipConfig.position === 'top-left' || pipConfig.position === 'bottom-left'
-                    ? '20px'
-                    : 'auto',
-                  right: pipConfig.position === 'top-right' || pipConfig.position === 'bottom-right'
-                    ? '20px'
-                    : 'auto',
-                  top: pipConfig.position === 'top-left' || pipConfig.position === 'top-right'
-                    ? '50px'
-                    : 'auto',
-                  bottom: pipConfig.position === 'bottom-left' || pipConfig.position === 'bottom-right'
-                    ? '20px'
-                    : 'auto',
-                  transform: pipConfig.position === 'custom' ? 'translate(-50%, -50%)' : 'none',
-                }}
-                className={`absolute z-20 cursor-grab active:cursor-grabbing transition-all ${
-                  pipConfig.size === 'small' ? 'w-20 h-20' : pipConfig.size === 'large' ? 'w-32 h-32' : 'w-24 h-24'
-                } ${
+                style={getStagePipStyle()}
+                className={`absolute z-20 cursor-grab active:cursor-grabbing transition-all aspect-square ${
                   pipConfig.shape === 'circle'
                     ? 'rounded-full'
                     : pipConfig.shape === 'rounded'

@@ -282,15 +282,15 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
   };
 
   return (
-    <div id="post-recording-studio" className="min-h-[calc(100vh-4rem)] bg-[#F8FAFC] pb-16 pt-4">
+    <div id="post-recording-studio" className="min-h-[calc(100vh-4rem)] bg-[#F8FAFC] dark:bg-[#09090B] pb-16 pt-4 transition-colors">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-5">
         
         {/* HEADER BAR: Editable File Name, Metadata Badges & Action Buttons */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 sm:px-6 sm:py-4 rounded-3xl border border-slate-200 shadow-xs">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-zinc-950 p-4 sm:px-6 sm:py-4 rounded-3xl border border-slate-200 dark:border-zinc-800 shadow-xs transition-colors">
           {/* Editable File Name */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-200/60">
+              <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-zinc-900 text-blue-600 dark:text-emerald-400 flex items-center justify-center shrink-0 border border-blue-200/60 dark:border-zinc-800">
                 <Film01Icon className="w-4 h-4" />
               </div>
 
@@ -308,11 +308,11 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
                       }
                     }}
                     placeholder="Enter file name..."
-                    className="w-full text-base font-bold text-slate-900 bg-slate-50 border border-blue-500 rounded-xl px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                    className="w-full text-base font-bold text-slate-900 dark:text-zinc-100 bg-slate-50 dark:bg-zinc-900 border border-blue-500 dark:border-emerald-500 rounded-xl px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-emerald-500/20"
                   />
                   <button
                     onClick={() => setIsEditingTitle(false)}
-                    className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg cursor-pointer transition-colors"
+                    className="p-1.5 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-zinc-900 rounded-lg cursor-pointer transition-colors"
                     title="Confirm Name"
                   >
                     <Tick01Icon className="w-4 h-4 stroke-[2.5]" />
@@ -324,11 +324,11 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
                   className="group/title flex items-center gap-2 cursor-pointer min-w-0"
                   title="Click to rename recording"
                 >
-                  <h2 className="text-base font-bold text-slate-900 tracking-tight truncate hover:text-blue-600 transition-colors">
+                  <h2 className="text-base font-bold text-slate-900 dark:text-zinc-100 tracking-tight truncate hover:text-blue-600 dark:hover:text-emerald-400 transition-colors">
                     {title}
                   </h2>
-                  <span className="text-xs font-mono text-slate-400">.{fileExtension}</span>
-                  <div className="p-1 text-slate-400 group-hover/title:text-blue-600 rounded-md transition-colors opacity-60 group-hover/title:opacity-100">
+                  <span className="text-xs font-mono text-slate-400 dark:text-zinc-500">.{fileExtension}</span>
+                  <div className="p-1 text-slate-400 group-hover/title:text-blue-600 dark:group-hover/title:text-emerald-400 rounded-md transition-colors opacity-60 group-hover/title:opacity-100">
                     <PencilEdit02Icon className="w-3.5 h-3.5" />
                   </div>
                 </div>
@@ -337,18 +337,18 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
 
             {/* Metadata Pills: File Size, File Type, Duration */}
             <div className="flex items-center flex-wrap gap-2 mt-2 ml-10">
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 font-mono text-[11px] font-semibold">
-                <HardDriveIcon className="w-3 h-3 text-slate-500" />
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 border border-transparent dark:border-zinc-800 font-mono text-[11px] font-semibold">
+                <HardDriveIcon className="w-3 h-3 text-slate-500 dark:text-zinc-400" />
                 {formatBytes(currentBlob.size)}
               </span>
 
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 font-mono text-[11px] font-semibold">
-                <Film01Icon className="w-3 h-3 text-slate-500" />
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 border border-transparent dark:border-zinc-800 font-mono text-[11px] font-semibold">
+                <Film01Icon className="w-3 h-3 text-slate-500 dark:text-zinc-400" />
                 {fileTypeLabel} ({fileExtension.toUpperCase()})
               </span>
 
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 font-mono text-[11px] font-semibold">
-                <Clock01Icon className="w-3 h-3 text-slate-500" />
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 border border-transparent dark:border-zinc-800 font-mono text-[11px] font-semibold">
+                <Clock01Icon className="w-3 h-3 text-slate-500 dark:text-zinc-400" />
                 {formatTime(currentDuration)}
               </span>
             </div>
@@ -358,10 +358,10 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
           <div className="flex items-center flex-wrap gap-2.5 shrink-0">
             <button
               onClick={onRecordAnother}
-              className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border border-slate-200/80 rounded-full transition-all cursor-pointer active:scale-95"
+              className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-700 dark:text-zinc-300 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-zinc-900 hover:bg-slate-200 dark:hover:bg-zinc-800 border border-slate-200/80 dark:border-zinc-800 rounded-full transition-all cursor-pointer active:scale-95"
               title="Start a new recording"
             >
-              <RotateLeft01Icon className="w-3.5 h-3.5 text-slate-500" />
+              <RotateLeft01Icon className="w-3.5 h-3.5 text-slate-500 dark:text-zinc-400" />
               <span>Record Again</span>
             </button>
 
@@ -369,12 +369,12 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
               onClick={() => setIsTrimmingMode(!isTrimmingMode)}
               className={`flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-full border transition-all cursor-pointer active:scale-95 ${
                 isTrimmingMode
-                  ? 'bg-blue-50 text-blue-700 border-blue-300'
-                  : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200 shadow-xs'
+                  ? 'bg-blue-50 dark:bg-zinc-800 text-blue-700 dark:text-emerald-400 border-blue-300 dark:border-zinc-700'
+                  : 'bg-white dark:bg-zinc-900 hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300 border-slate-200 dark:border-zinc-800 shadow-xs'
               }`}
               title="Trim recording start and end"
             >
-              <ScissorIcon className="w-3.5 h-3.5 text-blue-600" />
+              <ScissorIcon className="w-3.5 h-3.5 text-blue-600 dark:text-emerald-400" />
               <span>{isTrimmingMode ? 'Close Trimmer' : 'Trim'}</span>
             </button>
 
@@ -383,14 +383,14 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
               disabled={isSaved}
               className={`flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-full border transition-all cursor-pointer active:scale-95 ${
                 isSaved
-                  ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
-                  : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200 shadow-xs'
+                  ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border-emerald-300 dark:border-emerald-800/80'
+                  : 'bg-white dark:bg-zinc-900 hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300 border-slate-200 dark:border-zinc-800 shadow-xs'
               }`}
             >
               {isSaved ? (
-                <Tick01Icon className="w-3.5 h-3.5 text-emerald-600 stroke-[2.5]" />
+                <Tick01Icon className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 stroke-[2.5]" />
               ) : (
-                <FloppyDiskIcon className="w-3.5 h-3.5 text-slate-500" />
+                <FloppyDiskIcon className="w-3.5 h-3.5 text-slate-500 dark:text-zinc-400" />
               )}
               <span>{isSaved ? 'Saved to Library' : 'Save to Library'}</span>
             </button>
@@ -398,7 +398,7 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
             <button
               id="download-local-btn"
               onClick={handleDownloadLocal}
-              className="flex items-center gap-2 px-5 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-full shadow-md shadow-blue-500/25 transition-all cursor-pointer active:scale-95"
+              className="flex items-center gap-2 px-5 py-2 text-xs font-black text-white dark:text-black bg-blue-600 dark:bg-white hover:bg-blue-700 dark:hover:bg-zinc-200 rounded-full shadow-md shadow-blue-500/25 dark:shadow-white/10 transition-all cursor-pointer active:scale-95"
             >
               <Download01Icon className="w-4 h-4 stroke-[2.5]" />
               <span>Download Local</span>
@@ -408,29 +408,29 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
 
         {/* TRIM CONTROL PANEL (Expandable) */}
         {isTrimmingMode && (
-          <div className="p-5 rounded-3xl bg-white border border-slate-200 shadow-xs space-y-4 animate-in fade-in slide-in-from-top-2 duration-150">
+          <div className="p-5 rounded-3xl bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 shadow-xs space-y-4 animate-in fade-in slide-in-from-top-2 duration-150 transition-colors">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <ScissorIcon className="w-4 h-4 text-blue-600" />
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900">
+                <ScissorIcon className="w-4 h-4 text-blue-600 dark:text-emerald-400" />
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-zinc-100">
                   Client-Side Video Trimmer
                 </h3>
               </div>
-              <div className="text-xs font-mono text-slate-600 bg-slate-100 px-3 py-1 rounded-full">
+              <div className="text-xs font-mono text-slate-600 dark:text-zinc-300 bg-slate-100 dark:bg-zinc-900 border border-transparent dark:border-zinc-800 px-3 py-1 rounded-full">
                 Trimmed Length:{' '}
-                <span className="text-blue-600 font-bold">{formatTime(Math.max(0, trimEnd - trimStart))}</span>
+                <span className="text-blue-600 dark:text-emerald-400 font-bold">{formatTime(Math.max(0, trimEnd - trimStart))}</span>
               </div>
             </div>
 
             <div className="space-y-2">
-              <div className="flex items-center justify-between text-xs text-slate-500 font-mono">
+              <div className="flex items-center justify-between text-xs text-slate-500 dark:text-zinc-400 font-mono">
                 <span>Start: {formatTime(trimStart)}</span>
                 <span>End: {formatTime(trimEnd)}</span>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-[11px] font-semibold text-slate-600 block mb-1">Trim Start ({formatTime(trimStart)})</label>
+                  <label className="text-[11px] font-semibold text-slate-600 dark:text-zinc-400 block mb-1">Trim Start ({formatTime(trimStart)})</label>
                   <input
                     type="range"
                     min={0}
@@ -442,11 +442,11 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
                       setTrimStart(val);
                       handleSeek(val);
                     }}
-                    className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                    className="w-full h-1.5 bg-slate-200 dark:bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-emerald-400"
                   />
                 </div>
                 <div>
-                  <label className="text-[11px] font-semibold text-slate-600 block mb-1">Trim End ({formatTime(trimEnd)})</label>
+                  <label className="text-[11px] font-semibold text-slate-600 dark:text-zinc-400 block mb-1">Trim End ({formatTime(trimEnd)})</label>
                   <input
                     type="range"
                     min={0}
@@ -458,23 +458,23 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
                       setTrimEnd(val);
                       handleSeek(val);
                     }}
-                    className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                    className="w-full h-1.5 bg-slate-200 dark:bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-emerald-400"
                   />
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-zinc-800">
               <button
                 onClick={() => setIsTrimmingMode(false)}
-                className="px-4 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-full cursor-pointer"
+                className="px-4 py-1.5 text-xs font-semibold text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-900 rounded-full cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 onClick={handleApplyTrim}
                 disabled={isProcessingTrim || trimStart >= trimEnd}
-                className="flex items-center gap-1.5 px-5 py-1.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-full shadow-sm shadow-blue-500/20 cursor-pointer disabled:opacity-50"
+                className="flex items-center gap-1.5 px-5 py-1.5 text-xs font-bold text-white dark:text-black bg-blue-600 dark:bg-white hover:bg-blue-700 dark:hover:bg-zinc-200 rounded-full shadow-sm shadow-blue-500/20 dark:shadow-white/10 cursor-pointer disabled:opacity-50"
               >
                 <ScissorIcon className="w-3.5 h-3.5" />
                 <span>{isProcessingTrim ? `Trimming (${trimProgress}%)...` : 'Apply Trim'}</span>
@@ -486,15 +486,15 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
         {/* MAIN VIDEO PREVIEW CENTERPIECE */}
         <div
           ref={playerContainerRef}
-          className="group relative rounded-3xl bg-[#0F141C] border border-slate-800/90 shadow-2xl overflow-hidden flex flex-col ring-1 ring-white/5"
+          className="group relative rounded-3xl bg-[#0F141C] dark:bg-black border border-slate-800/90 dark:border-zinc-800 shadow-2xl overflow-hidden flex flex-col ring-1 ring-white/5"
         >
           {/* Top ambient spotlight */}
-          <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-48 bg-gradient-to-b from-blue-500/15 to-transparent blur-3xl pointer-events-none" />
+          <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-48 bg-gradient-to-b from-blue-500/15 dark:from-emerald-500/10 to-transparent blur-3xl pointer-events-none" />
 
           {/* Video Viewport */}
           <div
             onClick={handleTogglePlay}
-            className="relative w-full aspect-video flex items-center justify-center cursor-pointer bg-[#0F141C] select-none overflow-hidden"
+            className="relative w-full aspect-video flex items-center justify-center cursor-pointer bg-[#0F141C] dark:bg-black select-none overflow-hidden"
           >
             {videoUrl ? (
               <video
@@ -506,8 +506,8 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
                 className="w-full h-full object-contain"
               />
             ) : (
-              <div className="flex flex-col items-center text-slate-500">
-                <Film01Icon className="w-12 h-12 mb-2 animate-pulse text-blue-500" />
+              <div className="flex flex-col items-center text-slate-500 dark:text-zinc-500">
+                <Film01Icon className="w-12 h-12 mb-2 animate-pulse text-blue-500 dark:text-emerald-400" />
                 <p className="text-xs">Processing local recording...</p>
               </div>
             )}
@@ -515,7 +515,7 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
             {/* Ripple on play/pause */}
             {showPlayRipple && (
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="flex items-center justify-center w-20 h-20 rounded-full bg-blue-600/90 text-white shadow-2xl animate-ping opacity-75">
+                <div className="flex items-center justify-center w-20 h-20 rounded-full bg-blue-600/90 dark:bg-emerald-500/90 text-white dark:text-black shadow-2xl animate-ping opacity-75">
                   {isPlaying ? <PlayIcon className="w-8 h-8 fill-current" /> : <PauseIcon className="w-8 h-8 fill-current" />}
                 </div>
               </div>
@@ -524,7 +524,7 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
             {/* Center Big Play Button when paused */}
             {!isPlaying && videoUrl && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/25 group-hover:bg-black/35 transition-colors">
-                <div className="flex items-center justify-center w-16 h-16 rounded-full bg-blue-600 text-white shadow-xl shadow-blue-600/40 group-hover:scale-110 transition-transform">
+                <div className="flex items-center justify-center w-16 h-16 rounded-full bg-blue-600 dark:bg-white text-white dark:text-black shadow-xl shadow-blue-600/40 dark:shadow-white/20 group-hover:scale-110 transition-transform">
                   <PlayIcon className="w-7 h-7 fill-current ml-1" />
                 </div>
               </div>
@@ -532,7 +532,7 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
           </div>
 
           {/* Scrubber & Player Controls Bar */}
-          <div className="bg-[#141A24]/95 backdrop-blur-md p-4 text-white space-y-2 border-t border-slate-800/80">
+          <div className="bg-[#141A24]/95 dark:bg-zinc-950/95 backdrop-blur-md p-4 text-white space-y-2 border-t border-slate-800/80 dark:border-zinc-800">
             {/* Scrubber track */}
             <div className="relative flex items-center group/scrubber">
               <input
@@ -542,7 +542,7 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
                 step={0.1}
                 value={currentTime}
                 onChange={(e) => handleSeek(Number(e.target.value))}
-                className="w-full h-1.5 bg-slate-700/80 rounded-lg appearance-none cursor-pointer accent-blue-500 group-hover/scrubber:h-2 transition-all"
+                className="w-full h-1.5 bg-slate-700/80 dark:bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-blue-500 dark:accent-emerald-400 group-hover/scrubber:h-2 transition-all"
               />
             </div>
 
@@ -551,7 +551,7 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
               <div className="flex items-center gap-3">
                 <button
                   onClick={handleTogglePlay}
-                  className="p-2 bg-slate-800 hover:bg-slate-700 rounded-full text-white transition-colors cursor-pointer active:scale-90"
+                  className="p-2 bg-slate-800 dark:bg-zinc-900 hover:bg-slate-700 dark:hover:bg-zinc-800 rounded-full text-white transition-colors cursor-pointer active:scale-90"
                   title={isPlaying ? 'Pause (Space)' : 'Play (Space)'}
                 >
                   {isPlaying ? <PauseIcon className="w-4 h-4 fill-current" /> : <PlayIcon className="w-4 h-4 fill-current ml-0.5" />}
@@ -559,7 +559,7 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
 
                 <button
                   onClick={handleToggleMute}
-                  className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-full transition-colors cursor-pointer active:scale-90"
+                  className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 dark:hover:bg-zinc-900 rounded-full transition-colors cursor-pointer active:scale-90"
                   title={isMuted ? 'Unmute (M)' : 'Mute (M)'}
                 >
                   {isMuted ? <VolumeMute01Icon className="w-4 h-4 text-red-400" /> : <VolumeHighIcon className="w-4 h-4" />}
@@ -575,13 +575,15 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
               {/* Right Controls: Speed Selector, Fullscreen */}
               <div className="flex items-center gap-2">
                 {/* Speed Selector */}
-                <div className="flex items-center bg-slate-800/90 rounded-full p-0.5 text-xs font-semibold border border-slate-700/60">
+                <div className="flex items-center bg-slate-800/90 dark:bg-zinc-900 rounded-full p-0.5 text-xs font-semibold border border-slate-700/60 dark:border-zinc-800">
                   {[0.75, 1, 1.25, 1.5, 2].map((spd) => (
                     <button
                       key={spd}
                       onClick={() => handleSetSpeed(spd)}
                       className={`px-2 py-0.5 rounded-full transition-colors cursor-pointer ${
-                        playbackSpeed === spd ? 'bg-blue-600 text-white font-bold' : 'text-slate-400 hover:text-white'
+                        playbackSpeed === spd
+                          ? 'bg-blue-600 dark:bg-emerald-500 text-white dark:text-black font-bold'
+                          : 'text-slate-400 hover:text-white'
                       }`}
                     >
                       {spd}x
@@ -591,7 +593,7 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
 
                 <button
                   onClick={handleToggleFullscreen}
-                  className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-full transition-colors cursor-pointer active:scale-90"
+                  className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 dark:hover:bg-zinc-900 rounded-full transition-colors cursor-pointer active:scale-90"
                   title="Toggle Fullscreen (F)"
                 >
                   {isFullscreen ? <Minimize01Icon className="w-4 h-4" /> : <Maximize01Icon className="w-4 h-4" />}
@@ -602,12 +604,12 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
         </div>
 
         {/* BOTTOM QUICK FOOTER BAR */}
-        <div className="flex items-center justify-between text-xs text-slate-500 px-2">
+        <div className="flex items-center justify-between text-xs text-slate-500 dark:text-zinc-500 px-2">
           <div className="flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
             <span>Saved in local memory buffer. Click "Download Local" to save to disk.</span>
           </div>
-          <div className="font-mono text-[11px] text-slate-400 hidden sm:block">
+          <div className="font-mono text-[11px] text-slate-400 dark:text-zinc-500 hidden sm:block">
             Keyboard Shortcuts: Space (Play/Pause) · F (Fullscreen) · ← / → (Seek 5s)
           </div>
         </div>

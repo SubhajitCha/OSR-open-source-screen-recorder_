@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --font-system: system-ui, -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -12,6 +14,11 @@ body {
   color: #0F172A;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+html.dark body {
+  background-color: #09090B;
+  color: #F4F4F5;
 }
 
 code, kbd, pre, .font-mono {
@@ -30,7 +37,7 @@ button:active:not(:disabled), [role="button"]:active:not(:disabled) {
   transition-duration: 80ms;
 }
 
-/* Screenity Smooth Minimalist Scrollbars */
+/* Minimalist Scrollbars with Dark Mode Support */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -40,17 +47,46 @@ button:active:not(:disabled), [role="button"]:active:not(:disabled) {
   background: #F1F5F9;
 }
 
+html.dark ::-webkit-scrollbar-track {
+  background: #09090B;
+}
+
 ::-webkit-scrollbar-thumb {
   background: #CBD5E1;
   border-radius: 9999px;
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: #27272A;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: #94A3B8;
 }
 
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: #3F3F46;
+}
+
 /* Subtle glow utilities */
 .glow-blue {
   box-shadow: 0 0 20px -3px rgba(37, 99, 235, 0.25);
 }
+
+.glow-emerald {
+  box-shadow: 0 0 20px -3px rgba(16, 185, 129, 0.3);
+}
+
+.glow-zinc {
+  box-shadow: 0 0 20px -3px rgba(255, 255, 255, 0.08);
+}
+
+/* Outbid subtle background grid pattern */
+.outbid-grid {
+  background-size: 32px 32px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+}
+
 

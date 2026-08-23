@@ -368,7 +368,7 @@ export default function App() {
   }, [recordingState, audioSettings.micVolume, micMuted]);
 
   return (
-    <div id="screen-recorder-app" className="min-h-screen bg-[#F3F4F6] text-gray-900 flex flex-col font-sans selection:bg-red-500 selection:text-white">
+    <div id="screen-recorder-app" className="min-h-screen bg-[#F3F4F6] dark:bg-[#09090B] text-gray-900 dark:text-zinc-100 flex flex-col font-sans selection:bg-red-500 selection:text-white dark:selection:bg-emerald-500 dark:selection:text-black transition-colors duration-200">
       {/* Top Navigation Bar */}
       <Navbar
         activeView={activeView}
@@ -529,21 +529,13 @@ export default function App() {
       {toast && (
         <div
           id="app-toast-notification"
-          className="fixed top-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl shadow-xl border backdrop-blur-md max-w-md w-full mx-4 animate-in slide-in-from-top-4 fade-in duration-200 transition-all select-none"
-          style={{
-            backgroundColor:
-              toast.type === 'error'
-                ? 'rgba(254, 242, 242, 0.96)'
-                : toast.type === 'success'
-                ? 'rgba(240, 253, 244, 0.96)'
-                : 'rgba(248, 250, 252, 0.96)',
-            borderColor:
-              toast.type === 'error'
-                ? '#fca5a5'
-                : toast.type === 'success'
-                ? '#86efac'
-                : '#cbd5e1',
-          }}
+          className={`fixed top-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl shadow-xl border backdrop-blur-md max-w-md w-full mx-4 animate-in slide-in-from-top-4 fade-in duration-200 transition-all select-none ${
+            toast.type === 'error'
+              ? 'bg-red-50/95 dark:bg-zinc-950/95 border-red-200 dark:border-red-900/80 text-red-950 dark:text-red-300'
+              : toast.type === 'success'
+              ? 'bg-emerald-50/95 dark:bg-zinc-950/95 border-emerald-200 dark:border-emerald-900/80 text-emerald-950 dark:text-emerald-300'
+              : 'bg-slate-50/95 dark:bg-zinc-950/95 border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100'
+          }`}
         >
           <div
             className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
@@ -564,22 +556,14 @@ export default function App() {
           </div>
 
           <div className="flex-1 min-w-0">
-            <p
-              className={`text-xs font-semibold leading-snug ${
-                toast.type === 'error'
-                  ? 'text-red-950'
-                  : toast.type === 'success'
-                  ? 'text-emerald-950'
-                  : 'text-slate-900'
-              }`}
-            >
+            <p className="text-xs font-semibold leading-snug">
               {toast.message}
             </p>
           </div>
 
           <button
             onClick={() => setToast(null)}
-            className="p-1 text-gray-400 hover:text-gray-700 rounded-lg transition-colors cursor-pointer shrink-0"
+            className="p-1 text-gray-400 hover:text-gray-700 dark:text-zinc-500 dark:hover:text-zinc-200 rounded-lg transition-colors cursor-pointer shrink-0"
           >
             <Cancel01Icon className="w-4 h-4" />
           </button>

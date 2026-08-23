@@ -155,14 +155,14 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
         <div className="lg:col-span-8 flex flex-col space-y-3 min-h-0">
           
           {/* TOP PREVIEW CONTROL BAR (Width strictly locked to video preview column) */}
-          <div className="w-full bg-white px-3.5 py-2 rounded-2xl border border-slate-200/90 shadow-xs flex items-center justify-between gap-2 flex-wrap">
+          <div className="w-full bg-white dark:bg-zinc-950 px-3.5 py-2 rounded-2xl border border-slate-200/90 dark:border-zinc-800 shadow-xs flex items-center justify-between gap-2 flex-wrap transition-colors">
             
             {/* Capture Mode Tabs */}
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 hidden sm:inline">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 hidden sm:inline">
                 Mode:
               </span>
-              <div className="inline-flex items-center p-0.5 bg-slate-100/90 rounded-xl border border-slate-200/70 gap-1">
+              <div className="inline-flex items-center p-0.5 bg-slate-100/90 dark:bg-zinc-900 rounded-xl border border-slate-200/70 dark:border-zinc-800 gap-1">
                 {/* Screen + Camera */}
                 <button
                   id="mode-tab-screen-cam"
@@ -170,11 +170,11 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
                   onClick={() => onSelectMode('screen_cam')}
                   className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                     mode === 'screen_cam'
-                      ? 'bg-white text-blue-800 shadow-xs ring-1 ring-slate-200/80'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                      ? 'bg-white dark:bg-zinc-800 text-blue-800 dark:text-white shadow-xs ring-1 ring-slate-200/80 dark:ring-zinc-700 font-black'
+                      : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-100 hover:bg-white/60 dark:hover:bg-zinc-800/60'
                   }`}
                 >
-                  <Layers01Icon className={`w-3.5 h-3.5 ${mode === 'screen_cam' ? 'text-blue-700' : 'text-slate-500'}`} />
+                  <Layers01Icon className={`w-3.5 h-3.5 ${mode === 'screen_cam' ? 'text-blue-700 dark:text-emerald-400' : 'text-slate-500 dark:text-zinc-500'}`} />
                   <span>Screen + Camera</span>
                 </button>
 
@@ -185,11 +185,11 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
                   onClick={() => onSelectMode('screen')}
                   className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                     mode === 'screen'
-                      ? 'bg-white text-blue-800 shadow-xs ring-1 ring-slate-200/80'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                      ? 'bg-white dark:bg-zinc-800 text-blue-800 dark:text-white shadow-xs ring-1 ring-slate-200/80 dark:ring-zinc-700 font-black'
+                      : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-100 hover:bg-white/60 dark:hover:bg-zinc-800/60'
                   }`}
                 >
-                  <ComputerIcon className={`w-3.5 h-3.5 ${mode === 'screen' ? 'text-blue-700' : 'text-slate-500'}`} />
+                  <ComputerIcon className={`w-3.5 h-3.5 ${mode === 'screen' ? 'text-blue-700 dark:text-emerald-400' : 'text-slate-500 dark:text-zinc-500'}`} />
                   <span>Screen Only</span>
                 </button>
               </div>
@@ -197,7 +197,7 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
 
             {/* Premium Refined Audio Source Toggles */}
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 hidden sm:inline">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 hidden sm:inline">
                 Audio:
               </span>
 
@@ -207,28 +207,30 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
                 onClick={() => onUpdateAudioSettings({ includeMic: !audioSettings.includeMic })}
                 className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer active:scale-95 ${
                   audioSettings.includeMic
-                    ? 'bg-gradient-to-r from-blue-50 to-indigo-50/70 text-blue-800 border-blue-200/90 shadow-xs ring-1 ring-blue-500/15'
-                    : 'bg-slate-50/80 text-slate-500 border-slate-200/80 hover:bg-slate-100 hover:text-slate-700'
+                    ? 'bg-gradient-to-r from-blue-50 to-indigo-50/70 dark:from-emerald-950/40 dark:to-emerald-900/30 text-blue-800 dark:text-emerald-300 border-blue-200/90 dark:border-emerald-800/80 shadow-xs ring-1 ring-blue-500/15 dark:ring-emerald-500/20'
+                    : 'bg-slate-50/80 dark:bg-zinc-900 text-slate-500 dark:text-zinc-500 border-slate-200/80 dark:border-zinc-800 hover:bg-slate-100 dark:hover:bg-zinc-800 hover:text-slate-700 dark:hover:text-zinc-300'
                 }`}
                 title={audioSettings.includeMic ? 'Microphone enabled (Click to mute)' : 'Microphone disabled (Click to enable)'}
               >
                 <div
                   className={`p-0.5 rounded-md ${
-                    audioSettings.includeMic ? 'bg-blue-100 text-blue-700' : 'bg-slate-200/80 text-slate-500'
+                    audioSettings.includeMic
+                      ? 'bg-blue-100 dark:bg-emerald-900/60 text-blue-700 dark:text-emerald-300'
+                      : 'bg-slate-200/80 dark:bg-zinc-800 text-slate-500 dark:text-zinc-500'
                   }`}
                 >
                   {audioSettings.includeMic ? (
-                    <Mic01Icon className="w-3.5 h-3.5 text-blue-700" />
+                    <Mic01Icon className="w-3.5 h-3.5 text-blue-700 dark:text-emerald-400" />
                   ) : (
-                    <MicOff01Icon className="w-3.5 h-3.5 text-slate-500" />
+                    <MicOff01Icon className="w-3.5 h-3.5 text-slate-500 dark:text-zinc-500" />
                   )}
                 </div>
                 <span className="font-semibold">Mic</span>
                 <span
-                  className={`px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider ${
+                  className={`px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider font-mono ${
                     audioSettings.includeMic
-                      ? 'bg-blue-700 text-white shadow-xs'
-                      : 'bg-slate-200 text-slate-600'
+                      ? 'bg-blue-700 dark:bg-emerald-400 text-white dark:text-black shadow-xs'
+                      : 'bg-slate-200 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400'
                   }`}
                 >
                   {audioSettings.includeMic ? 'ON' : 'OFF'}
@@ -241,8 +243,8 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
                 onClick={() => onUpdateAudioSettings({ includeSystemAudio: !audioSettings.includeSystemAudio })}
                 className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer active:scale-95 ${
                   audioSettings.includeSystemAudio
-                    ? 'bg-gradient-to-r from-blue-50 to-indigo-50/70 text-blue-800 border-blue-200/90 shadow-xs ring-1 ring-blue-500/15'
-                    : 'bg-slate-50/80 text-slate-500 border-slate-200/80 hover:bg-slate-100 hover:text-slate-700'
+                    ? 'bg-gradient-to-r from-blue-50 to-indigo-50/70 dark:from-emerald-950/40 dark:to-emerald-900/30 text-blue-800 dark:text-emerald-300 border-blue-200/90 dark:border-emerald-800/80 shadow-xs ring-1 ring-blue-500/15 dark:ring-emerald-500/20'
+                    : 'bg-slate-50/80 dark:bg-zinc-900 text-slate-500 dark:text-zinc-500 border-slate-200/80 dark:border-zinc-800 hover:bg-slate-100 dark:hover:bg-zinc-800 hover:text-slate-700 dark:hover:text-zinc-300'
                 }`}
                 title={
                   audioSettings.includeSystemAudio
@@ -252,21 +254,23 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
               >
                 <div
                   className={`p-0.5 rounded-md ${
-                    audioSettings.includeSystemAudio ? 'bg-blue-100 text-blue-700' : 'bg-slate-200/80 text-slate-500'
+                    audioSettings.includeSystemAudio
+                      ? 'bg-blue-100 dark:bg-emerald-900/60 text-blue-700 dark:text-emerald-300'
+                      : 'bg-slate-200/80 dark:bg-zinc-800 text-slate-500 dark:text-zinc-500'
                   }`}
                 >
                   {audioSettings.includeSystemAudio ? (
-                    <VolumeHighIcon className="w-3.5 h-3.5 text-blue-700" />
+                    <VolumeHighIcon className="w-3.5 h-3.5 text-blue-700 dark:text-emerald-400" />
                   ) : (
-                    <VolumeMute01Icon className="w-3.5 h-3.5 text-slate-500" />
+                    <VolumeMute01Icon className="w-3.5 h-3.5 text-slate-500 dark:text-zinc-500" />
                   )}
                 </div>
                 <span className="font-semibold">System</span>
                 <span
-                  className={`px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider ${
+                  className={`px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider font-mono ${
                     audioSettings.includeSystemAudio
-                      ? 'bg-blue-700 text-white shadow-xs'
-                      : 'bg-slate-200 text-slate-600'
+                      ? 'bg-blue-700 dark:bg-emerald-400 text-white dark:text-black shadow-xs'
+                      : 'bg-slate-200 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400'
                   }`}
                 >
                   {audioSettings.includeSystemAudio ? 'ON' : 'OFF'}
@@ -282,10 +286,10 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
             onMouseMove={handleStageMouseMove}
             onMouseUp={() => setIsDraggingStagePip(false)}
             onMouseLeave={() => setIsDraggingStagePip(false)}
-            className="relative aspect-video w-full rounded-3xl bg-[#0B0F17] border border-slate-800/90 overflow-hidden shadow-lg flex flex-col justify-between p-4 sm:p-5 select-none ring-1 ring-white/5"
+            className="relative aspect-video w-full rounded-3xl bg-[#0B0F17] dark:bg-black border border-slate-800/90 dark:border-zinc-800 overflow-hidden shadow-lg flex flex-col justify-between p-4 sm:p-5 select-none ring-1 ring-white/5"
           >
             {/* Top ambient studio spotlight */}
-            <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-48 bg-gradient-to-b from-sky-500/15 via-blue-600/10 to-transparent blur-3xl pointer-events-none" />
+            <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-48 bg-gradient-to-b from-sky-500/15 via-blue-600/10 to-transparent dark:from-emerald-500/10 dark:via-emerald-900/5 blur-3xl pointer-events-none" />
 
             {/* Stage Background fine grid pattern */}
             <div
@@ -299,7 +303,7 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
 
             {/* Stage Header Info */}
             <div className="relative z-10 flex items-center justify-between">
-              <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-[#161D2B]/90 backdrop-blur-md border border-slate-700/60 text-slate-200 text-xs shadow-xs">
+              <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-[#161D2B]/90 dark:bg-zinc-900/90 backdrop-blur-md border border-slate-700/60 dark:border-zinc-800 text-slate-200 text-xs shadow-xs">
                 <span className={`w-2 h-2 rounded-full ${isRecording ? 'bg-rose-500 animate-ping' : 'bg-emerald-400'}`} />
                 <span className="font-mono font-medium text-[11px]">
                   {videoSettings.resolution === 'native' ? 'Native Screen' : videoSettings.resolution.toUpperCase()} · {videoSettings.fps} FPS
@@ -307,7 +311,7 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
               </div>
 
               <div className="flex items-center gap-2">
-                <span className="text-[11px] font-mono text-slate-400 bg-[#161D2B]/90 backdrop-blur-md px-2.5 py-0.5 rounded-full border border-slate-700/60">
+                <span className="text-[11px] font-mono text-slate-400 bg-[#161D2B]/90 dark:bg-zinc-900/90 backdrop-blur-md px-2.5 py-0.5 rounded-full border border-slate-700/60 dark:border-zinc-800">
                   Codec: {videoSettings.codec.split(';')[0]}
                 </span>
               </div>
@@ -315,11 +319,11 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
 
             {/* Stage Center Graphic / Target Representation */}
             <div className="relative z-10 flex flex-col items-center justify-center text-center p-4 space-y-1.5">
-              <div className="w-12 h-12 rounded-2xl bg-[#141B26] border border-slate-700/70 flex items-center justify-center text-sky-400 shadow-xl">
+              <div className="w-12 h-12 rounded-2xl bg-[#141B26] dark:bg-zinc-900 border border-slate-700/70 dark:border-zinc-800 flex items-center justify-center text-sky-400 dark:text-emerald-400 shadow-xl">
                 {mode === 'screen_cam' ? (
-                  <Layers01Icon className="w-6 h-6 text-sky-400" />
+                  <Layers01Icon className="w-6 h-6 text-sky-400 dark:text-emerald-400" />
                 ) : (
-                  <ComputerIcon className="w-6 h-6 text-sky-400" />
+                  <ComputerIcon className="w-6 h-6 text-sky-400 dark:text-emerald-400" />
                 )}
               </div>
               <h4 className="text-sm font-bold text-white tracking-tight">
@@ -341,15 +345,15 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
                     : pipConfig.shape === 'rounded'
                     ? 'rounded-2xl'
                     : 'rounded-xl'
-                } bg-gradient-to-b from-slate-800/90 via-slate-900/95 to-slate-950/95 border border-white/20 ring-2 ring-sky-500/50 shadow-2xl shadow-blue-950/60 backdrop-blur-md flex flex-col items-center justify-center text-white overflow-hidden group hover:ring-sky-400`}
+                } bg-gradient-to-b from-slate-800/90 via-slate-900/95 to-slate-950/95 dark:from-zinc-900 dark:to-zinc-950 border border-white/20 dark:border-zinc-700 ring-2 ring-sky-500/50 dark:ring-emerald-500/50 shadow-2xl shadow-blue-950/60 backdrop-blur-md flex flex-col items-center justify-center text-white overflow-hidden group hover:ring-sky-400 dark:hover:ring-emerald-400`}
               >
                 <div className="absolute inset-1 rounded-[inherit] border border-white/10 opacity-70 pointer-events-none" />
                 <div className="absolute top-2 right-2.5 w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-xs" />
                 <div className="absolute -top-6 -right-6 w-16 h-16 rounded-full bg-white/10 blur-sm pointer-events-none" />
 
                 <div className="relative z-10 flex flex-col items-center justify-center p-1 text-center">
-                  <div className="p-1.5 rounded-xl bg-sky-500/20 text-sky-300 border border-sky-400/30 mb-0.5 group-hover:scale-105 transition-transform">
-                    <Camera01Icon className="w-3.5 h-3.5 text-sky-300" />
+                  <div className="p-1.5 rounded-xl bg-sky-500/20 dark:bg-emerald-500/20 text-sky-300 dark:text-emerald-300 border border-sky-400/30 dark:border-emerald-400/30 mb-0.5 group-hover:scale-105 transition-transform">
+                    <Camera01Icon className="w-3.5 h-3.5 text-sky-300 dark:text-emerald-300" />
                   </div>
                   <span className="text-[10px] font-bold text-slate-200 tracking-tight">Camera</span>
                 </div>
@@ -371,21 +375,21 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
 
         {/* RIGHT COLUMN: Studio Settings & Action Panel (Compact layout fitted neatly in 100vh) */}
         <aside className="lg:col-span-4 flex flex-col">
-          <div className="bg-white p-4 sm:p-5 rounded-3xl border border-slate-200/90 shadow-xs space-y-4">
+          <div className="bg-white dark:bg-zinc-950 p-4 sm:p-5 rounded-3xl border border-slate-200/90 dark:border-zinc-800 shadow-xs space-y-4 transition-colors">
             
             {/* Framerate & Performance Settings */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">
                   Frame Rate (FPS)
                 </h4>
-                <span className="text-[10px] font-mono text-blue-800 font-bold bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200/60">
+                <span className="text-[10px] font-mono text-blue-800 dark:text-emerald-400 font-bold bg-blue-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full border border-blue-200/60 dark:border-emerald-800/60">
                   {videoSettings.fps} FPS
                 </span>
               </div>
 
               {/* Framerate Preset Selector Button Row */}
-              <div className="grid grid-cols-3 gap-1.5 p-1 bg-slate-100 rounded-2xl border border-slate-200/60">
+              <div className="grid grid-cols-3 gap-1.5 p-1 bg-slate-100 dark:bg-zinc-900 rounded-2xl border border-slate-200/60 dark:border-zinc-800">
                 {([60, 30, 24] as FrameRatePreset[]).map((fpsVal) => (
                   <button
                     key={fpsVal}
@@ -393,8 +397,8 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
                     onClick={() => onUpdateVideoSettings({ fps: fpsVal })}
                     className={`py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${
                       videoSettings.fps === fpsVal
-                        ? 'bg-white text-blue-800 shadow-xs ring-1 ring-slate-200/60'
-                        : 'text-slate-600 hover:text-slate-900'
+                        ? 'bg-white dark:bg-zinc-800 text-blue-800 dark:text-white shadow-xs ring-1 ring-slate-200/60 dark:ring-zinc-700'
+                        : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200'
                     }`}
                   >
                     {fpsVal} FPS
@@ -402,7 +406,7 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
                 ))}
               </div>
 
-              <div className="flex items-center justify-between text-[11px] text-slate-400 px-1 font-mono">
+              <div className="flex items-center justify-between text-[11px] text-slate-400 dark:text-zinc-500 px-1 font-mono">
                 <span>{videoSettings.fps === 60 ? 'Ultra Smooth' : videoSettings.fps === 30 ? 'Standard Video' : 'Cinematic Rate'}</span>
                 <span>~{videoSettings.fps === 60 ? '6.0' : videoSettings.fps === 30 ? '3.5' : '2.5'} Mbps</span>
               </div>
@@ -410,20 +414,20 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
 
             {/* Camera PIP Options if mode === screen_cam */}
             {mode === 'screen_cam' && (
-              <div className="space-y-3 pt-3 border-t border-slate-100">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+              <div className="space-y-3 pt-3 border-t border-slate-100 dark:border-zinc-800/80">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">
                   Camera Frame
                 </h4>
 
                 {/* Position Preset Selector */}
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="font-semibold text-slate-700 text-xs">Placement</span>
-                    <span className="text-[10px] text-slate-400 font-mono capitalize">
+                    <span className="font-semibold text-slate-700 dark:text-zinc-300 text-xs">Placement</span>
+                    <span className="text-[10px] text-slate-400 dark:text-zinc-500 font-mono capitalize">
                       {pipConfig.position === 'custom' ? 'Custom Drag' : pipConfig.position.replace('-', ' ')}
                     </span>
                   </div>
-                  <div className="grid grid-cols-4 gap-1 p-0.5 bg-slate-100 rounded-2xl border border-slate-200/60">
+                  <div className="grid grid-cols-4 gap-1 p-0.5 bg-slate-100 dark:bg-zinc-900 rounded-2xl border border-slate-200/60 dark:border-zinc-800">
                     {[
                       { id: 'top-left', label: 'TL' },
                       { id: 'top-right', label: 'TR' },
@@ -436,8 +440,8 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
                         onClick={() => onUpdatePipConfig({ position: pos.id as PipPosition, customX: undefined, customY: undefined })}
                         className={`py-1 text-[11px] font-bold rounded-xl transition-all cursor-pointer ${
                           pipConfig.position === pos.id
-                            ? 'bg-white text-blue-800 shadow-xs'
-                            : 'text-slate-500 hover:text-slate-900'
+                            ? 'bg-white dark:bg-zinc-800 text-blue-800 dark:text-white shadow-xs'
+                            : 'text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-100'
                         }`}
                         title={pos.id.replace('-', ' ')}
                       >
@@ -451,15 +455,17 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
                 <div className="grid grid-cols-2 gap-2">
                   {/* Shape Selector */}
                   <div className="space-y-1">
-                    <span className="text-[11px] font-semibold text-slate-700">Shape</span>
-                    <div className="flex items-center p-0.5 bg-slate-100 rounded-xl border border-slate-200/60 justify-between">
+                    <span className="text-[11px] font-semibold text-slate-700 dark:text-zinc-300">Shape</span>
+                    <div className="flex items-center p-0.5 bg-slate-100 dark:bg-zinc-900 rounded-xl border border-slate-200/60 dark:border-zinc-800 justify-between">
                       {(['circle', 'rounded', 'square'] as const).map((sh) => (
                         <button
                           key={sh}
                           type="button"
                           onClick={() => onUpdatePipConfig({ shape: sh })}
                           className={`flex-1 py-0.5 text-[10px] font-semibold rounded-lg capitalize transition-all cursor-pointer ${
-                            pipConfig.shape === sh ? 'bg-white text-slate-900 shadow-xs font-bold' : 'text-slate-500 hover:text-slate-900'
+                            pipConfig.shape === sh
+                              ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-xs font-bold'
+                              : 'text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-100'
                           }`}
                         >
                           {sh === 'rounded' ? 'Rnd' : sh === 'circle' ? 'Circ' : 'Sqr'}
@@ -470,15 +476,17 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
 
                   {/* Size Selector */}
                   <div className="space-y-1">
-                    <span className="text-[11px] font-semibold text-slate-700">Size</span>
-                    <div className="flex items-center p-0.5 bg-slate-100 rounded-xl border border-slate-200/60 justify-between">
+                    <span className="text-[11px] font-semibold text-slate-700 dark:text-zinc-300">Size</span>
+                    <div className="flex items-center p-0.5 bg-slate-100 dark:bg-zinc-900 rounded-xl border border-slate-200/60 dark:border-zinc-800 justify-between">
                       {(['small', 'medium', 'large'] as const).map((sz) => (
                         <button
                           key={sz}
                           type="button"
                           onClick={() => onUpdatePipConfig({ size: sz })}
                           className={`flex-1 py-0.5 text-[10px] font-semibold rounded-lg capitalize transition-all cursor-pointer ${
-                            pipConfig.size === sz ? 'bg-white text-slate-900 shadow-xs font-bold' : 'text-slate-500 hover:text-slate-900'
+                            pipConfig.size === sz
+                              ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-xs font-bold'
+                              : 'text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-100'
                           }`}
                         >
                           {sz === 'small' ? 'S' : sz === 'medium' ? 'M' : 'L'}
@@ -490,16 +498,16 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
 
                 {/* Mirror Camera Toggle */}
                 <div className="flex items-center justify-between text-xs pt-0.5">
-                  <span className="font-semibold text-slate-700 text-xs">Mirror Camera</span>
+                  <span className="font-semibold text-slate-700 dark:text-zinc-300 text-xs">Mirror Camera</span>
                   <button
                     type="button"
                     onClick={() => onUpdatePipConfig({ mirror: !pipConfig.mirror })}
                     className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                      pipConfig.mirror ? 'bg-blue-700' : 'bg-slate-200'
+                      pipConfig.mirror ? 'bg-blue-700 dark:bg-emerald-500' : 'bg-slate-200 dark:bg-zinc-800'
                     }`}
                   >
                     <span
-                      className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-xs ring-0 transition duration-200 ease-in-out ${
+                      className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white dark:bg-zinc-100 shadow-xs ring-0 transition duration-200 ease-in-out ${
                         pipConfig.mirror ? 'translate-x-4' : 'translate-x-0'
                       }`}
                     />
@@ -509,13 +517,13 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
             )}
 
             {/* Countdown Delay Setting */}
-            <div className="space-y-1.5 pt-2.5 border-t border-slate-100">
+            <div className="space-y-1.5 pt-2.5 border-t border-slate-100 dark:border-zinc-800/80">
               <div className="flex items-center justify-between text-xs">
-                <span className="font-semibold text-slate-700 text-xs">Countdown Delay</span>
+                <span className="font-semibold text-slate-700 dark:text-zinc-300 text-xs">Countdown Delay</span>
                 <select
                   value={videoSettings.countdownSeconds}
                   onChange={(e) => onUpdateVideoSettings({ countdownSeconds: Number(e.target.value) as 0 | 3 | 5 | 10 })}
-                  className="px-2.5 py-1 text-xs bg-slate-50 border border-slate-200 rounded-full text-slate-800 font-semibold focus:outline-none focus:border-blue-500"
+                  className="px-2.5 py-1 text-xs bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-full text-slate-800 dark:text-zinc-200 font-semibold focus:outline-none focus:border-blue-500 dark:focus:border-emerald-500"
                 >
                   <option value={0}>Instant (0s)</option>
                   <option value={3}>3 Seconds</option>
@@ -525,7 +533,7 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
               </div>
             </div>
 
-            {/* Start / Stop Recording Main Button with Modern Gradient Styling */}
+            {/* Start / Stop Recording Main Button with Outbid Contrast Styling */}
             <div className="pt-2">
               {isRecording ? (
                 <div className="space-y-2">
@@ -545,16 +553,16 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
                     <button
                       id="btn-toggle-pause-dashboard"
                       onClick={onTogglePause}
-                      className="w-full flex items-center justify-center gap-2 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl font-semibold text-xs border border-slate-200 transition-all cursor-pointer"
+                      className="w-full flex items-center justify-center gap-2 px-3 py-1.5 bg-slate-100 dark:bg-zinc-900 hover:bg-slate-200 dark:hover:bg-zinc-800 text-slate-800 dark:text-zinc-200 rounded-xl font-semibold text-xs border border-slate-200 dark:border-zinc-800 transition-all cursor-pointer"
                     >
                       {recordingState === 'paused' ? (
                         <>
-                          <PlayIcon className="w-3.5 h-3.5 fill-current text-blue-700" />
+                          <PlayIcon className="w-3.5 h-3.5 fill-current text-blue-700 dark:text-emerald-400" />
                           <span>Resume Recording (Alt + P)</span>
                         </>
                       ) : (
                         <>
-                          <PauseIcon className="w-3.5 h-3.5 text-slate-700" />
+                          <PauseIcon className="w-3.5 h-3.5 text-slate-700 dark:text-zinc-300" />
                           <span>Pause Recording (Alt + P)</span>
                         </>
                       )}
@@ -565,19 +573,19 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
                 <button
                   id="btn-start-recording-main"
                   onClick={onStartRecording}
-                  className="w-full relative group overflow-hidden flex items-center justify-between px-5 py-3.5 bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 hover:from-sky-700 hover:via-blue-700 hover:to-indigo-700 active:scale-[0.98] text-white rounded-2xl font-bold text-sm shadow-md shadow-blue-500/25 hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-200 cursor-pointer"
+                  className="w-full relative group overflow-hidden flex items-center justify-between px-5 py-3.5 bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 dark:from-white dark:via-zinc-100 dark:to-white hover:from-sky-700 hover:via-blue-700 hover:to-indigo-700 dark:hover:bg-zinc-200 text-white dark:text-black active:scale-[0.98] rounded-2xl font-black text-sm shadow-md shadow-blue-500/25 dark:shadow-white/10 transition-all duration-200 cursor-pointer"
                 >
                   {/* Gradient Shimmer Highlight Effect */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent -translate-x-full group-hover:translate-x-full duration-1000 transition-transform pointer-events-none" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 dark:via-black/5 to-transparent -translate-x-full group-hover:translate-x-full duration-1000 transition-transform pointer-events-none" />
 
                   <div className="relative flex items-center gap-2.5">
-                    <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
-                      <PlayIcon className="w-3.5 h-3.5 fill-current text-white ml-0.5" />
+                    <div className="w-5 h-5 rounded-full bg-white/20 dark:bg-black/10 flex items-center justify-center">
+                      <PlayIcon className="w-3.5 h-3.5 fill-current text-white dark:text-black ml-0.5" />
                     </div>
                     <span className="font-black tracking-tight">Start Recording</span>
                   </div>
                   
-                  <div className="relative flex items-center gap-1 bg-white/20 px-2 py-0.5 rounded-lg text-xs text-white font-mono font-bold shadow-xs">
+                  <div className="relative flex items-center gap-1 bg-white/20 dark:bg-black/10 px-2 py-0.5 rounded-lg text-xs text-white dark:text-black font-mono font-bold shadow-xs">
                     <span>Alt + R</span>
                   </div>
                 </button>

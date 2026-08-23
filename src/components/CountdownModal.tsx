@@ -75,13 +75,13 @@ export const CountdownModal: React.FC<CountdownModalProps> = ({
       id="countdown-modal-overlay"
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-md transition-all duration-300 select-none animate-in fade-in duration-200"
     >
-      <div className="relative flex flex-col items-center justify-center p-8 sm:p-10 text-center bg-white/95 backdrop-blur-xl border border-slate-200/80 rounded-3xl shadow-2xl max-w-sm w-full mx-4 overflow-hidden">
+      <div className="relative flex flex-col items-center justify-center p-8 sm:p-10 text-center bg-white/95 dark:bg-zinc-950/95 backdrop-blur-xl border border-slate-200/80 dark:border-zinc-800 rounded-3xl shadow-2xl max-w-sm w-full mx-4 overflow-hidden transition-colors">
         {/* Screenity Decorative ambient glow */}
-        <div className="absolute -top-24 -left-24 w-48 h-48 bg-blue-500/15 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-indigo-500/15 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -top-24 -left-24 w-48 h-48 bg-blue-500/15 dark:bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-indigo-500/15 dark:bg-zinc-700/20 rounded-full blur-3xl pointer-events-none" />
 
         {/* Top badge */}
-        <div className="flex items-center gap-1.5 px-3.5 py-1 mb-6 rounded-full bg-blue-50 border border-blue-200/80 text-blue-600 text-xs font-bold tracking-wide">
+        <div className="flex items-center gap-1.5 px-3.5 py-1 mb-6 rounded-full bg-blue-50 dark:bg-zinc-900 border border-blue-200/80 dark:border-zinc-800 text-blue-600 dark:text-emerald-400 text-xs font-bold tracking-wide">
           <SparklesIcon className="w-3.5 h-3.5 animate-spin" />
           <span>STARTING IN</span>
         </div>
@@ -96,7 +96,7 @@ export const CountdownModal: React.FC<CountdownModalProps> = ({
               r={radius}
               stroke="currentColor"
               strokeWidth="6"
-              className="text-slate-100"
+              className="text-slate-100 dark:text-zinc-800"
               fill="transparent"
             />
             <circle
@@ -105,7 +105,7 @@ export const CountdownModal: React.FC<CountdownModalProps> = ({
               r={radius}
               stroke="currentColor"
               strokeWidth="6"
-              className="text-blue-600 transition-all duration-700 ease-out"
+              className="text-blue-600 dark:text-emerald-400 transition-all duration-700 ease-out"
               fill="transparent"
               strokeDasharray={circumference}
               strokeDashoffset={strokeDashoffset}
@@ -122,7 +122,7 @@ export const CountdownModal: React.FC<CountdownModalProps> = ({
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 1.4, opacity: 0, y: -10 }}
                 transition={{ type: 'spring', stiffness: 450, damping: 25 }}
-                className="text-6xl font-black tracking-tighter text-slate-900 font-mono"
+                className="text-6xl font-black tracking-tighter text-slate-900 dark:text-zinc-100 font-mono"
               >
                 {currentCount}
               </motion.span>
@@ -131,14 +131,14 @@ export const CountdownModal: React.FC<CountdownModalProps> = ({
         </div>
 
         {/* Action button */}
-        <p className="text-xs text-slate-500 mb-5 max-w-[200px]">
+        <p className="text-xs text-slate-500 dark:text-zinc-400 mb-5 max-w-[200px]">
           Get ready! Your screen and camera will start recording automatically.
         </p>
 
         <button
           id="btn-cancel-countdown"
           onClick={onCancel}
-          className="flex items-center gap-1.5 px-5 py-2 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-full transition-all cursor-pointer border border-slate-200 active:scale-95"
+          className="flex items-center gap-1.5 px-5 py-2 text-xs font-bold text-slate-700 dark:text-zinc-300 bg-slate-100 dark:bg-zinc-900 hover:bg-slate-200 dark:hover:bg-zinc-800 rounded-full transition-all cursor-pointer border border-slate-200 dark:border-zinc-800 active:scale-95"
         >
           <Cancel01Icon className="w-3.5 h-3.5" />
           <span>Cancel (Esc)</span>

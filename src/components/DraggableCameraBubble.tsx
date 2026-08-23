@@ -37,10 +37,13 @@ export const DraggableCameraBubble: React.FC<DraggableCameraBubbleProps> = ({
   const { width, height } = getDimensions();
 
   const [position, setPosition] = useState<{ x: number; y: number }>(() => {
-    const padding = 24;
+    const paddingX = Math.round(window.innerWidth * 0.03);
+    const paddingY = Math.round(window.innerHeight * 0.04);
+    const w = 190;
+    const h = 190;
     return {
-      x: window.innerWidth - 214,
-      y: window.innerHeight - 280,
+      x: window.innerWidth - w - paddingX,
+      y: window.innerHeight - h - paddingY,
     };
   });
 
@@ -55,18 +58,19 @@ export const DraggableCameraBubble: React.FC<DraggableCameraBubbleProps> = ({
   // Sync position from preset config if not actively dragging
   useEffect(() => {
     if (isDragging) return;
-    const padding = 24;
+    const paddingX = Math.round(window.innerWidth * 0.03);
+    const paddingY = Math.round(window.innerHeight * 0.04);
     const w = width;
     const h = height;
 
     if (pipConfig.position === 'top-left') {
-      setPosition({ x: padding, y: padding });
+      setPosition({ x: paddingX, y: paddingY });
     } else if (pipConfig.position === 'top-right') {
-      setPosition({ x: window.innerWidth - w - padding, y: padding });
+      setPosition({ x: window.innerWidth - w - paddingX, y: paddingY });
     } else if (pipConfig.position === 'bottom-left') {
-      setPosition({ x: padding, y: Math.max(padding, window.innerHeight - h - padding - 80) });
+      setPosition({ x: paddingX, y: Math.max(paddingY, window.innerHeight - h - paddingY) });
     } else if (pipConfig.position === 'bottom-right') {
-      setPosition({ x: Math.max(padding, window.innerWidth - w - padding), y: Math.max(padding, window.innerHeight - h - padding - 80) });
+      setPosition({ x: Math.max(paddingX, window.innerWidth - w - paddingX), y: Math.max(paddingY, window.innerHeight - h - paddingY) });
     } else if (pipConfig.position === 'custom' && pipConfig.customX !== undefined && pipConfig.customY !== undefined) {
       setPosition({
         x: Math.max(10, Math.min(window.innerWidth - w - 10, Math.round((pipConfig.customX / 100) * (window.innerWidth - w)))),

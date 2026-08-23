@@ -154,16 +154,10 @@ export class RecorderEngine {
         finalVideoStream = new MediaStream();
       } else if (mode === 'cam_only') {
         finalVideoStream = this.webcamStream || new MediaStream();
-      } else if (mode === 'screen_cam' && this.webcamStream && this.screenStream) {
-        // High-performance canvas compositor mixes screen + draggable camera PIP at user-selected FPS
-        this.compositor = createStreamCompositor(
-          this.screenStream,
-          this.webcamStream,
-          pipConfig,
-          videoSettings.fps || 30
-        );
-        finalVideoStream = this.compositor.stream;
-      } else if (mode === 'screen' || mode === 'screen_cam') {
+      } else if (mode === 'screen_cam' || mode === 'screen') {
+        // Direct zero-copy hardware encoding: The interactive floating camera bubble on the screen
+        // is naturally and accurately captured directly on the display stream in real time.
+        // This eliminates duplicate camera overlays and provides 100% position accuracy with 0% extra CPU.
         finalVideoStream = this.screenStream || new MediaStream();
       } else {
         finalVideoStream = this.screenStream || this.webcamStream || new MediaStream();

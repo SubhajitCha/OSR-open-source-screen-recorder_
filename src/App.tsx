@@ -478,9 +478,9 @@ export default function App() {
         />
       )}
 
-      {/* Real-time Floating Camera Bubble when in Camera-Only mode */}
+      {/* Real-time Draggable Floating Camera Bubble when in Screen + Camera or Camera-Only mode */}
       {(recordingState === 'recording' || recordingState === 'paused') &&
-        mode === 'cam_only' &&
+        (mode === 'screen_cam' || mode === 'cam_only') &&
         activeWebcamStream && (
           <DraggableCameraBubble
             stream={activeWebcamStream}

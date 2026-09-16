@@ -34,12 +34,17 @@ interface RecordingsLibraryProps {
   onRecordingDeleted?: () => void;
 }
 
-export const RecordingsLibrary: React.FC<RecordingsLibraryProps> = ({ onOpenStudio, onRecordingDeleted }) => {
+export const RecordingsLibrary: React.FC<RecordingsLibraryProps> = ({
+  onOpenStudio,
+  onRecordingDeleted,
+  onSelectRecordingForEdit,
+}) => {
   const [recordings, setRecordings] = useState<SavedRecording[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedTag, setSelectedTag] = useState<string>('all');
   const [activePlayback, setActivePlayback] = useState<SavedRecording | null>(null);
+  const [playbackUrl, setPlaybackUrl] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState<string>('');
 
@@ -75,6 +80,18 @@ export const RecordingsLibrary: React.FC<RecordingsLibraryProps> = ({ onOpenStud
   useEffect(() => {
     loadData();
   }, []);
+
+  useEffect(() => {
+    if (activePlayback?.blob) {
+      const url = URL.createObjectURL(activePlayback.blob);
+      setPlaybackUrl(url);
+      return () => {
+        URL.revokeObjectURL(url);
+      };
+    } else {
+      setPlaybackUrl(null);
+    }
+  }, [activePlayback]);
 
   const confirmDeleteSingle = async () => {
     if (!deleteTarget) return;
@@ -393,13 +410,26 @@ export const RecordingsLibrary: React.FC<RecordingsLibraryProps> = ({ onOpenStud
 
                 {/* Actions Footer */}
                 <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-zinc-800/80">
-                  <button
-                    onClick={() => setActivePlayback(rec)}
-                    className="flex items-center gap-1.5 text-xs font-bold text-blue-600 dark:text-emerald-400 hover:text-blue-700 dark:hover:text-emerald-300 cursor-pointer transition-colors"
-                  >
-                    <PlayIcon className="w-3.5 h-3.5 fill-current" />
-                    <span>Watch</span>
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setActivePlayback(rec)}
+                      className="flex items-center gap-1 text-xs font-bold text-blue-600 dark:text-emerald-400 hover:text-blue-700 dark:hover:text-emerald-300 cursor-pointer transition-colors"
+                    >
+                      <PlayIcon className="w-3.5 h-3.5 fill-current" />
+                      <span>Watch</span>
+                    </button>
+
+                    {onSelectRecordingForEdit && (
+                      <button
+                        onClick={() => onSelectRecordingForEdit(rec)}
+                        className="flex items-center gap-1 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 cursor-pointer transition-colors bg-indigo-50 dark:bg-indigo-950/60 px-2 py-1 rounded-lg border border-indigo-200/60 dark:border-indigo-800/60"
+                        title="Open in Screen Studio Editor with auto-zoom & background effects"
+                      >
+                        <PencilEdit02Icon className="w-3 h-3" />
+                        <span>Studio</span>
+                      </button>
+                    )}
+                  </div>
 
                   <div className="flex items-center gap-1">
                     <button
@@ -533,9 +563,9 @@ export const RecordingsLibrary: React.FC<RecordingsLibraryProps> = ({ onOpenStud
             </div>
 
             <div className="flex-1 p-6 flex flex-col items-center justify-center bg-slate-950">
-              {activePlayback.blob && (
+              {playbackUrl && (
                 <video
-                  src={URL.createObjectURL(activePlayback.blob)}
+                  src={playbackUrl}
                   controls
                   autoPlay
                   className="w-full max-h-[60vh] object-contain rounded-2xl border-2 border-slate-800 dark:border-zinc-800"
@@ -545,16 +575,31 @@ export const RecordingsLibrary: React.FC<RecordingsLibraryProps> = ({ onOpenStud
 
             <div className="flex items-center justify-between px-6 py-3 border-t border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-xs">
               <span className="text-slate-500 dark:text-zinc-400">Recorded offline with OSR Open Source Recorder</span>
-              <button
-                onClick={() => {
-                  const ext = activePlayback.mimeType.includes('mp4') ? 'mp4' : 'webm';
-                  downloadBlob(activePlayback.blob, `${activePlayback.title.replace(/\s+/g, '_')}.${ext}`);
-                }}
-                className="flex items-center gap-2 px-5 py-2 font-black text-white dark:text-black bg-blue-600 dark:bg-white hover:bg-blue-700 dark:hover:bg-zinc-200 rounded-full shadow-sm shadow-blue-500/25 dark:shadow-white/10 cursor-pointer"
-              >
-                <Download01Icon className="w-4 h-4" />
-                <span>Download File</span>
-              </button>
+              <div className="flex items-center gap-2">
+                {onSelectRecordingForEdit && (
+                  <button
+                    onClick={() => {
+                      const rec = activePlayback;
+                      setActivePlayback(null);
+                      onSelectRecordingForEdit(rec);
+                    }}
+                    className="flex items-center gap-1.5 px-4 py-2 font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-full shadow-sm cursor-pointer"
+                  >
+                    <PencilEdit02Icon className="w-4 h-4" />
+                    <span>Open in Studio Editor</span>
+                  </button>
+                )}
+                <button
+                  onClick={() => {
+                    const ext = activePlayback.mimeType.includes('mp4') ? 'mp4' : 'webm';
+                    downloadBlob(activePlayback.blob, `${activePlayback.title.replace(/\s+/g, '_')}.${ext}`);
+                  }}
+                  className="flex items-center gap-2 px-5 py-2 font-bold text-white dark:text-black bg-blue-600 dark:bg-white hover:bg-blue-700 dark:hover:bg-zinc-200 rounded-full shadow-sm shadow-blue-500/25 dark:shadow-white/10 cursor-pointer"
+                >
+                  <Download01Icon className="w-4 h-4" />
+                  <span>Download File</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>

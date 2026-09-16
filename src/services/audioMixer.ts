@@ -17,6 +17,23 @@ export function createAudioMixer(
 ): AudioMixerController {
   const AudioCtxClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
   const audioCtx = new AudioCtxClass();
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume().catch(() => {});
+  }
+
+  // Ensure AudioContext is immediately revived if browser attempts to suspend background audio
+  audioCtx.onstatechange = () => {
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume().catch(() => {});
+    }
+  };
+
+  const handleAudioVisibility = () => {
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume().catch(() => {});
+    }
+  };
+  document.addEventListener('visibilitychange', handleAudioVisibility);
 
   const destination = audioCtx.createMediaStreamDestination();
   const analyserNode = audioCtx.createAnalyser();
@@ -94,13 +111,38 @@ export function createAudioMixer(
 
   const cleanup = () => {
     try {
-      if (micSource) micSource.disconnect();
-      if (micGain) micGain.disconnect();
-      if (systemSource) systemSource.disconnect();
-      if (systemGain) systemGain.disconnect();
-      analyserNode.disconnect();
+      document.removeEventListener('visibilitychange', handleAudioVisibility);
+      if (micSource) {
+        try {
+          micSource.disconnect();
+        } catch (_) {}
+      }
+      if (micGain) {
+        try {
+          micGain.disconnect();
+        } catch (_) {}
+      }
+      if (systemSource) {
+        try {
+          systemSource.disconnect();
+        } catch (_) {}
+      }
+      if (systemGain) {
+        try {
+          systemGain.disconnect();
+        } catch (_) {}
+      }
+      try {
+        analyserNode.disconnect();
+      } catch (_) {}
+      try {
+        destination.stream.getTracks().forEach((track) => {
+          track.enabled = false;
+          track.stop();
+        });
+      } catch (_) {}
       if (audioCtx.state !== 'closed') {
-        audioCtx.close();
+        audioCtx.close().catch(() => {});
       }
     } catch (err) {
       console.warn('Error during audio mixer cleanup:', err);

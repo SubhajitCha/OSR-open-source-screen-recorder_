@@ -13,26 +13,35 @@ import {
   VideoSettings,
   ActiveView,
   PipPosition,
+  SavedRecording,
+  RecordingMetadata,
+  Project,
+  CompositionLayout,
+  RecorderAspectRatio,
+  RecorderBackgroundConfig,
+  SmartRecordingConfig,
+  PrompterConfig,
 } from './types';
 import { RecorderEngine } from './services/recorderEngine';
-import { getAllRecordings } from './services/db';
+import { getAllRecordings, saveRecordingToDB, generateThumbnailFromBlob, saveActiveEditingSession, getActiveEditingSession, clearActiveEditingSession } from './services/db';
 import { getBestSupportedVideoMimeType } from './services/browserCapabilities';
 import { logbook } from './services/logbook';
 import { Navbar } from './components/Navbar';
 import { RecorderDashboard } from './components/RecorderDashboard';
-import { LiveRecordingOverlay } from './components/LiveRecordingOverlay';
-import { DraggableCameraBubble } from './components/DraggableCameraBubble';
-import { PostRecordingStudio } from './components/PostRecordingStudio';
+import { VideoEditor } from './components/editor/VideoEditor';
 import { RecordingsLibrary } from './components/RecordingsLibrary';
 import { ServicesStatusPage } from './components/ServicesStatusPage';
 import { CountdownModal } from './components/CountdownModal';
 import { SettingsModal } from './components/SettingsModal';
 import { TechDocsPage } from './components/TechDocsPage';
 import { LogbookPage } from './components/LogbookPage';
+import { RecordingReviewScreen } from './components/recorder/RecordingReviewScreen';
+import { ModeSelectionScreen } from './components/recorder/ModeSelectionScreen';
 
 export default function App() {
   // Navigation & Views
   const [activeView, setActiveView] = useState<ActiveView>('studio');
+  const [hasSelectedInitialMode, setHasSelectedInitialMode] = useState<boolean>(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
   const [recordingsCount, setRecordingsCount] = useState<number>(0);
 
@@ -52,32 +61,119 @@ export default function App() {
   }, []);
 
   // Recording State
-  const [recordingState, setRecordingState] = useState<'idle' | 'countdown' | 'recording' | 'paused' | 'review'>('idle');
+  const [recordingState, setRecordingState] = useState<'idle' | 'countdown' | 'recording' | 'paused' | 'review' | 'editing'>('idle');
+  const [isStoppingRecording, setIsStoppingRecording] = useState<boolean>(false);
   const [durationSeconds, setDurationSeconds] = useState<number>(0);
   const [bytesRecorded, setBytesRecorded] = useState<number>(0);
   const [bitrateMbps, setBitrateMbps] = useState<number>(0);
   const [micMuted, setMicMuted] = useState<boolean>(false);
   const [activeWebcamStream, setActiveWebcamStream] = useState<MediaStream | null>(null);
+  const [activeScreenStream, setActiveScreenStream] = useState<MediaStream | null>(null);
+  const [activeMicStream, setActiveMicStream] = useState<MediaStream | null>(null);
 
-  // Finished recording output data
+  // Synchronous stream refs to ensure zero-leak hardware teardown regardless of React closure state
+  const activeWebcamStreamRef = useRef<MediaStream | null>(null);
+  const activeScreenStreamRef = useRef<MediaStream | null>(null);
+  const activeMicStreamRef = useRef<MediaStream | null>(null);
+
+  const updateActiveWebcamStream = useCallback((stream: MediaStream | null) => {
+    activeWebcamStreamRef.current = stream;
+    setActiveWebcamStream(stream);
+  }, []);
+
+  const updateActiveScreenStream = useCallback((stream: MediaStream | null) => {
+    activeScreenStreamRef.current = stream;
+    setActiveScreenStream(stream);
+  }, []);
+
+  const updateActiveMicStream = useCallback((stream: MediaStream | null) => {
+    activeMicStreamRef.current = stream;
+    setActiveMicStream(stream);
+  }, []);
+
+  // Master teardown function: guarantees total revocation of camera, screen, and mic hardware handles
+  const stopAllActiveMediaAccess = useCallback(() => {
+    const streamsToStop = [
+      activeWebcamStreamRef.current,
+      activeScreenStreamRef.current,
+      activeMicStreamRef.current,
+      activeWebcamStream,
+      activeScreenStream,
+      activeMicStream,
+    ];
+
+    streamsToStop.forEach((stream) => {
+      if (stream) {
+        stream.getTracks().forEach((track) => {
+          try {
+            track.onended = null;
+            track.enabled = false;
+            track.stop();
+          } catch (_) {}
+        });
+      }
+    });
+
+    activeWebcamStreamRef.current = null;
+    activeScreenStreamRef.current = null;
+    activeMicStreamRef.current = null;
+
+    setActiveWebcamStream(null);
+    setActiveScreenStream(null);
+    setActiveMicStream(null);
+
+    if (recorderEngineRef.current) {
+      try {
+        recorderEngineRef.current.cleanupStreams();
+      } catch (_) {}
+    }
+  }, [activeWebcamStream, activeScreenStream, activeMicStream]);
+
+  // Finished recording output data & Project model
   const [lastRecordingData, setLastRecordingData] = useState<{
     blob: Blob;
     duration: number;
     mimeType: string;
     bookmarks: VideoBookmark[];
+    metadata?: RecordingMetadata;
+    project?: Project;
   } | null>(null);
 
-  // Configuration States
+  // Composition States for Clean 3-Zone Studio UX
+  const [compositionLayout, setCompositionLayout] = useState<CompositionLayout>('overlay');
+  const [aspectRatio, setAspectRatio] = useState<RecorderAspectRatio>('16:9');
+  const [background, setBackground] = useState<RecorderBackgroundConfig>({
+    type: 'gradient',
+    value: 'linear-gradient(145deg, #18181B 0%, #131316 50%, #0D0D0F 100%)',
+    padding: 24,
+    borderRadius: 12,
+  });
+  const [smartConfig, setSmartConfig] = useState<SmartRecordingConfig>({
+    smoothCursor: true,
+    detectClicks: true,
+    automaticZoom: true,
+    smartFraming: true,
+    autoSpeedTyping: true,
+  });
+  const [prompter, setPrompter] = useState<PrompterConfig>({
+    enabled: false,
+    text: '',
+    speed: 3,
+    fontSize: 18,
+    isScrolling: false,
+  });
+
+  // Legacy Configuration States
   const [mode, setMode] = useState<RecordingMode>('screen_cam');
 
   const [pipConfig, setPipConfig] = useState<PipConfig>({
     enabled: true,
     position: 'bottom-right',
-    shape: 'circle',
+    shape: 'rounded',
     size: 'medium',
     mirror: true,
-    borderWidth: 3,
-    borderColor: '#ffffff',
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
   });
 
   const [audioSettings, setAudioSettings] = useState<AudioSettings>({
@@ -100,12 +196,30 @@ export default function App() {
     directSaveToFileSystem: false,
   });
 
-  // Auto-detect optimal video codec and initialize logbook observer on mount
+  // Auto-detect optimal video codec and initialize logbook observer & capture handle config on mount
   useEffect(() => {
     logbook.init();
     const bestCodec = getBestSupportedVideoMimeType();
     setVideoSettings((prev) => ({ ...prev, codec: bestCodec }));
     refreshLibraryCount();
+
+    // Set Capture Handle Config for self-capture detection & coordination
+    if (typeof navigator !== 'undefined' && navigator.mediaDevices && 'setCaptureHandleConfig' in navigator.mediaDevices) {
+      try {
+        (navigator.mediaDevices as any).setCaptureHandleConfig({
+          handle: 'osr-recorder',
+          exposeOrigin: true,
+          permittedOrigins: ['*'],
+        });
+      } catch (e) {
+        console.warn('Capture Handle Config could not be set:', e);
+      }
+    }
+
+    // Auto-acquire microphone stream on initial load if mic is enabled
+    if (audioSettings.includeMic && !activeMicStream) {
+      handleEnableMicPreview(true).catch(() => {});
+    }
   }, []);
 
   // Sync runtime context with logbook observer
@@ -118,6 +232,40 @@ export default function App() {
       mode,
     });
   }, [activeView, recordingState, videoSettings.resolution, videoSettings.codec, mode]);
+
+  // Keep document.title synchronized so user can see live recording status even in background tabs
+  useEffect(() => {
+    if (recordingState === 'recording') {
+      const mins = Math.floor(durationSeconds / 60);
+      const secs = durationSeconds % 60;
+      const formatted = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+      document.title = `🔴 Recording (${formatted}) — OSR`;
+    } else if (recordingState === 'paused') {
+      document.title = `⏸️ Paused — OSR`;
+    } else {
+      document.title = `OSR — Open Source Screen Recorder`;
+    }
+  }, [recordingState, durationSeconds]);
+
+  // Session Recovery: Restore active editing or review session on browser refresh or reload
+  useEffect(() => {
+    const restoreSession = async () => {
+      try {
+        const savedState = sessionStorage.getItem('osr_active_state');
+        if (savedState === 'editing' || savedState === 'review') {
+          const session = await getActiveEditingSession();
+          if (session && session.blob) {
+            setLastRecordingData(session);
+            setRecordingState(savedState);
+            setHasSelectedInitialMode(true);
+          }
+        }
+      } catch (err) {
+        console.warn('Could not restore session:', err);
+      }
+    };
+    restoreSession();
+  }, []);
 
   const refreshLibraryCount = async () => {
     try {
@@ -153,7 +301,8 @@ export default function App() {
           showToast(msg, 'error');
           setActiveWebcamStream(null);
           isStartingRecordingRef.current = false;
-          setRecordingState('idle');
+          // Guard: NEVER reset to idle if user is in review or editing
+          setRecordingState((prev) => (prev === 'review' || prev === 'editing' ? prev : 'idle'));
         },
         onBookmarkAdded: () => {
           // bookmark added
@@ -163,34 +312,333 @@ export default function App() {
     return recorderEngineRef.current;
   }, [showToast]);
 
+  const countdownStartTimerRef = useRef<number | null>(null);
+
   const handleCountdownComplete = useCallback(() => {
-    try {
-      const engine = recorderEngineRef.current;
-      if (!engine) {
-        throw new Error('Recording engine was closed');
-      }
-      engine.startMediaRecorder();
-      setRecordingState('recording');
-    } catch (err: unknown) {
-      console.warn('Failed to start media recorder after countdown:', err);
-      if (recorderEngineRef.current) {
-        recorderEngineRef.current.cleanupStreams();
-        recorderEngineRef.current = null;
-      }
-      setActiveWebcamStream(null);
-      setRecordingState('idle');
-      showToast('Could not start recording', 'error');
+    // 1. Immediately dismiss countdown overlay and transition state
+    setRecordingState('recording');
+
+    if (countdownStartTimerRef.current) {
+      window.clearTimeout(countdownStartTimerRef.current);
     }
+
+    // 2. Allow browser, OS window capture pipeline, and compositor 500ms
+    // to completely flush out any frames showing the countdown modal,
+    // guaranteeing that the timer is completely gone before MediaRecorder starts.
+    countdownStartTimerRef.current = window.setTimeout(() => {
+      countdownStartTimerRef.current = null;
+      try {
+        const engine = recorderEngineRef.current;
+        if (!engine) {
+          throw new Error('Recording engine was closed');
+        }
+        engine.startMediaRecorder();
+      } catch (err: unknown) {
+        console.warn('Failed to start media recorder after countdown:', err);
+        if (recorderEngineRef.current) {
+          recorderEngineRef.current.cleanupStreams();
+          recorderEngineRef.current = null;
+        }
+        setActiveWebcamStream(null);
+        setRecordingState('idle');
+        showToast('Could not start recording', 'error');
+      }
+    }, 500);
   }, [showToast]);
 
   const handleCountdownCancel = useCallback(() => {
+    if (countdownStartTimerRef.current) {
+      window.clearTimeout(countdownStartTimerRef.current);
+      countdownStartTimerRef.current = null;
+    }
+    stopAllActiveMediaAccess();
     if (recorderEngineRef.current) {
       recorderEngineRef.current.cleanupStreams();
       recorderEngineRef.current = null;
     }
-    setActiveWebcamStream(null);
     setRecordingState('idle');
-  }, []);
+  }, [stopAllActiveMediaAccess]);
+
+  const handleShareScreenPreview = useCallback(async () => {
+    try {
+      const stream = await navigator.mediaDevices.getDisplayMedia({
+        video: {
+          frameRate: { ideal: videoSettings.fps || 60, max: videoSettings.fps || 60 },
+        },
+        audio: audioSettings.includeSystemAudio ? true : false,
+        preferCurrentTab: false,
+        selfBrowserSurface: 'exclude',
+        surfaceSwitching: 'include',
+        systemAudio: audioSettings.includeSystemAudio ? 'include' : 'exclude',
+      } as DisplayMediaStreamOptions);
+      const videoTrack = stream.getVideoTracks()[0];
+      if (videoTrack) {
+        videoTrack.onended = () => {
+          updateActiveScreenStream(null);
+        };
+      }
+      updateActiveScreenStream(stream);
+    } catch (err: unknown) {
+      const domErr = err as { name?: string; message?: string };
+      if (
+        domErr?.name === 'NotAllowedError' ||
+        domErr?.name === 'AbortError' ||
+        domErr?.message?.includes('Permission') ||
+        domErr?.message?.includes('denied')
+      ) {
+        return;
+      }
+      showToast('Could not share screen', 'error');
+    }
+  }, [videoSettings.fps, audioSettings.includeSystemAudio, showToast, updateActiveScreenStream]);
+
+  const handleStopSharingScreen = useCallback(() => {
+    if (activeScreenStream) {
+      activeScreenStream.getTracks().forEach((t) => {
+        try {
+          t.enabled = false;
+          t.stop();
+        } catch (_) {}
+      });
+      updateActiveScreenStream(null);
+    }
+  }, [activeScreenStream, updateActiveScreenStream]);
+
+  const handleToggleCameraPreview = useCallback(async (enable?: boolean) => {
+    const shouldEnable = enable !== undefined ? enable : !activeWebcamStream;
+    if (!shouldEnable) {
+      if (activeWebcamStream) {
+        activeWebcamStream.getTracks().forEach((t) => {
+          try {
+            t.enabled = false;
+            t.stop();
+          } catch (_) {}
+        });
+        updateActiveWebcamStream(null);
+      }
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          width: { ideal: 1280, max: 1920 },
+          height: { ideal: 720, max: 1080 },
+          facingMode: 'user',
+        },
+      });
+      const videoTrack = stream.getVideoTracks()[0];
+      if (videoTrack) {
+        videoTrack.onended = () => {
+          updateActiveWebcamStream(null);
+        };
+      }
+      updateActiveWebcamStream(stream);
+      return stream;
+    } catch {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        const videoTrack = stream.getVideoTracks()[0];
+        if (videoTrack) {
+          videoTrack.onended = () => {
+            updateActiveWebcamStream(null);
+          };
+        }
+        updateActiveWebcamStream(stream);
+        return stream;
+      } catch {
+        showToast('Could not access camera', 'error');
+      }
+    }
+  }, [activeWebcamStream, showToast, updateActiveWebcamStream]);
+
+  const handleEnableMicPreview = useCallback(async (enable?: boolean) => {
+    const shouldEnable =
+      enable !== undefined ? enable : !activeMicStream || !audioSettings.includeMic;
+    if (!shouldEnable) {
+      if (activeMicStream) {
+        activeMicStream.getTracks().forEach((t) => {
+          try {
+            t.enabled = false;
+            t.stop();
+          } catch (_) {}
+        });
+        updateActiveMicStream(null);
+      }
+      setAudioSettings((prev) => ({ ...prev, includeMic: false }));
+      return;
+    }
+    try {
+      const micConstraints: MediaTrackConstraints = {
+        echoCancellation: audioSettings.echoCancellation,
+        noiseSuppression: audioSettings.noiseSuppression,
+        autoGainControl: audioSettings.autoGainControl,
+      };
+      if (audioSettings.micDeviceId) {
+        micConstraints.deviceId = { exact: audioSettings.micDeviceId };
+      }
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: micConstraints });
+      const audioTrack = stream.getAudioTracks()[0];
+      if (audioTrack) {
+        audioTrack.onended = () => {
+          updateActiveMicStream(null);
+          setAudioSettings((prev) => ({ ...prev, includeMic: false }));
+        };
+      }
+      updateActiveMicStream(stream);
+      setAudioSettings((prev) => ({ ...prev, includeMic: true }));
+      return stream;
+    } catch {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const audioTrack = stream.getAudioTracks()[0];
+        if (audioTrack) {
+          audioTrack.onended = () => {
+            updateActiveMicStream(null);
+            setAudioSettings((prev) => ({ ...prev, includeMic: false }));
+          };
+        }
+        updateActiveMicStream(stream);
+        setAudioSettings((prev) => ({ ...prev, includeMic: true }));
+        return stream;
+      } catch {
+        showToast('Could not access microphone', 'error');
+      }
+    }
+  }, [activeMicStream, audioSettings, showToast, updateActiveMicStream]);
+
+  const handleSelectRecordingSetup = useCallback(
+    (selectedMode: RecordingMode, suggestedLayout?: CompositionLayout) => {
+      setMode(selectedMode);
+      if (suggestedLayout) {
+        setCompositionLayout(suggestedLayout);
+      } else {
+        setCompositionLayout((currentLayout) => {
+          if (selectedMode === 'screen') return 'screen';
+          if (selectedMode === 'cam_only') return 'cam-only';
+          if (selectedMode === 'audio_only') return 'screen';
+          if (['overlay', 'corner-cam', 'framed', 'split'].includes(currentLayout)) {
+            return currentLayout;
+          }
+          return 'overlay';
+        });
+      }
+
+      // Configure default audio settings for selected mode
+      if (selectedMode === 'audio_only') {
+        setAudioSettings((prev) => ({ ...prev, includeMic: true, includeSystemAudio: false }));
+      } else if (selectedMode === 'cam_only') {
+        setAudioSettings((prev) => ({ ...prev, includeMic: true }));
+      }
+
+      setHasSelectedInitialMode(true);
+    },
+    []
+  );
+
+  const handleSwitchMode = useCallback(
+    async (targetMode: RecordingMode, suggestedLayout?: CompositionLayout) => {
+      if (recordingState === 'recording' || recordingState === 'paused') return;
+      handleSelectRecordingSetup(targetMode, suggestedLayout);
+
+      if (targetMode === 'screen') {
+        // Revoke camera hardware access
+        if (activeWebcamStream) {
+          activeWebcamStream.getTracks().forEach((t) => t.stop());
+          setActiveWebcamStream(null);
+        }
+
+        // Trigger Screen access automatically if not active
+        const isScreenLive =
+          activeScreenStream &&
+          activeScreenStream.getVideoTracks().some((t) => t.readyState === 'live');
+        if (!isScreenLive) {
+          await handleShareScreenPreview();
+        }
+
+        // Trigger Microphone access automatically if not active
+        const isMicLive =
+          activeMicStream &&
+          activeMicStream.getAudioTracks().some((t) => t.readyState === 'live');
+        if (!isMicLive) {
+          await handleEnableMicPreview(true);
+        }
+      } else if (targetMode === 'screen_cam') {
+        // Trigger Screen access automatically if not active
+        const isScreenLive =
+          activeScreenStream &&
+          activeScreenStream.getVideoTracks().some((t) => t.readyState === 'live');
+        if (!isScreenLive) {
+          await handleShareScreenPreview();
+        }
+
+        // Trigger Camera access automatically if not active
+        const isCamLive =
+          activeWebcamStream &&
+          activeWebcamStream.getVideoTracks().some((t) => t.readyState === 'live');
+        if (!isCamLive) {
+          await handleToggleCameraPreview(true);
+        }
+
+        // Trigger Microphone access automatically if not active
+        const isMicLive =
+          activeMicStream &&
+          activeMicStream.getAudioTracks().some((t) => t.readyState === 'live');
+        if (!isMicLive) {
+          await handleEnableMicPreview(true);
+        }
+      } else if (targetMode === 'cam_only') {
+        // Revoke Screen access
+        if (activeScreenStream) {
+          activeScreenStream.getTracks().forEach((t) => t.stop());
+          setActiveScreenStream(null);
+        }
+
+        // Trigger Camera access automatically if not active
+        const isCamLive =
+          activeWebcamStream &&
+          activeWebcamStream.getVideoTracks().some((t) => t.readyState === 'live');
+        if (!isCamLive) {
+          await handleToggleCameraPreview(true);
+        }
+
+        // Trigger Microphone access automatically if not active
+        const isMicLive =
+          activeMicStream &&
+          activeMicStream.getAudioTracks().some((t) => t.readyState === 'live');
+        if (!isMicLive) {
+          await handleEnableMicPreview(true);
+        }
+      } else if (targetMode === 'audio_only') {
+        // Revoke Camera and Screen access
+        if (activeWebcamStream) {
+          activeWebcamStream.getTracks().forEach((t) => t.stop());
+          setActiveWebcamStream(null);
+        }
+        if (activeScreenStream) {
+          activeScreenStream.getTracks().forEach((t) => t.stop());
+          setActiveScreenStream(null);
+        }
+
+        // Trigger Microphone access automatically if not active
+        const isMicLive =
+          activeMicStream &&
+          activeMicStream.getAudioTracks().some((t) => t.readyState === 'live');
+        if (!isMicLive) {
+          await handleEnableMicPreview(true);
+        }
+      }
+    },
+    [
+      recordingState,
+      handleSelectRecordingSetup,
+      activeWebcamStream,
+      activeScreenStream,
+      activeMicStream,
+      handleShareScreenPreview,
+      handleToggleCameraPreview,
+      handleEnableMicPreview,
+    ]
+  );
 
   const handleStartRecordingSequence = useCallback(async () => {
     if (isStartingRecordingRef.current) {
@@ -235,7 +683,8 @@ export default function App() {
           showToast(msg, 'error');
           setActiveWebcamStream(null);
           isStartingRecordingRef.current = false;
-          setRecordingState('idle');
+          // Guard: NEVER reset to idle if user is in review or editing
+          setRecordingState((prev) => (prev === 'review' || prev === 'editing' ? prev : 'idle'));
         },
         onBookmarkAdded: () => {
           // bookmark added
@@ -243,10 +692,28 @@ export default function App() {
       });
       recorderEngineRef.current = engine;
 
-      // 2. Immediately prompt for screen share & camera within the active user gesture
-      const result = await engine.prepareStreams(mode, audioSettings, videoSettings, pipConfig);
+      // 2. Prepare streams using pre-acquired preview streams if available
+      const result = await engine.prepareStreams(
+        mode,
+        audioSettings,
+        videoSettings,
+        pipConfig,
+        {
+          screenStream: activeScreenStream,
+          webcamStream: activeWebcamStream,
+          micStream: activeMicStream,
+        },
+        compositionLayout,
+        background
+      );
       if (result && result.webcamStream) {
-        setActiveWebcamStream(result.webcamStream);
+        updateActiveWebcamStream(result.webcamStream);
+      }
+      if (result && result.screenStream) {
+        updateActiveScreenStream(result.screenStream);
+      }
+      if (result && result.micStream) {
+        updateActiveMicStream(result.micStream);
       }
 
       // 3. If countdown configured, enter countdown; else start immediately
@@ -261,16 +728,56 @@ export default function App() {
       const msg = errObj?.message || 'Screen share was not provided or was cancelled.';
       console.warn('Failed to start recording streams:', msg);
       showToast(msg, 'error');
-      if (recorderEngineRef.current) {
-        recorderEngineRef.current.cleanupStreams();
-        recorderEngineRef.current = null;
-      }
-      setActiveWebcamStream(null);
+      stopAllActiveMediaAccess();
       setRecordingState('idle');
     } finally {
       isStartingRecordingRef.current = false;
     }
-  }, [recordingState, mode, audioSettings, videoSettings, pipConfig, showToast]);
+  }, [
+    recordingState,
+    mode,
+    audioSettings,
+    videoSettings,
+    pipConfig,
+    activeScreenStream,
+    activeWebcamStream,
+    activeMicStream,
+    showToast,
+    compositionLayout,
+    background,
+    updateActiveWebcamStream,
+    updateActiveScreenStream,
+    updateActiveMicStream,
+    stopAllActiveMediaAccess,
+  ]);
+
+  const handleSelectLayout = useCallback((newLayout: CompositionLayout) => {
+    setCompositionLayout(newLayout);
+    if (newLayout === 'corner-cam') {
+      setPipConfig((prev) => ({
+        ...prev,
+        enabled: true,
+        position: 'bottom-right',
+        shape: 'rounded',
+        size: 'medium',
+        borderWidth: 2,
+        borderColor: 'rgba(255, 255, 255, 0.3)',
+      }));
+    }
+    if (recorderEngineRef.current) {
+      recorderEngineRef.current.updateLayoutAndBackground(newLayout, background);
+    }
+  }, [background]);
+
+  const handleUpdateBackground = useCallback((updates: Partial<RecorderBackgroundConfig>) => {
+    setBackground((prev) => {
+      const next = { ...prev, ...updates };
+      if (recorderEngineRef.current) {
+        recorderEngineRef.current.updateLayoutAndBackground(compositionLayout, next);
+      }
+      return next;
+    });
+  }, [compositionLayout]);
 
   const handleTogglePause = () => {
     const engine = recorderEngineRef.current;
@@ -304,18 +811,124 @@ export default function App() {
   };
 
   const handleStopRecording = async () => {
+    if (isStoppingRecording) return;
+    setIsStoppingRecording(true);
+
+    if (countdownStartTimerRef.current) {
+      window.clearTimeout(countdownStartTimerRef.current);
+      countdownStartTimerRef.current = null;
+    }
     const engine = recorderEngineRef.current;
-    if (!engine) return;
+    if (!engine) {
+      stopAllActiveMediaAccess();
+      setIsStoppingRecording(false);
+      return;
+    }
 
     try {
-      const result = await engine.stopRecording();
-      setActiveWebcamStream(null);
+      // Direct stop without flush delay, ensuring immediate response and instant teardown
+      const result = await engine.stopRecording(0);
+
+      // Disarm engine and set ref to null so no trailing errors fire
+      if (recorderEngineRef.current) {
+        recorderEngineRef.current.cleanupStreams();
+        recorderEngineRef.current = null;
+      }
+
+      // Immediately revoke all camera, screen, and mic media tracks and device hardware locks
+      stopAllActiveMediaAccess();
       setLastRecordingData(result);
       setRecordingState('review');
+      saveActiveEditingSession(result);
+      try {
+        sessionStorage.setItem('osr_active_state', 'review');
+      } catch (_) {}
     } catch (err) {
       console.error('Error stopping recording:', err);
-      setActiveWebcamStream(null);
+      if (recorderEngineRef.current) {
+        recorderEngineRef.current.cleanupStreams();
+        recorderEngineRef.current = null;
+      }
+      stopAllActiveMediaAccess();
       setRecordingState('idle');
+    } finally {
+      setIsStoppingRecording(false);
+    }
+  };
+
+  const handleDeleteRecording = () => {
+    stopAllActiveMediaAccess();
+    setLastRecordingData(null);
+    setDurationSeconds(0);
+    setBytesRecorded(0);
+    setBitrateMbps(0);
+    setRecordingState('idle');
+    showToast('Recording discarded', 'info');
+  };
+
+  const handleRetake = async () => {
+    if (recorderEngineRef.current) {
+      try {
+        await recorderEngineRef.current.stopRecording(0);
+      } catch {}
+    }
+    stopAllActiveMediaAccess();
+    setLastRecordingData(null);
+    setRecordingState('idle');
+    setDurationSeconds(0);
+    setBytesRecorded(0);
+    setBitrateMbps(0);
+    setBitrateMbps(0);
+
+    // Request permissions again for screen & camera preview without auto-starting recording
+    try {
+      if (mode === 'screen' || mode === 'screen_cam') {
+        await handleShareScreenPreview();
+      }
+      if (mode === 'screen_cam' || mode === 'cam_only') {
+        await handleToggleCameraPreview(true);
+      }
+    } catch (e) {
+      console.warn('Retake preview stream request:', e);
+    }
+  };
+
+  const handleSceneCompleteSaveToLibrary = async () => {
+    if (!lastRecordingData) return;
+    try {
+      let thumbnail = '';
+      try {
+        const thumb = await generateThumbnailFromBlob(lastRecordingData.blob);
+        if (thumb) thumbnail = thumb;
+      } catch {}
+
+      const rec: SavedRecording = {
+        id: 'rec_' + Date.now(),
+        title: `Recording ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
+        blob: lastRecordingData.blob,
+        duration: Math.round(lastRecordingData.duration),
+        mimeType: lastRecordingData.mimeType,
+        size: lastRecordingData.blob.size,
+        thumbnailUrl: thumbnail,
+        notes: '',
+        tags: [],
+        createdAt: Date.now(),
+        mode,
+        resolution: videoSettings.resolution,
+        fps: videoSettings.fps,
+        bookmarks: lastRecordingData.bookmarks || [],
+        metadata: lastRecordingData.metadata,
+        project: lastRecordingData.project,
+      };
+
+      await saveRecordingToDB(rec);
+      refreshLibraryCount();
+      setRecordingState('idle');
+      setActiveView('library');
+      showToast('Saved to your recording library!', 'success');
+    } catch (err) {
+      console.error('Failed to save to library:', err);
+      showToast('Failed to save recording to library', 'error');
     }
   };
 
@@ -339,7 +952,7 @@ export default function App() {
         e.preventDefault();
         if (recordingState === 'idle') {
           handleStartRecordingSequence();
-        } else if (recordingState === 'recording' || recordingState === 'paused') {
+        } else if ((recordingState === 'recording' || recordingState === 'paused') && !isStoppingRecording) {
           handleStopRecording();
         }
       } else if (e.altKey && e.key.toLowerCase() === 'p') {
@@ -367,15 +980,68 @@ export default function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [recordingState, audioSettings.micVolume, micMuted]);
 
+  const handleOpenRecordingInStudio = (rec: SavedRecording) => {
+    const data = {
+      blob: rec.blob,
+      duration: rec.duration,
+      mimeType: rec.mimeType,
+      bookmarks: rec.bookmarks || [],
+      metadata: rec.metadata,
+      project: rec.project,
+    };
+    setLastRecordingData(data);
+    setActiveView('studio');
+    setRecordingState('review');
+    saveActiveEditingSession(data);
+    try {
+      sessionStorage.setItem('osr_active_state', 'review');
+    } catch (_) {}
+  };
+
+  const handleGoHome = useCallback(() => {
+    if (recorderEngineRef.current) {
+      recorderEngineRef.current.cleanupStreams();
+      recorderEngineRef.current = null;
+    }
+    clearActiveEditingSession();
+    try {
+      sessionStorage.removeItem('osr_active_state');
+    } catch (_) {}
+    setLastRecordingData(null);
+    setActiveWebcamStream(null);
+    setHasSelectedInitialMode(false);
+    setActiveView('studio');
+    setRecordingState('idle');
+    setDurationSeconds(0);
+    setBytesRecorded(0);
+    setBitrateMbps(0);
+    refreshLibraryCount();
+  }, [refreshLibraryCount]);
+
   return (
-    <div id="screen-recorder-app" className="min-h-screen bg-[#F3F4F6] dark:bg-[#09090B] text-gray-900 dark:text-zinc-100 flex flex-col font-sans selection:bg-red-500 selection:text-white dark:selection:bg-emerald-500 dark:selection:text-black transition-colors duration-200">
-      {/* Top Navigation Bar */}
+    <div id="screen-recorder-app" className="min-h-screen bg-[#F8FAFC] dark:bg-[#000000] text-gray-900 dark:text-zinc-100 flex flex-col font-sans selection:bg-[#D90000] selection:text-white dark:selection:bg-[#D90000] dark:selection:text-white transition-colors duration-200">
+      {/* Top Navigation Bar - Unified Master Header */}
       <Navbar
         activeView={activeView}
         recordingsCount={recordingsCount}
-        onSelectView={(v) => setActiveView(v)}
-        onOpenSettings={() => setIsSettingsOpen(true)}
+        onSelectView={(v) => {
+          setActiveView(v);
+        }}
         isRecording={recordingState === 'recording' || recordingState === 'paused'}
+        recordingState={recordingState}
+        durationSeconds={durationSeconds}
+        mode={mode}
+        onSelectMode={handleSwitchMode}
+        onStartRecording={handleStartRecordingSequence}
+        onStopRecording={handleStopRecording}
+        isStoppingRecording={isStoppingRecording}
+        onTogglePause={handleTogglePause}
+        onGoHome={handleGoHome}
+        onBackToModeSelect={handleGoHome}
+        hasSelectedInitialMode={hasSelectedInitialMode}
+        onOpenEditorExport={() => {
+          window.dispatchEvent(new CustomEvent('open-editor-export-modal'));
+        }}
       />
 
       {/* Main Content Area */}
@@ -387,6 +1053,7 @@ export default function App() {
               setActiveView('studio');
               setRecordingState('idle');
             }}
+            onSelectRecordingForEdit={handleOpenRecordingInStudio}
             onRecordingDeleted={refreshLibraryCount}
           />
         ) : activeView === 'services' ? (
@@ -409,18 +1076,47 @@ export default function App() {
             }}
           />
         ) : recordingState === 'review' && lastRecordingData ? (
-          /* VIEW 5: Post-Recording Review Studio */
-          <PostRecordingStudio
-            key={`post-studio-${lastRecordingData.blob.size}-${lastRecordingData.duration}`}
+          /* VIEW 5: In-Screen Recording Review with Download, Edit, Retake, Delete options */
+          <RecordingReviewScreen
+            key={`review-screen-${lastRecordingData.blob.size}-${lastRecordingData.duration}`}
             videoBlob={lastRecordingData.blob}
             duration={lastRecordingData.duration}
             mimeType={lastRecordingData.mimeType}
             bookmarks={lastRecordingData.bookmarks}
+            metadata={lastRecordingData.metadata}
+            layout={compositionLayout}
+            onSelectLayout={handleSelectLayout}
+            background={background}
+            onUpdateBackground={handleUpdateBackground}
+            onDownload={() => showToast('Downloading video file...', 'success')}
+            onEdit={() => {
+              setRecordingState('editing');
+              try {
+                sessionStorage.setItem('osr_active_state', 'editing');
+              } catch (_) {}
+            }}
+            onRetake={handleRetake}
+            onSaveToLibrary={handleSceneCompleteSaveToLibrary}
+          />
+        ) : recordingState === 'editing' && lastRecordingData ? (
+          /* VIEW 6: Screen Studio Non-Destructive Video Editor */
+          <VideoEditor
+            key={`video-editor-${lastRecordingData.blob.size}-${lastRecordingData.duration}`}
+            videoBlob={lastRecordingData.blob}
+            duration={lastRecordingData.duration}
+            mimeType={lastRecordingData.mimeType}
+            bookmarks={lastRecordingData.bookmarks}
+            metadata={lastRecordingData.metadata}
+            initialProject={lastRecordingData.project}
             onRecordAnother={() => {
               if (recorderEngineRef.current) {
                 recorderEngineRef.current.cleanupStreams();
                 recorderEngineRef.current = null;
               }
+              clearActiveEditingSession();
+              try {
+                sessionStorage.removeItem('osr_active_state');
+              } catch (_) {}
               setLastRecordingData(null);
               setActiveWebcamStream(null);
               setDurationSeconds(0);
@@ -435,17 +1131,29 @@ export default function App() {
                 recorderEngineRef.current.cleanupStreams();
                 recorderEngineRef.current = null;
               }
+              clearActiveEditingSession();
+              try {
+                sessionStorage.removeItem('osr_active_state');
+              } catch (_) {}
               refreshLibraryCount();
               setActiveWebcamStream(null);
               setActiveView('library');
               setRecordingState('idle');
             }}
           />
+        ) : !hasSelectedInitialMode && recordingState === 'idle' ? (
+          /* STEP 1: Interactive Mode / Setup Selector Flow */
+          <ModeSelectionScreen
+            onSelectSetup={(selectedMode, suggestedLayout) => {
+              handleSwitchMode(selectedMode, suggestedLayout);
+            }}
+            currentMode={mode}
+          />
         ) : (
-          /* VIEW 6: Main Studio Recorder Dashboard */
+          /* STEP 2: Main Studio Recorder Dashboard with live toggles */
           <RecorderDashboard
             mode={mode}
-            onSelectMode={setMode}
+            onSelectMode={(targetMode) => handleSwitchMode(targetMode)}
             pipConfig={pipConfig}
             onUpdatePipConfig={(updates) => {
               setPipConfig((prev) => {
@@ -461,10 +1169,31 @@ export default function App() {
             onStartRecording={handleStartRecordingSequence}
             onStopRecording={handleStopRecording}
             onTogglePause={handleTogglePause}
+            onRetake={handleRetake}
+            onAddBookmark={handleAddBookmark}
             onOpenSettings={() => setIsSettingsOpen(true)}
             onOpenDocs={() => setActiveView('docs')}
+            onBackToModeSelect={() => setHasSelectedInitialMode(false)}
             recordingState={recordingState}
             durationSeconds={durationSeconds}
+            webcamStream={activeWebcamStream}
+            screenStream={activeScreenStream}
+            micStream={activeMicStream}
+            onShareScreen={handleShareScreenPreview}
+            onStopSharingScreen={handleStopSharingScreen}
+            onToggleCamera={handleToggleCameraPreview}
+            onEnableMic={handleEnableMicPreview}
+            onToggleMic={handleEnableMicPreview}
+            layout={compositionLayout}
+            onSelectLayout={handleSelectLayout}
+            aspectRatio={aspectRatio}
+            onSelectAspectRatio={setAspectRatio}
+            background={background}
+            onUpdateBackground={handleUpdateBackground}
+            smartConfig={smartConfig}
+            onUpdateSmartConfig={(updates) => setSmartConfig((prev) => ({ ...prev, ...updates }))}
+            prompter={prompter}
+            onUpdatePrompter={(updates) => setPrompter((prev) => ({ ...prev, ...updates }))}
           />
         )}
       </main>
@@ -475,42 +1204,6 @@ export default function App() {
           seconds={videoSettings.countdownSeconds}
           onComplete={handleCountdownComplete}
           onCancel={handleCountdownCancel}
-        />
-      )}
-
-      {/* Real-time Draggable Floating Camera Bubble when in Screen + Camera or Camera-Only mode */}
-      {(recordingState === 'recording' || recordingState === 'paused') &&
-        (mode === 'screen_cam' || mode === 'cam_only') &&
-        activeWebcamStream && (
-          <DraggableCameraBubble
-            stream={activeWebcamStream}
-            pipConfig={pipConfig}
-            onUpdatePipConfig={(updates) => {
-              setPipConfig((prev) => {
-                const next = { ...prev, ...updates };
-                recorderEngineRef.current?.updatePipConfig(next);
-                return next;
-              });
-            }}
-            isRecording={true}
-          />
-        )}
-
-      {/* Live Compact HUD during Active Recording */}
-      {(recordingState === 'recording' || recordingState === 'paused') && (
-        <LiveRecordingOverlay
-          durationSeconds={durationSeconds}
-          isPaused={recordingState === 'paused'}
-          bytesRecorded={bytesRecorded}
-          bitrateMbps={bitrateMbps}
-          audioMixer={recorderEngineRef.current?.getAudioMixer() || null}
-          micMuted={micMuted}
-          onTogglePause={handleTogglePause}
-          onToggleMicMute={handleToggleMicMute}
-          onAddBookmark={handleAddBookmark}
-          onTakeSnapshot={handleTakeSnapshotDuringRecording}
-          onStopRecording={handleStopRecording}
-          onChangePipPosition={mode === 'screen_cam' ? handleChangePipPosition : undefined}
         />
       )}
 

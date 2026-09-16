@@ -4,7 +4,8 @@ import {
   Settings01Icon,
   Mic01Icon,
   Video01Icon,
-  KeyboardIcon,
+  ArrowDown01Icon,
+  Tick01Icon,
 } from 'hugeicons-react';
 import { AudioSettings, FrameRatePreset, ResolutionPreset, VideoSettings } from '../types';
 
@@ -15,6 +16,138 @@ interface SettingsModalProps {
   onUpdateAudioSettings: (updates: Partial<AudioSettings>) => void;
   onClose: () => void;
 }
+
+interface Option<T> {
+  value: T;
+  label: string;
+}
+
+interface SettingsSelectProps<T> {
+  id?: string;
+  label: string;
+  value: T;
+  options: Option<T>[];
+  onChange: (val: T) => void;
+}
+
+function SettingsSelect<T extends string | number>({
+  id,
+  label,
+  value,
+  options,
+  onChange,
+}: SettingsSelectProps<T>) {
+  const [isOpen, setIsOpen] = React.useState(false);
+  const containerRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const handlePointerDown = (e: MouseEvent | TouchEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsOpen(false);
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handlePointerDown);
+      document.addEventListener('touchstart', handlePointerDown);
+      document.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('touchstart', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen]);
+
+  const selectedOption = options.find((opt) => opt.value === value) || options[0];
+
+  return (
+    <div ref={containerRef} className={`relative ${isOpen ? 'z-40' : 'z-10'}`}>
+      <label className="text-xs font-semibold text-slate-700 block mb-1.5">
+        {label}
+      </label>
+      <button
+        id={id}
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className={`w-full px-3.5 py-2.5 text-xs bg-slate-50 hover:bg-slate-100/80 border rounded-xl text-slate-900 flex items-center justify-between transition-all cursor-pointer shadow-2xs ${
+          isOpen
+            ? 'border-blue-500 ring-2 ring-blue-500/20 bg-white'
+            : 'border-slate-200 hover:border-slate-300'
+        }`}
+      >
+        <span className="truncate font-medium">{selectedOption?.label}</span>
+        <ArrowDown01Icon
+          className={`w-3.5 h-3.5 text-slate-400 shrink-0 ml-2 transition-transform duration-200 ${
+            isOpen ? 'rotate-180 text-blue-600' : ''
+          }`}
+        />
+      </button>
+
+      {isOpen && (
+        <div className="absolute top-full left-0 right-0 mt-1.5 p-1 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 max-h-56 overflow-y-auto space-y-0.5 animate-in fade-in-50 zoom-in-95 duration-100">
+          {options.map((opt) => {
+            const isSelected = opt.value === value;
+            return (
+              <button
+                key={String(opt.value)}
+                type="button"
+                onClick={() => {
+                  onChange(opt.value);
+                  setIsOpen(false);
+                }}
+                className={`w-full px-3 py-2 text-xs rounded-xl flex items-center justify-between text-left transition-colors cursor-pointer ${
+                  isSelected
+                    ? 'bg-blue-50 text-blue-700 font-semibold'
+                    : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900 font-normal'
+                }`}
+              >
+                <span className="truncate">{opt.label}</span>
+                {isSelected && (
+                  <Tick01Icon className="w-3.5 h-3.5 text-blue-600 shrink-0 ml-2" />
+                )}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+const RESOLUTION_OPTIONS: Option<ResolutionPreset>[] = [
+  { value: 'native', label: 'Native Display Resolution (Default)' },
+  { value: '4k', label: '4K Ultra HD (3840 × 2160)' },
+  { value: '1440p', label: '2K QHD (2560 × 1440)' },
+  { value: '1080p', label: '1080p Full HD (1920 × 1080)' },
+  { value: '720p', label: '720p HD (1280 × 720)' },
+];
+
+const FPS_OPTIONS: Option<FrameRatePreset>[] = [
+  { value: 60, label: '60 FPS (Ultra Smooth)' },
+  { value: 30, label: '30 FPS (Standard Balance)' },
+  { value: 24, label: '24 FPS (Cinematic / Low Size)' },
+  { value: 15, label: '15 FPS (Slide Deck & Presentations)' },
+];
+
+const CODEC_OPTIONS: Option<string>[] = [
+  { value: 'video/webm;codecs=vp9,opus', label: 'VP9 + Opus (Recommended Quality)' },
+  { value: 'video/webm;codecs=vp8,opus', label: 'VP8 + Opus (Universal Web)' },
+  { value: 'video/webm;codecs=h264,opus', label: 'H.264 + Opus (Hardware Accel)' },
+  { value: 'video/webm', label: 'Standard WebM Container' },
+  { value: 'video/mp4;codecs=avc1,mp4a.40.2', label: 'MP4 AVC / H.264 (Direct MP4)' },
+];
+
+const COUNTDOWN_OPTIONS: Option<0 | 3 | 5 | 10>[] = [
+  { value: 0, label: 'Immediate (No Countdown)' },
+  { value: 3, label: '3 Seconds' },
+  { value: 5, label: '5 Seconds' },
+  { value: 10, label: '10 Seconds' },
+];
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
   videoSettings,
@@ -40,7 +173,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </div>
             <div>
               <h2 className="text-base font-bold text-slate-900">Recording Preferences</h2>
-              <p className="text-xs text-slate-500">Configure codecs, frame rates, audio DSP, and keybindings</p>
+              <p className="text-xs text-slate-500">Configure codecs, frame rates, audio DSP, and video bitrate</p>
             </div>
           </div>
           <button
@@ -62,79 +195,41 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Resolution */}
-              <div>
-                <label className="text-xs font-semibold text-slate-700 block mb-1.5">
-                  Resolution Target
-                </label>
-                <select
-                  id="select-resolution"
-                  value={videoSettings.resolution}
-                  onChange={(e) => onUpdateVideoSettings({ resolution: e.target.value as ResolutionPreset })}
-                  className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-blue-500"
-                >
-                  <option value="native">Native Display Resolution (Default)</option>
-                  <option value="4k">4K Ultra HD (3840 × 2160)</option>
-                  <option value="1440p">2K QHD (2560 × 1440)</option>
-                  <option value="1080p">1080p Full HD (1920 × 1080)</option>
-                  <option value="720p">720p HD (1280 × 720)</option>
-                </select>
-              </div>
+              {/* Resolution Target */}
+              <SettingsSelect
+                id="select-resolution"
+                label="Resolution Target"
+                value={videoSettings.resolution}
+                options={RESOLUTION_OPTIONS}
+                onChange={(val) => onUpdateVideoSettings({ resolution: val })}
+              />
 
-              {/* Framerate */}
-              <div>
-                <label className="text-xs font-semibold text-slate-700 block mb-1.5">
-                  Frame Rate (FPS)
-                </label>
-                <select
-                  id="select-fps"
-                  value={videoSettings.fps}
-                  onChange={(e) => onUpdateVideoSettings({ fps: Number(e.target.value) as FrameRatePreset })}
-                  className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-blue-500"
-                >
-                  <option value={60}>60 FPS (Ultra Smooth)</option>
-                  <option value={30}>30 FPS (Standard Balance)</option>
-                  <option value={24}>24 FPS (Cinematic / Low Size)</option>
-                  <option value={15}>15 FPS (Slide Deck & Presentations)</option>
-                </select>
-              </div>
+              {/* Frame Rate */}
+              <SettingsSelect
+                id="select-fps"
+                label="Frame Rate (FPS)"
+                value={videoSettings.fps}
+                options={FPS_OPTIONS}
+                onChange={(val) => onUpdateVideoSettings({ fps: val })}
+              />
 
               {/* Codec */}
-              <div>
-                <label className="text-xs font-semibold text-slate-700 block mb-1.5">
-                  Video Codec Engine
-                </label>
-                <select
-                  id="select-codec"
-                  value={videoSettings.codec}
-                  onChange={(e) => onUpdateVideoSettings({ codec: e.target.value })}
-                  className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-blue-500"
-                >
-                  <option value="video/webm;codecs=vp9,opus">VP9 + Opus (Recommended Quality)</option>
-                  <option value="video/webm;codecs=vp8,opus">VP8 + Opus (Universal Web)</option>
-                  <option value="video/webm;codecs=h264,opus">H.264 + Opus (Hardware Accel)</option>
-                  <option value="video/webm">Standard WebM Container</option>
-                  <option value="video/mp4;codecs=avc1,mp4a.40.2">MP4 AVC / H.264 (Direct MP4)</option>
-                </select>
-              </div>
+              <SettingsSelect
+                id="select-codec"
+                label="Video Codec Engine"
+                value={videoSettings.codec}
+                options={CODEC_OPTIONS}
+                onChange={(val) => onUpdateVideoSettings({ codec: val })}
+              />
 
               {/* Countdown Timer */}
-              <div>
-                <label className="text-xs font-semibold text-slate-700 block mb-1.5">
-                  Pre-recording Countdown
-                </label>
-                <select
-                  id="select-countdown"
-                  value={videoSettings.countdownSeconds}
-                  onChange={(e) => onUpdateVideoSettings({ countdownSeconds: Number(e.target.value) as 0 | 3 | 5 | 10 })}
-                  className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-blue-500"
-                >
-                  <option value={0}>Immediate (No Countdown)</option>
-                  <option value={3}>3 Seconds</option>
-                  <option value={5}>5 Seconds</option>
-                  <option value={10}>10 Seconds</option>
-                </select>
-              </div>
+              <SettingsSelect
+                id="select-countdown"
+                label="Pre-recording Countdown"
+                value={videoSettings.countdownSeconds}
+                options={COUNTDOWN_OPTIONS}
+                onChange={(val) => onUpdateVideoSettings({ countdownSeconds: val })}
+              />
             </div>
 
             {/* Target Bitrate Slider */}
@@ -207,58 +302,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   <span className="text-[10px] text-slate-500">Normalizes volume</span>
                 </div>
               </label>
-            </div>
-          </div>
-
-          {/* Section: Keyboard Shortcuts */}
-          <div className="space-y-3">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
-              <KeyboardIcon className="w-4 h-4 text-blue-600" />
-              Keyboard Shortcuts Cheatsheet
-            </h3>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-              <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200">
-                <span className="text-slate-700">Start / Finish Recording</span>
-                <kbd className="px-2 py-0.5 font-mono text-[11px] font-semibold bg-white border border-slate-200 rounded text-slate-800 shadow-xs">
-                  Alt + R
-                </kbd>
-              </div>
-
-              <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200">
-                <span className="text-slate-700">Pause / Resume</span>
-                <kbd className="px-2 py-0.5 font-mono text-[11px] font-semibold bg-white border border-slate-200 rounded text-slate-800 shadow-xs">
-                  Alt + P
-                </kbd>
-              </div>
-
-              <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200">
-                <span className="text-slate-700">Mute / Unmute Mic</span>
-                <kbd className="px-2 py-0.5 font-mono text-[11px] font-semibold bg-white border border-slate-200 rounded text-slate-800 shadow-xs">
-                  Alt + M
-                </kbd>
-              </div>
-
-              <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200">
-                <span className="text-slate-700">Drop Bookmark Marker</span>
-                <kbd className="px-2 py-0.5 font-mono text-[11px] font-semibold bg-white border border-slate-200 rounded text-slate-800 shadow-xs">
-                  Alt + B
-                </kbd>
-              </div>
-
-              <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200">
-                <span className="text-slate-700">Take Instant Snapshot</span>
-                <kbd className="px-2 py-0.5 font-mono text-[11px] font-semibold bg-white border border-slate-200 rounded text-slate-800 shadow-xs">
-                  Alt + S
-                </kbd>
-              </div>
-
-              <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200">
-                <span className="text-slate-700">Open Tech Documentation</span>
-                <kbd className="px-2 py-0.5 font-mono text-[11px] font-semibold bg-white border border-slate-200 rounded text-slate-800 shadow-xs">
-                  Alt + D
-                </kbd>
-              </div>
             </div>
           </div>
         </div>

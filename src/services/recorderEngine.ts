@@ -1,7 +1,9 @@
-import { AudioSettings, PipConfig, RecordingMode, VideoBookmark, VideoSettings } from '../types';
+import { AudioSettings, CompositionLayout, PipConfig, RecorderBackgroundConfig, RecordingMode, VideoBookmark, VideoSettings, RecordingMetadata } from '../types';
 import { createAudioMixer, AudioMixerController } from './audioMixer';
 import { createStreamCompositor, CompositorController } from './streamCompositor';
 import { fixWebmDuration } from './webmDurationFixer';
+import { CursorTracker } from './cursorTracker';
+import { EventTracker, buildRecordingMetadata } from './eventTracker';
 import { logbook } from './logbook';
 
 export interface RecorderCallbacks {
@@ -20,11 +22,17 @@ export class RecorderEngine {
   private compositor: CompositorController | null = null;
   private mediaRecorder: MediaRecorder | null = null;
 
+  // Phase 1 Telemetry Trackers
+  private cursorTracker: CursorTracker = new CursorTracker();
+  private eventTracker: EventTracker = new EventTracker();
+
   private recordedChunks: Blob[] = [];
   private startTime = 0;
   private pausedTime = 0;
   private totalPausedDuration = 0;
   private timerInterval: number | null = null;
+  private timerWorker: Worker | null = null;
+  private workerBlobUrl: string | null = null;
   private bytesRecorded = 0;
   private bookmarks: VideoBookmark[] = [];
 
@@ -38,15 +46,21 @@ export class RecorderEngine {
     mode: RecordingMode,
     audioSettings: AudioSettings,
     videoSettings: VideoSettings,
-    pipConfig: PipConfig
-  ): Promise<{ webcamStream: MediaStream | null; screenStream: MediaStream | null }> {
+    pipConfig: PipConfig,
+    existingStreams?: {
+      screenStream?: MediaStream | null;
+      webcamStream?: MediaStream | null;
+      micStream?: MediaStream | null;
+    },
+    layout: CompositionLayout = 'framed',
+    background?: RecorderBackgroundConfig
+  ): Promise<{ webcamStream: MediaStream | null; screenStream: MediaStream | null; micStream: MediaStream | null }> {
     if (this.isStarting || this.isRecording) {
       console.warn('RecorderEngine: prepareStreams called while already starting or recording.');
-      return { webcamStream: this.webcamStream, screenStream: this.screenStream };
+      return { webcamStream: this.webcamStream, screenStream: this.screenStream, micStream: this.micStream };
     }
     this.isStarting = true;
     try {
-      this.cleanupStreams();
       this.recordedChunks = [];
       this.bookmarks = [];
       this.bytesRecorded = 0;
@@ -54,63 +68,110 @@ export class RecorderEngine {
       this.startTime = 0;
       this.pausedTime = 0;
 
-      // 1. Acquire Screen Stream if needed (Immediately in user click handler)
+      // 1. Acquire Screen Stream if needed (or reuse existing active preview stream)
       if (mode === 'screen' || mode === 'screen_cam') {
-        try {
-          this.screenStream = await navigator.mediaDevices.getDisplayMedia({
-            video: {
-              frameRate: { ideal: videoSettings.fps, max: videoSettings.fps },
-              displaySurface: 'monitor',
-            },
-            audio: audioSettings.includeSystemAudio ? {
-              echoCancellation: audioSettings.echoCancellation,
-              noiseSuppression: audioSettings.noiseSuppression,
-              autoGainControl: audioSettings.autoGainControl,
-            } : false,
-          });
+        const hasLiveScreen =
+          existingStreams?.screenStream &&
+          existingStreams.screenStream.getVideoTracks().some((t) => t.readyState === 'live');
 
-          // Handle user clicking native browser "Stop sharing" button
-          const videoTrack = this.screenStream.getVideoTracks()[0];
-          if (videoTrack) {
-            videoTrack.onended = () => {
-              if (this.isRecording) {
-                this.stopRecording();
+        if (hasLiveScreen && existingStreams?.screenStream) {
+          this.screenStream = existingStreams.screenStream;
+        } else {
+          try {
+            this.screenStream = await navigator.mediaDevices.getDisplayMedia({
+              video: {
+                frameRate: { ideal: videoSettings.fps || 60, max: videoSettings.fps || 60 },
+              },
+              audio: audioSettings.includeSystemAudio ? true : false,
+              preferCurrentTab: false,
+              selfBrowserSurface: 'exclude',
+              surfaceSwitching: 'include',
+              systemAudio: audioSettings.includeSystemAudio ? 'include' : 'exclude',
+            } as DisplayMediaStreamOptions);
+          } catch (initialErr) {
+            // Fallback if browser rejected specific constraint
+            try {
+              this.screenStream = await navigator.mediaDevices.getDisplayMedia({
+                video: true,
+                audio: audioSettings.includeSystemAudio ? true : false,
+                preferCurrentTab: false,
+                selfBrowserSurface: 'exclude',
+              } as DisplayMediaStreamOptions);
+            } catch (fallbackErr: unknown) {
+              const domErr = (fallbackErr || initialErr) as { name?: string; message?: string };
+              if (
+                domErr?.name === 'NotAllowedError' ||
+                domErr?.name === 'AbortError' ||
+                domErr?.message?.includes('Permission') ||
+                domErr?.message?.includes('denied') ||
+                domErr?.message?.includes('cancel')
+              ) {
+                throw new Error('Screen share was not provided or was cancelled.');
               }
-            };
+              throw new Error(domErr?.message || 'Screen capture permission was cancelled or not granted.');
+            }
           }
-        } catch (err: unknown) {
-          const domErr = err as { name?: string; message?: string };
-          if (
-            domErr?.name === 'NotAllowedError' ||
-            domErr?.name === 'AbortError' ||
-            domErr?.message?.includes('Permission') ||
-            domErr?.message?.includes('denied') ||
-            domErr?.message?.includes('cancel')
-          ) {
-            throw new Error('Screen share was not provided or was cancelled.');
-          }
-          throw new Error(domErr?.message || 'Screen capture permission was cancelled or not granted.');
+        }
+
+        // Handle user clicking native browser "Stop sharing" button
+        const videoTrack = this.screenStream?.getVideoTracks()[0];
+        if (videoTrack) {
+          videoTrack.onended = () => {
+            if (this.isRecording) {
+              this.stopRecording();
+            }
+          };
+          videoTrack.onmute = () => {
+            logbook.addLog('info', 'media', 'Screen capture track muted momentarily (active surface switch or tab shift)');
+          };
+          videoTrack.onunmute = () => {
+            logbook.addLog('info', 'media', 'Screen capture track unmuted (active surface restored)');
+          };
         }
       }
 
-      // 2. Acquire Webcam & Mic Stream with a single combined getUserMedia call
+      // 2. Acquire Webcam & Mic Streams gracefully
       const needCamera = mode === 'screen_cam' || mode === 'cam_only';
       const needMic = audioSettings.includeMic;
 
-      if (needCamera || needMic) {
-        try {
-          const constraints: MediaStreamConstraints = {};
+      if (needCamera) {
+        const hasLiveWebcam =
+          existingStreams?.webcamStream &&
+          existingStreams.webcamStream.getVideoTracks().some((t) => t.readyState === 'live');
 
-          if (needCamera) {
-            constraints.video = {
-              width: { ideal: 1280, max: 1920 },
-              height: { ideal: 720, max: 1080 },
-              frameRate: { ideal: videoSettings.fps || 60, max: videoSettings.fps || 60 },
-              facingMode: 'user',
-            };
+        if (hasLiveWebcam && existingStreams?.webcamStream) {
+          this.webcamStream = existingStreams.webcamStream;
+        } else {
+          try {
+            this.webcamStream = await navigator.mediaDevices.getUserMedia({
+              video: {
+                width: { ideal: 1280, max: 1920 },
+                height: { ideal: 720, max: 1080 },
+                facingMode: 'user',
+              },
+            });
+          } catch {
+            try {
+              this.webcamStream = await navigator.mediaDevices.getUserMedia({ video: true });
+            } catch (err) {
+              console.warn('Camera permission denied or device not found:', err);
+              if (mode === 'cam_only') {
+                throw new Error('Camera permission is required for Camera Only recording.');
+              }
+            }
           }
+        }
+      }
 
-          if (needMic) {
+      if (needMic) {
+        const hasLiveMic =
+          existingStreams?.micStream &&
+          existingStreams.micStream.getAudioTracks().some((t) => t.readyState === 'live');
+
+        if (hasLiveMic && existingStreams?.micStream) {
+          this.micStream = existingStreams.micStream;
+        } else {
+          try {
             const micConstraints: MediaTrackConstraints = {
               echoCancellation: audioSettings.echoCancellation,
               noiseSuppression: audioSettings.noiseSuppression,
@@ -119,22 +180,13 @@ export class RecorderEngine {
             if (audioSettings.micDeviceId) {
               micConstraints.deviceId = { exact: audioSettings.micDeviceId };
             }
-            constraints.audio = micConstraints;
-          }
-
-          const combinedStream = await navigator.mediaDevices.getUserMedia(constraints);
-
-          if (needCamera && combinedStream.getVideoTracks().length > 0) {
-            this.webcamStream = new MediaStream(combinedStream.getVideoTracks());
-          }
-
-          if (needMic && combinedStream.getAudioTracks().length > 0) {
-            this.micStream = new MediaStream(combinedStream.getAudioTracks());
-          }
-        } catch (err) {
-          console.warn('Camera/Microphone permission denied or device not found:', err);
-          if (mode === 'cam_only') {
-            throw new Error('Camera permission is required for Camera Only recording.');
+            this.micStream = await navigator.mediaDevices.getUserMedia({ audio: micConstraints });
+          } catch {
+            try {
+              this.micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            } catch (err) {
+              console.warn('Microphone permission denied or device not found:', err);
+            }
           }
         }
       }
@@ -154,11 +206,18 @@ export class RecorderEngine {
         finalVideoStream = new MediaStream();
       } else if (mode === 'cam_only') {
         finalVideoStream = this.webcamStream || new MediaStream();
-      } else if (mode === 'screen_cam' || mode === 'screen') {
-        // Direct zero-copy hardware encoding: The interactive floating camera bubble on the screen
-        // is naturally and accurately captured directly on the display stream in real time.
-        // This eliminates duplicate camera overlays and provides 100% position accuracy with 0% extra CPU.
-        finalVideoStream = this.screenStream || new MediaStream();
+      } else if ((mode === 'screen_cam' || mode === 'screen') && this.screenStream) {
+        // Compose Screen (+ Camera if available) into resilient worker-driven compositor
+        // This guarantees continuous 60/30fps rendering even when switching tabs, windows, or monitors
+        this.compositor = createStreamCompositor(
+          this.screenStream,
+          this.webcamStream,
+          pipConfig,
+          videoSettings.fps || 60,
+          layout,
+          background
+        );
+        finalVideoStream = this.compositor.stream;
       } else {
         finalVideoStream = this.screenStream || this.webcamStream || new MediaStream();
       }
@@ -166,17 +225,34 @@ export class RecorderEngine {
       // Combine video + mixed audio into one final recording MediaStream
       const finalStream = new MediaStream();
       finalVideoStream.getVideoTracks().forEach((track) => finalStream.addTrack(track));
-      this.audioMixer.destinationStream.getAudioTracks().forEach((track) => finalStream.addTrack(track));
+      if (mode === 'audio_only' || audioSettings.includeMic || (audioSettings.includeSystemAudio && this.screenStream?.getAudioTracks().length)) {
+        this.audioMixer.destinationStream.getAudioTracks().forEach((track) => finalStream.addTrack(track));
+      }
 
-      // 5. Setup MediaRecorder
-      const mimeType = MediaRecorder.isTypeSupported(videoSettings.codec)
-        ? videoSettings.codec
-        : (MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')
-          ? 'video/webm;codecs=vp9,opus'
-          : 'video/webm');
+      // 5. Setup MediaRecorder with robust mimeType fallback
+      let mimeType = 'video/webm';
+      if (mode === 'audio_only') {
+        mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : 'audio/webm';
+      } else {
+        const supportedTypes = [
+          videoSettings.codec,
+          'video/webm;codecs=vp9,opus',
+          'video/webm;codecs=vp8,opus',
+          'video/webm;codecs=h264,opus',
+          'video/webm',
+          'video/mp4;codecs=avc1,mp4a.40.2',
+          'video/mp4',
+        ];
+        for (const t of supportedTypes) {
+          if (t && MediaRecorder.isTypeSupported(t)) {
+            mimeType = t;
+            break;
+          }
+        }
+      }
 
       const recorderOptions: MediaRecorderOptions = {
-        mimeType: mode === 'audio_only' ? (MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : 'audio/webm') : mimeType,
+        mimeType,
       };
 
       if (videoSettings.bitrateMbps > 0 && mode !== 'audio_only') {
@@ -201,6 +277,15 @@ export class RecorderEngine {
         this.isPaused = false;
         this.startTime = Date.now();
         this.startTimer();
+
+        // Start event and cursor tracking
+        try {
+          this.cursorTracker.start();
+          this.eventTracker.start();
+        } catch (e) {
+          console.warn('Telemetry tracker error on start:', e);
+        }
+
         this.callbacks.onStateChange('recording');
         logbook.addLog('info', 'media', `MediaRecorder pipeline engaged (${mimeType})`, {
           digest: `Hardware encoding stream active at ~${videoSettings.bitrateMbps} Mbps, ${videoSettings.fps} FPS.`,
@@ -210,6 +295,10 @@ export class RecorderEngine {
       this.mediaRecorder.onpause = () => {
         this.isPaused = true;
         this.pausedTime = Date.now();
+        try {
+          this.cursorTracker.pause();
+          this.eventTracker.pause();
+        } catch {}
         this.callbacks.onStateChange('paused');
         logbook.addLog('info', 'media', 'Recording session paused by user');
       };
@@ -220,6 +309,10 @@ export class RecorderEngine {
           this.totalPausedDuration += Date.now() - this.pausedTime;
           this.pausedTime = 0;
         }
+        try {
+          this.cursorTracker.resume();
+          this.eventTracker.resume();
+        } catch {}
         this.callbacks.onStateChange('recording');
         logbook.addLog('info', 'media', 'Recording session resumed');
       };
@@ -244,6 +337,7 @@ export class RecorderEngine {
       return {
         webcamStream: this.webcamStream,
         screenStream: this.screenStream,
+        micStream: this.micStream,
       };
     } catch (err) {
       this.cleanupStreams();
@@ -286,7 +380,23 @@ export class RecorderEngine {
     }
   }
 
-  public async stopRecording(): Promise<{ blob: Blob; duration: number; mimeType: string; bookmarks: VideoBookmark[] }> {
+  public async stopRecording(flushMs: number = 450): Promise<{
+    blob: Blob;
+    duration: number;
+    mimeType: string;
+    bookmarks: VideoBookmark[];
+    metadata: RecordingMetadata;
+  }> {
+    if (!this.mediaRecorder) {
+      throw new Error('No active recorder found');
+    }
+
+    if (flushMs > 0 && this.isRecording && !this.isPaused) {
+      // Keep stream and compositor active briefly so in-flight OS capture frames
+      // (such as moving the mouse and clicking Stop) are rendered and encoded before stopping
+      await new Promise((resolve) => setTimeout(resolve, flushMs));
+    }
+
     return new Promise((resolve, reject) => {
       if (!this.mediaRecorder) {
         reject(new Error('No active recorder found'));
@@ -296,24 +406,39 @@ export class RecorderEngine {
       const mimeType = this.mediaRecorder.mimeType || 'video/webm';
       const durationSeconds = Math.max(1, Math.round((Date.now() - this.startTime - this.totalPausedDuration) / 1000));
       const durationMs = Math.max(1000, Date.now() - this.startTime - this.totalPausedDuration);
-      const capturedChunks = [...this.recordedChunks];
       const bookmarks = [...this.bookmarks];
 
+      // Harvest metadata
+      const cursorPoints = this.cursorTracker.stop();
+      const events = this.eventTracker.stop();
+      const metadata = buildRecordingMetadata(cursorPoints, events.clicks, events.keyboard, bookmarks);
+
+      let isFinalized = false;
       const finalize = async () => {
-        let fullBlob = new Blob(capturedChunks, { type: mimeType });
-        try {
-          // Patch WebM header with accurate duration so video seeks instantly and never freezes
-          fullBlob = await fixWebmDuration(fullBlob, durationMs);
-        } catch {
-          // ignore
-        }
+        if (isFinalized) return;
+        isFinalized = true;
+
+        // Immediately revoke and stop all hardware capture streams so camera/mic/screen indicators vanish instantly
         this.cleanupStreams();
+
+        const capturedChunks = [...this.recordedChunks];
+        let fullBlob = new Blob(capturedChunks, { type: mimeType });
+        if (fullBlob.size > 0) {
+          try {
+            // Patch WebM header with accurate duration so video seeks instantly and never freezes
+            fullBlob = await fixWebmDuration(fullBlob, durationMs);
+          } catch (e) {
+            console.warn('WebM duration fix skipped:', e);
+          }
+        }
+
         this.callbacks.onStateChange('stopped');
         resolve({
           blob: fullBlob,
           duration: durationSeconds,
           mimeType,
           bookmarks,
+          metadata,
         });
       };
 
@@ -321,7 +446,11 @@ export class RecorderEngine {
         this.mediaRecorder.onstop = () => {
           finalize();
         };
+
         try {
+          if (this.mediaRecorder.state === 'recording') {
+            this.mediaRecorder.requestData();
+          }
           this.mediaRecorder.stop();
         } catch (e) {
           console.warn('Error stopping mediaRecorder:', e);
@@ -373,18 +502,79 @@ export class RecorderEngine {
 
   private startTimer(): void {
     this.stopTimer();
-    this.timerInterval = window.setInterval(() => {
+
+    let lastChunkRequestTime = Date.now();
+
+    const onTick = () => {
       if (this.isRecording && !this.isPaused) {
         const dur = (Date.now() - this.startTime - this.totalPausedDuration) / 1000;
         this.callbacks.onTimeUpdate(dur);
+
+        // Background Watchdog: Periodically request data chunk if recording to avoid browser buffer stalling
+        const now = Date.now();
+        if (now - lastChunkRequestTime >= 2000) {
+          lastChunkRequestTime = now;
+          if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
+            try {
+              this.mediaRecorder.requestData();
+            } catch (_) {}
+          }
+        }
       }
-    }, 250);
+    };
+
+    // Dedicated unthrottled Web Worker heartbeat for background execution
+    try {
+      const script = `
+        let id = null;
+        self.onmessage = function(e) {
+          if (e.data === 'start') {
+            if (!id) {
+              id = setInterval(function() {
+                self.postMessage('tick');
+              }, 250);
+            }
+          } else if (e.data === 'stop') {
+            if (id) {
+              clearInterval(id);
+              id = null;
+            }
+          }
+        };
+      `;
+      const blob = new Blob([script], { type: 'application/javascript' });
+      this.workerBlobUrl = URL.createObjectURL(blob);
+      this.timerWorker = new Worker(this.workerBlobUrl);
+      this.timerWorker.onmessage = () => onTick();
+      this.timerWorker.postMessage('start');
+    } catch (_) {
+      // Fallback to window.setInterval if Web Worker is unavailable
+    }
+
+    this.timerInterval = window.setInterval(onTick, 250);
   }
 
   private stopTimer(): void {
+    if (this.timerWorker) {
+      try {
+        this.timerWorker.postMessage('stop');
+        this.timerWorker.terminate();
+      } catch (_) {}
+      this.timerWorker = null;
+    }
+    if (this.workerBlobUrl) {
+      URL.revokeObjectURL(this.workerBlobUrl);
+      this.workerBlobUrl = null;
+    }
     if (this.timerInterval !== null) {
       clearInterval(this.timerInterval);
       this.timerInterval = null;
+    }
+  }
+
+  public updateLayoutAndBackground(layout: CompositionLayout, background?: RecorderBackgroundConfig): void {
+    if (this.compositor) {
+      this.compositor.updateLayoutAndBackground(layout, background);
     }
   }
 
@@ -396,39 +586,62 @@ export class RecorderEngine {
 
     if (this.screenStream) {
       this.screenStream.getTracks().forEach((track) => {
-        track.onended = null;
-        track.stop();
+        try {
+          track.onended = null;
+          track.enabled = false;
+          track.stop();
+        } catch (_) {}
       });
       this.screenStream = null;
     }
 
     if (this.webcamStream) {
       this.webcamStream.getTracks().forEach((track) => {
-        track.onended = null;
-        track.stop();
+        try {
+          track.onended = null;
+          track.enabled = false;
+          track.stop();
+        } catch (_) {}
       });
       this.webcamStream = null;
     }
 
     if (this.micStream) {
       this.micStream.getTracks().forEach((track) => {
-        track.onended = null;
-        track.stop();
+        try {
+          track.onended = null;
+          track.enabled = false;
+          track.stop();
+        } catch (_) {}
       });
       this.micStream = null;
     }
 
     if (this.compositor) {
-      this.compositor.cleanup();
+      try {
+        this.compositor.cleanup();
+      } catch (_) {}
       this.compositor = null;
     }
 
     if (this.audioMixer) {
-      this.audioMixer.cleanup();
+      try {
+        this.audioMixer.cleanup();
+      } catch (_) {}
       this.audioMixer = null;
     }
 
     if (this.mediaRecorder) {
+      try {
+        if (this.mediaRecorder.stream) {
+          this.mediaRecorder.stream.getTracks().forEach((track) => {
+            try {
+              track.enabled = false;
+              track.stop();
+            } catch (_) {}
+          });
+        }
+      } catch (_) {}
       this.mediaRecorder.ondataavailable = null;
       this.mediaRecorder.onstart = null;
       this.mediaRecorder.onpause = null;

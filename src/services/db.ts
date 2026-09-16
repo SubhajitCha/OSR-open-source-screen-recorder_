@@ -45,7 +45,9 @@ export async function getAllRecordings(): Promise<SavedRecording[]> {
       request.onsuccess = (event) => {
         const cursor = (event.target as IDBRequest<IDBCursorWithValue>).result;
         if (cursor) {
-          results.push(cursor.value);
+          if (cursor.value.id !== '__ACTIVE_EDITOR_SESSION__') {
+            results.push(cursor.value);
+          }
           cursor.continue();
         } else {
           resolve(results);
@@ -57,6 +59,94 @@ export async function getAllRecordings(): Promise<SavedRecording[]> {
   } catch (error) {
     console.error('Failed to get recordings from IndexedDB:', error);
     return [];
+  }
+}
+
+export async function saveActiveEditingSession(session: {
+  blob: Blob;
+  duration: number;
+  mimeType: string;
+  bookmarks: any[];
+  metadata?: any;
+  project?: any;
+}): Promise<void> {
+  try {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readwrite');
+      const store = tx.objectStore(STORE_NAME);
+      const request = store.put({
+        id: '__ACTIVE_EDITOR_SESSION__',
+        title: session.project?.title || 'Current Edit Session',
+        blob: session.blob,
+        mimeType: session.mimeType,
+        duration: session.duration,
+        size: session.blob.size,
+        createdAt: Date.now(),
+        mode: 'screen',
+        resolution: '1080p',
+        fps: 60,
+        bookmarks: session.bookmarks || [],
+        metadata: session.metadata,
+        project: session.project,
+        tags: ['__session__'],
+      });
+      request.onsuccess = () => resolve();
+      request.onerror = () => reject(request.error);
+    });
+  } catch (err) {
+    console.warn('Could not save active editing session:', err);
+  }
+}
+
+export async function getActiveEditingSession(): Promise<{
+  blob: Blob;
+  duration: number;
+  mimeType: string;
+  bookmarks: any[];
+  metadata?: any;
+  project?: any;
+} | null> {
+  try {
+    const db = await openDB();
+    return new Promise((resolve) => {
+      const tx = db.transaction(STORE_NAME, 'readonly');
+      const store = tx.objectStore(STORE_NAME);
+      const request = store.get('__ACTIVE_EDITOR_SESSION__');
+      request.onsuccess = () => {
+        const res = request.result;
+        if (res && res.blob) {
+          resolve({
+            blob: res.blob,
+            duration: res.duration,
+            mimeType: res.mimeType,
+            bookmarks: res.bookmarks || [],
+            metadata: res.metadata,
+            project: res.project,
+          });
+        } else {
+          resolve(null);
+        }
+      };
+      request.onerror = () => resolve(null);
+    });
+  } catch {
+    return null;
+  }
+}
+
+export async function clearActiveEditingSession(): Promise<void> {
+  try {
+    const db = await openDB();
+    return new Promise((resolve) => {
+      const tx = db.transaction(STORE_NAME, 'readwrite');
+      const store = tx.objectStore(STORE_NAME);
+      const request = store.delete('__ACTIVE_EDITOR_SESSION__');
+      request.onsuccess = () => resolve();
+      request.onerror = () => resolve();
+    });
+  } catch {
+    // ignore
   }
 }
 

@@ -21,12 +21,16 @@ export class RecorderEngine {
   private audioMixer: AudioMixerController | null = null;
   private compositor: CompositorController | null = null;
   private mediaRecorder: MediaRecorder | null = null;
+  private screenRecorder: MediaRecorder | null = null;
+  private camRecorder: MediaRecorder | null = null;
 
   // Phase 1 Telemetry Trackers
   private cursorTracker: CursorTracker = new CursorTracker();
   private eventTracker: EventTracker = new EventTracker();
 
   private recordedChunks: Blob[] = [];
+  private screenChunks: Blob[] = [];
+  private camChunks: Blob[] = [];
   private startTime = 0;
   private pausedTime = 0;
   private totalPausedDuration = 0;
@@ -225,24 +229,43 @@ export class RecorderEngine {
       // Combine video + mixed audio into one final recording MediaStream
       const finalStream = new MediaStream();
       finalVideoStream.getVideoTracks().forEach((track) => finalStream.addTrack(track));
-      if (mode === 'audio_only' || audioSettings.includeMic || (audioSettings.includeSystemAudio && this.screenStream?.getAudioTracks().length)) {
+
+      const hasMicTrack = !!(this.micStream && this.micStream.getAudioTracks().some((t) => t.readyState === 'live'));
+      const hasSystemAudioTrack = !!(this.screenStream && this.screenStream.getAudioTracks().some((t) => t.readyState === 'live'));
+      const shouldAttachAudio =
+        mode === 'audio_only' ||
+        (audioSettings.includeMic && hasMicTrack) ||
+        (audioSettings.includeSystemAudio && hasSystemAudioTrack);
+
+      if (shouldAttachAudio && this.audioMixer) {
         this.audioMixer.destinationStream.getAudioTracks().forEach((track) => finalStream.addTrack(track));
       }
+
+      const hasAudioInFinalStream = finalStream.getAudioTracks().length > 0;
 
       // 5. Setup MediaRecorder with robust mimeType fallback
       let mimeType = 'video/webm';
       if (mode === 'audio_only') {
         mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : 'audio/webm';
       } else {
-        const supportedTypes = [
-          videoSettings.codec,
-          'video/webm;codecs=vp9,opus',
-          'video/webm;codecs=vp8,opus',
-          'video/webm;codecs=h264,opus',
-          'video/webm',
-          'video/mp4;codecs=avc1,mp4a.40.2',
-          'video/mp4',
-        ];
+        const supportedTypes = hasAudioInFinalStream
+          ? [
+              videoSettings.codec,
+              'video/webm;codecs=vp9,opus',
+              'video/webm;codecs=vp8,opus',
+              'video/webm;codecs=h264,opus',
+              'video/webm',
+              'video/mp4;codecs=avc1,mp4a.40.2',
+              'video/mp4',
+            ]
+          : [
+              'video/webm;codecs=vp9',
+              'video/webm;codecs=vp8',
+              'video/webm',
+              'video/mp4;codecs=avc1',
+              'video/mp4',
+              videoSettings.codec,
+            ];
         for (const t of supportedTypes) {
           if (t && MediaRecorder.isTypeSupported(t)) {
             mimeType = t;
@@ -260,6 +283,48 @@ export class RecorderEngine {
       }
 
       this.mediaRecorder = new MediaRecorder(finalStream, recorderOptions);
+      this.recordedChunks = [];
+
+      // Setup secondary isolated recorders if both screen and webcam are active
+      if (this.screenStream && this.webcamStream) {
+        try {
+          const isolatedScreenStream = new MediaStream();
+          this.screenStream.getVideoTracks().forEach((track) => isolatedScreenStream.addTrack(track));
+          if (shouldAttachAudio && this.audioMixer) {
+            this.audioMixer.destinationStream.getAudioTracks().forEach((track) => isolatedScreenStream.addTrack(track));
+          }
+          this.screenRecorder = new MediaRecorder(isolatedScreenStream, recorderOptions);
+          this.screenChunks = [];
+          this.screenRecorder.ondataavailable = (ev) => {
+            if (ev.data && ev.data.size > 0) {
+              this.screenChunks.push(ev.data);
+            }
+          };
+        } catch (e) {
+          console.warn('Isolated screen recorder not created:', e);
+          this.screenRecorder = null;
+        }
+
+        try {
+          const isolatedCamStream = new MediaStream();
+          this.webcamStream.getVideoTracks().forEach((track) => isolatedCamStream.addTrack(track));
+          this.camRecorder = new MediaRecorder(isolatedCamStream, { mimeType });
+          this.camChunks = [];
+          this.camRecorder.ondataavailable = (ev) => {
+            if (ev.data && ev.data.size > 0) {
+              this.camChunks.push(ev.data);
+            }
+          };
+        } catch (e) {
+          console.warn('Isolated camera recorder not created:', e);
+          this.camRecorder = null;
+        }
+      } else {
+        this.screenRecorder = null;
+        this.camRecorder = null;
+        this.screenChunks = [];
+        this.camChunks = [];
+      }
 
       this.mediaRecorder.ondataavailable = (event) => {
         if (event.data && event.data.size > 0) {
@@ -355,6 +420,20 @@ export class RecorderEngine {
     if (this.mediaRecorder.state === 'inactive') {
       this.mediaRecorder.start(1000);
     }
+    if (this.screenRecorder && this.screenRecorder.state === 'inactive') {
+      try {
+        this.screenRecorder.start(1000);
+      } catch (e) {
+        console.warn('screenRecorder start failed:', e);
+      }
+    }
+    if (this.camRecorder && this.camRecorder.state === 'inactive') {
+      try {
+        this.camRecorder.start(1000);
+      } catch (e) {
+        console.warn('camRecorder start failed:', e);
+      }
+    }
   }
 
   public async startRecording(
@@ -372,16 +451,38 @@ export class RecorderEngine {
     if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
       this.mediaRecorder.pause();
     }
+    if (this.screenRecorder && this.screenRecorder.state === 'recording') {
+      try {
+        this.screenRecorder.pause();
+      } catch (_) {}
+    }
+    if (this.camRecorder && this.camRecorder.state === 'recording') {
+      try {
+        this.camRecorder.pause();
+      } catch (_) {}
+    }
   }
 
   public resumeRecording(): void {
     if (this.mediaRecorder && this.mediaRecorder.state === 'paused') {
       this.mediaRecorder.resume();
     }
+    if (this.screenRecorder && this.screenRecorder.state === 'paused') {
+      try {
+        this.screenRecorder.resume();
+      } catch (_) {}
+    }
+    if (this.camRecorder && this.camRecorder.state === 'paused') {
+      try {
+        this.camRecorder.resume();
+      } catch (_) {}
+    }
   }
 
   public async stopRecording(flushMs: number = 450): Promise<{
     blob: Blob;
+    screenBlob?: Blob;
+    camBlob?: Blob;
     duration: number;
     mimeType: string;
     bookmarks: VideoBookmark[];
@@ -413,28 +514,77 @@ export class RecorderEngine {
       const events = this.eventTracker.stop();
       const metadata = buildRecordingMetadata(cursorPoints, events.clicks, events.keyboard, bookmarks);
 
+      // Stop secondary recorders if active
+      if (this.screenRecorder && this.screenRecorder.state !== 'inactive') {
+        try {
+          if (this.screenRecorder.state === 'recording') {
+            this.screenRecorder.requestData();
+          }
+          this.screenRecorder.stop();
+        } catch (_) {}
+      }
+      if (this.camRecorder && this.camRecorder.state !== 'inactive') {
+        try {
+          if (this.camRecorder.state === 'recording') {
+            this.camRecorder.requestData();
+          }
+          this.camRecorder.stop();
+        } catch (_) {}
+      }
+
       let isFinalized = false;
       const finalize = async () => {
         if (isFinalized) return;
         isFinalized = true;
 
+        const capturedChunks = [...this.recordedChunks];
+        const capturedScreenChunks = [...this.screenChunks];
+        const capturedCamChunks = [...this.camChunks];
+
         // Immediately revoke and stop all hardware capture streams so camera/mic/screen indicators vanish instantly
         this.cleanupStreams();
 
-        const capturedChunks = [...this.recordedChunks];
         let fullBlob = new Blob(capturedChunks, { type: mimeType });
         if (fullBlob.size > 0) {
           try {
             // Patch WebM header with accurate duration so video seeks instantly and never freezes
             fullBlob = await fixWebmDuration(fullBlob, durationMs);
           } catch (e) {
-            console.warn('WebM duration fix skipped:', e);
+            console.warn('WebM duration fix skipped for composite blob:', e);
+          }
+        }
+
+        let screenBlob: Blob | undefined;
+        if (capturedScreenChunks.length > 0) {
+          let sBlob = new Blob(capturedScreenChunks, { type: mimeType });
+          if (sBlob.size > 0) {
+            try {
+              sBlob = await fixWebmDuration(sBlob, durationMs);
+            } catch (e) {
+              console.warn('WebM duration fix skipped for screen track:', e);
+            }
+            screenBlob = sBlob;
+          }
+        }
+
+        let camBlob: Blob | undefined;
+        if (capturedCamChunks.length > 0) {
+          let cBlob = new Blob(capturedCamChunks, { type: mimeType });
+          if (cBlob.size > 0) {
+            try {
+              cBlob = await fixWebmDuration(cBlob, durationMs);
+            } catch (e) {
+              console.warn('WebM duration fix skipped for camera track:', e);
+            }
+            camBlob = cBlob;
           }
         }
 
         this.callbacks.onStateChange('stopped');
         resolve({
           blob: fullBlob,
+          screenBlob,
+          camBlob,
           duration: durationSeconds,
           mimeType,
           bookmarks,
@@ -657,5 +807,29 @@ export class RecorderEngine {
       }
       this.mediaRecorder = null;
     }
+
+    if (this.screenRecorder) {
+      this.screenRecorder.ondataavailable = null;
+      if (this.screenRecorder.state !== 'inactive') {
+        try {
+          this.screenRecorder.stop();
+        } catch (_) {}
+      }
+      this.screenRecorder = null;
+    }
+
+    if (this.camRecorder) {
+      this.camRecorder.ondataavailable = null;
+      if (this.camRecorder.state !== 'inactive') {
+        try {
+          this.camRecorder.stop();
+        } catch (_) {}
+      }
+      this.camRecorder = null;
+    }
+
+    this.recordedChunks = [];
+    this.screenChunks = [];
+    this.camChunks = [];
   }
 }

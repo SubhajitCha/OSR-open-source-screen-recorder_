@@ -247,7 +247,7 @@ export const Timeline: React.FC<TimelineProps> = ({
   }, []);
 
   return (
-    <div className="w-full bg-white dark:bg-[#101013] border-t border-slate-200/90 dark:border-zinc-800/90 px-4 py-2.5 select-none flex flex-col gap-2 text-slate-800 dark:text-[#EDEDED] font-sans transition-colors relative">
+    <div className="w-full bg-[#f3f5f8] dark:bg-[#111215] border-t-2 border-slate-300 dark:border-zinc-700 px-4 py-2.5 select-none flex flex-col gap-2 text-slate-800 dark:text-[#EDEDED] font-sans transition-colors relative shadow-[0_-6px_20px_rgba(0,0,0,0.06)] dark:shadow-none">
       {/* Top Edge Resize Drag Handle with Snatch-to-minimize support */}
       {onStartResizeDrag && (
         <div
@@ -270,19 +270,27 @@ export const Timeline: React.FC<TimelineProps> = ({
       <div className="flex items-center justify-between gap-3 text-xs">
         {/* Left: Track Indicator & Pro Workflow Tip */}
         <div className="flex items-center gap-2.5">
-          <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 text-slate-700 dark:text-zinc-300 font-bold text-[11px] shadow-2xs">
-            <span className="w-2 h-2 rounded-full bg-[#8DB355] animate-pulse" />
-            <Film01Icon className="w-3.5 h-3.5 text-[#8DB355]" />
+          <button
+            type="button"
+            onClick={onToggleCollapse}
+            className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white dark:bg-zinc-900 hover:bg-slate-100 dark:hover:bg-zinc-800 border border-slate-300 dark:border-zinc-700 text-slate-800 dark:text-zinc-200 font-bold text-[11px] shadow-2xs transition-colors cursor-pointer"
+            title={isCollapsed ? 'Expand Timeline' : 'Minimize Timeline'}
+          >
             <span className="tracking-wide uppercase">TIMELINE</span>
-          </div>
-          <span className="hidden lg:inline-block text-[11px] text-slate-400 dark:text-zinc-500 font-medium">
+            {isCollapsed ? (
+              <ArrowUp01Icon className="w-3.5 h-3.5 text-[#D90000]" />
+            ) : (
+              <ArrowDown01Icon className="w-3.5 h-3.5 text-slate-500 dark:text-zinc-400" />
+            )}
+          </button>
+          <span className="hidden lg:inline-block text-[11px] text-slate-500 dark:text-zinc-400 font-medium">
             Drag handles to trim clip • Hover on Zoom lane below to add zooms
           </span>
         </div>
 
-        {/* Right: Studio Digital Timecode Capsule & Minimize Toggle */}
+        {/* Right: Studio Digital Timecode Capsule */}
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-2 bg-slate-100/90 dark:bg-zinc-900/90 px-3.5 py-1 rounded-full border border-slate-200 dark:border-zinc-800 shadow-inner">
+          <div className="flex items-center gap-2 bg-white dark:bg-zinc-900 px-3.5 py-1 rounded-full border border-slate-200 dark:border-zinc-800 shadow-2xs">
             <div className="flex items-center gap-1 font-mono text-xs">
               <span className="font-black text-[#D90000] dark:text-[#FF6666] tracking-tight">
                 {formatTimecode(currentTime)}
@@ -293,34 +301,19 @@ export const Timeline: React.FC<TimelineProps> = ({
               </span>
             </div>
           </div>
-
-          {onToggleCollapse && (
-            <button
-              type="button"
-              onClick={onToggleCollapse}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100 dark:bg-zinc-900 hover:bg-slate-200 dark:hover:bg-zinc-800 border border-slate-200/80 dark:border-zinc-800 text-slate-600 dark:text-zinc-300 text-[11px] font-semibold transition-colors cursor-pointer"
-              title={isCollapsed ? 'Expand Timeline' : 'Minimize Timeline'}
-            >
-              {isCollapsed ? (
-                <>
-                  <ArrowUp01Icon className="w-3.5 h-3.5 text-[#D90000]" />
-                  <span>Expand</span>
-                </>
-              ) : (
-                <>
-                  <ArrowDown01Icon className="w-3.5 h-3.5" />
-                  <span>Minimize</span>
-                </>
-              )}
-            </button>
-          )}
         </div>
       </div>
 
-      {isCollapsed ? (
-        /* Compact Mini-Scrubber when minimized */
+      {/* Mini Scrubber container when collapsed with smooth easing */}
+      <div
+        className={`transition-all duration-300 ${
+          isCollapsed
+            ? 'max-h-12 opacity-100 ease-out py-0.5'
+            : 'max-h-0 opacity-0 overflow-hidden pointer-events-none ease-in'
+        }`}
+      >
         <div
-          ref={containerRef}
+          ref={isCollapsed ? containerRef : undefined}
           onClick={handleTimelineClick}
           className="relative h-3.5 bg-slate-200/90 dark:bg-zinc-800/90 rounded-full overflow-hidden cursor-pointer group shadow-inner"
           title="Click to seek on minimized timeline"
@@ -334,19 +327,27 @@ export const Timeline: React.FC<TimelineProps> = ({
             style={{ left: `${playheadPercent}%` }}
           />
         </div>
-      ) : (
-        /* Modern Multi-Track Timeline Canvas */
-        <div className="bg-slate-50 dark:bg-[#09090C] rounded-2xl border border-slate-200/90 dark:border-zinc-800/90 overflow-visible shadow-xs p-3 pt-6 pb-3 flex flex-col gap-2 relative">
-        {/* Main interactive container */}
-        <div
-          ref={containerRef}
-          onClick={handleTimelineClick}
-          onMouseMove={handleTimelineMouseMove}
-          onMouseLeave={handleTimelineMouseLeave}
-          className="relative cursor-pointer select-none overflow-visible flex flex-col gap-2"
-        >
+      </div>
+
+      {/* Modern Multi-Track Timeline Canvas with Subtle Distinct Surface & Easing Transition */}
+      <div
+        className={`transition-all duration-300 overflow-hidden ${
+          isCollapsed
+            ? 'max-h-0 opacity-0 pointer-events-none ease-out scale-[0.99] origin-bottom'
+            : 'max-h-[600px] opacity-100 ease-in scale-100'
+        }`}
+      >
+        <div className="bg-[#e9ecf2] dark:bg-[#0a0a0d] rounded-2xl border border-slate-300/80 dark:border-zinc-800/90 overflow-visible shadow-inner p-3 pt-6 pb-3 flex flex-col gap-2 relative">
+          {/* Main interactive container */}
+          <div
+            ref={!isCollapsed ? containerRef : undefined}
+            onClick={handleTimelineClick}
+            onMouseMove={handleTimelineMouseMove}
+            onMouseLeave={handleTimelineMouseLeave}
+            className="relative cursor-pointer select-none overflow-visible flex flex-col gap-2"
+          >
           {/* 1. TOP PRECISION RULER */}
-          <div className="relative h-5 w-full -mt-4 mb-1 pointer-events-none select-none border-b border-slate-200/60 dark:border-zinc-800/80">
+          <div className="relative h-5 w-full -mt-4 mb-1 pointer-events-none select-none border-b border-slate-300/70 dark:border-zinc-800/80">
             {rulerData.map((t, i) => (
               <div
                 key={i}
@@ -355,13 +356,13 @@ export const Timeline: React.FC<TimelineProps> = ({
               >
                 {t.isMajor ? (
                   <>
-                    <span className="text-[9px] font-mono font-semibold text-slate-400 dark:text-zinc-500 tracking-tighter">
+                    <span className="text-[9px] font-mono font-semibold text-slate-500 dark:text-zinc-400 tracking-tighter">
                       {t.label}
                     </span>
-                    <div className="w-[1px] h-2 bg-slate-400/80 dark:bg-zinc-600 mt-0.5" />
+                    <div className="w-[1px] h-2 bg-slate-400/90 dark:bg-zinc-600 mt-0.5" />
                   </>
                 ) : (
-                  <div className="w-[1px] h-1 bg-slate-300/60 dark:bg-zinc-800 mb-0" />
+                  <div className="w-[1px] h-1 bg-slate-300/90 dark:bg-zinc-800 mb-0" />
                 )}
               </div>
             ))}
@@ -407,7 +408,7 @@ export const Timeline: React.FC<TimelineProps> = ({
           {/* ============================================================ */}
           <div className="relative group">
             {/* Lane Header Label (Screen Studio Style) */}
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-[10px] font-bold text-slate-400/80 dark:text-zinc-600 pointer-events-none select-none z-10">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-[10px] font-bold text-slate-500 dark:text-zinc-500 pointer-events-none select-none z-10">
               <Film01Icon className="w-3 h-3 text-[#8DB355]" />
               <span className="tracking-widest uppercase font-mono">VIDEO</span>
             </div>
@@ -415,7 +416,7 @@ export const Timeline: React.FC<TimelineProps> = ({
             {/* Video Track Container */}
             <div
               style={{ height: `${videoTrackHeightPx}px` }}
-              className="rounded-xl bg-slate-200/60 dark:bg-zinc-900/80 border border-slate-200 dark:border-zinc-800 relative overflow-hidden flex items-center shadow-inner"
+              className="rounded-xl bg-slate-300/60 dark:bg-zinc-900/90 border border-slate-300/90 dark:border-zinc-800 relative overflow-hidden flex items-center shadow-inner"
             >
               {/* Active Video Clip Range */}
               <div
@@ -550,7 +551,7 @@ export const Timeline: React.FC<TimelineProps> = ({
           {/* ============================================================ */}
           <div className="relative group">
             {/* Lane Header Label */}
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-[10px] font-bold text-slate-400/80 dark:text-zinc-600 pointer-events-none select-none z-10">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-[10px] font-bold text-slate-500 dark:text-zinc-400 pointer-events-none select-none z-10">
               <Search01Icon className="w-3 h-3 text-[#D90000]" />
               <span className="tracking-widest uppercase font-mono">ZOOM</span>
             </div>
@@ -562,11 +563,11 @@ export const Timeline: React.FC<TimelineProps> = ({
               onMouseMove={handleZoomTrackMouseMove}
               onMouseLeave={handleZoomTrackMouseLeave}
               style={{ height: `${zoomTrackHeightPx}px` }}
-              className="rounded-xl bg-slate-100/90 dark:bg-zinc-900/60 border border-slate-200/80 dark:border-zinc-800/80 relative overflow-visible flex items-center shadow-xs cursor-crosshair hover:border-[#D90000]/40 transition-colors"
+              className="rounded-xl bg-slate-300/40 dark:bg-zinc-900/70 border border-slate-300/80 dark:border-zinc-800/80 relative overflow-visible flex items-center shadow-xs cursor-crosshair hover:border-[#D90000]/40 transition-colors"
               title="Click anywhere to add a Zoom effect at that point"
             >
               {/* Subtle centerline guide for track automation feel */}
-              <div className="absolute left-16 right-4 top-1/2 h-[1px] border-b border-dashed border-slate-300/50 dark:border-zinc-800 pointer-events-none" />
+              <div className="absolute left-16 right-4 top-1/2 h-[1px] border-b border-dashed border-slate-300/80 dark:border-zinc-800 pointer-events-none" />
 
               {/* Dynamic Ghost Hover Box & "+ Add Zoom" badge on mouseover */}
               {zoomHover && !dragState && (
@@ -684,7 +685,7 @@ export const Timeline: React.FC<TimelineProps> = ({
           </div>
         </div>
       </div>
-    )}
+    </div>
   </div>
 );
 };

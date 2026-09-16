@@ -98,10 +98,10 @@ export const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
         {/* Minimal Header */}
         <div className="space-y-1.5 max-w-xl">
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-            What would you like to record?
+            Choose what to record
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400">
-            Select a recording mode to start your session.
+            Select an option below to get started.
           </p>
         </div>
 

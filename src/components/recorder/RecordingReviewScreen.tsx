@@ -115,6 +115,9 @@ export const RecordingReviewScreen: React.FC<RecordingReviewScreenProps> = ({
   }, []);
 
   const formatTimer = (totalSeconds: number) => {
+    if (!Number.isFinite(totalSeconds) || totalSeconds < 0 || isNaN(totalSeconds)) {
+      return '00:00';
+    }
     const mins = Math.floor(totalSeconds / 60);
     const secs = Math.floor(totalSeconds % 60);
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;

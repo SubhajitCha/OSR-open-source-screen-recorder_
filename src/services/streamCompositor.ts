@@ -505,6 +505,9 @@ export function createStreamCompositor(
     }
   };
 
+  // Draw initial frame immediately to initialize canvas stream buffer
+  drawFrame(performance.now());
+
   // Start foreground requestAnimationFrame loop
   animFrameId = requestAnimationFrame(renderLoop);
 

@@ -24,6 +24,7 @@ interface AdjustableLayerBoxProps {
   lockAspectRatio?: boolean;
   onQuickPreset?: (preset: 'fit' | 'full' | 'center') => void;
   onAlignChange?: (guides: { x: boolean; y: boolean }) => void;
+  onReset?: () => void;
 }
 
 export const AdjustableLayerBox: React.FC<AdjustableLayerBoxProps> = ({
@@ -42,6 +43,7 @@ export const AdjustableLayerBox: React.FC<AdjustableLayerBoxProps> = ({
   lockAspectRatio = false,
   onQuickPreset,
   onAlignChange,
+  onReset,
 }) => {
   const boxRef = useRef<HTMLDivElement | null>(null);
   const dragStartRef = useRef<{
@@ -342,6 +344,25 @@ useEffect(() => {
             title="Resize Bottom-Right"
             className="absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 w-4 h-4 rounded-full bg-white border-2 border-[#00e5ff] shadow-md cursor-nwse-resize z-50 hover:scale-125 transition-transform"
           />
+
+          {/* Simple Minimalist Reset Button */}
+          {onReset && (
+            <button
+              type="button"
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation();
+                onReset();
+              }}
+              className={`absolute z-50 flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-900/90 dark:bg-zinc-900/95 hover:bg-black text-white text-[11px] font-medium shadow-md border border-white/20 backdrop-blur-md cursor-pointer transition-colors select-none ${
+                rect.y < 8 ? 'top-2 right-2' : '-top-7 right-0'
+              }`}
+              title="Reset screen size"
+            >
+              <RotateRight01Icon className="w-3 h-3 text-[#00e5ff]" />
+              <span>Reset</span>
+            </button>
+          )}
         </>
       )}
     </div>

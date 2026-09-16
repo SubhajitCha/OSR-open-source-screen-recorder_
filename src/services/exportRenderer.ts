@@ -1,9 +1,7 @@
 import { Project } from '../types';
 import { extractCutSegments, extractZoomSegments } from './editorEngine';
-import { computeZoomTransformAtTime, applyVirtualCameraTransform } from './zoomEngine';
-import { drawClickEffects, drawSyntheticCursor, interpolateCursorPosition } from './cursorEngine';
 import { fixWebmDuration } from './webmDurationFixer';
-import { renderBackgroundToCanvas } from './backgroundPresets';
+import { drawCompositionScene } from './layoutRenderer';
 
 export interface ExportProgress {
   progress: number; // 0 to 100
@@ -34,9 +32,10 @@ export async function renderProjectToVideo(
         stage: 'preparing',
       });
 
-      // 1. Create source video element
+      // 1. Create screen video element
+      const mainBlob = project.source.screenBlob || project.source.videoBlob;
       const video = document.createElement('video');
-      const videoUrl = URL.createObjectURL(project.source.videoBlob);
+      const videoUrl = URL.createObjectURL(mainBlob);
       video.src = videoUrl;
       video.muted = true;
       video.playsInline = true;
@@ -44,8 +43,32 @@ export async function renderProjectToVideo(
 
       await new Promise<void>((res, rej) => {
         video.onloadedmetadata = () => res();
-        video.onerror = () => rej(new Error('Failed to load video source for export'));
+        video.onerror = () => rej(new Error('Failed to load screen video source for export'));
       });
+
+      // Camera video element if multi-track
+      let camVideo: HTMLVideoElement | null = null;
+      let camVideoUrl: string | null = null;
+      if (project.source.camBlob) {
+        camVideo = document.createElement('video');
+        camVideoUrl = URL.createObjectURL(project.source.camBlob);
+        camVideo.src = camVideoUrl;
+        camVideo.muted = true;
+        camVideo.playsInline = true;
+        camVideo.preload = 'auto';
+
+        await new Promise<void>((res) => {
+          if (!camVideo) {
+            res();
+            return;
+          }
+          camVideo.onloadedmetadata = () => res();
+          camVideo.onerror = () => {
+            console.warn('Camera video failed to load for export, continuing with screen only');
+            res();
+          };
+        });
+      }
 
       const srcWidth = video.videoWidth || project.source.width || 1920;
       const srcHeight = video.videoHeight || project.source.height || 1080;
@@ -150,8 +173,13 @@ export async function renderProjectToVideo(
       video.playbackRate = 1.0;
       await video.play();
 
+      if (camVideo) {
+        camVideo.currentTime = trimStart;
+        camVideo.playbackRate = 1.0;
+        camVideo.play().catch(() => {});
+      }
+
       let isCancelled = false;
-      let renderedDuration = 0;
       let lastCheckTime = performance.now();
 
       const renderFrame = () => {
@@ -163,9 +191,16 @@ export async function renderProjectToVideo(
         for (const cut of cutSegments) {
           if (currentTime >= cut.start && currentTime < cut.end) {
             video.currentTime = cut.end + 0.05;
+            if (camVideo) {
+              camVideo.currentTime = cut.end + 0.05;
+            }
             currentTime = video.currentTime;
             break;
           }
+        }
+
+        if (camVideo && Math.abs(camVideo.currentTime - currentTime) > 0.25) {
+          camVideo.currentTime = currentTime;
         }
 
         if (video.ended || currentTime >= trimEnd - 0.05) {
@@ -173,8 +208,18 @@ export async function renderProjectToVideo(
           return;
         }
 
-        // Draw Frame
-        drawExportFrame(ctx, video, currentTime, outWidth, outHeight, project, zoomSegments, metadata);
+        // Draw Frame using Shared Multi-Track Layout Renderer
+        drawCompositionScene({
+          ctx,
+          width: outWidth,
+          height: outHeight,
+          screenVideo: video,
+          camVideo,
+          currentTime,
+          project,
+          zoomSegments,
+          metadata,
+        });
 
         // Progress notification
         const now = performance.now();
@@ -197,6 +242,9 @@ export async function renderProjectToVideo(
       const finishExport = async () => {
         isCancelled = true;
         video.pause();
+        if (camVideo) {
+          camVideo.pause();
+        }
 
         onProgress({
           progress: 96,
@@ -207,6 +255,9 @@ export async function renderProjectToVideo(
 
         recorder.onstop = async () => {
           URL.revokeObjectURL(videoUrl);
+          if (camVideoUrl) {
+            URL.revokeObjectURL(camVideoUrl);
+          }
           audioCtx.close().catch(() => {});
 
           let finalBlob = new Blob(chunks, { type: mimeType });
@@ -245,128 +296,4 @@ export async function renderProjectToVideo(
       reject(err);
     }
   });
-}
-
-function drawExportFrame(
-  ctx: CanvasRenderingContext2D,
-  video: HTMLVideoElement,
-  currentTime: number,
-  canvasWidth: number,
-  canvasHeight: number,
-  project: Project,
-  zoomSegments: import('../types').ZoomSegment[],
-  metadata: import('../types').RecordingMetadata
-): void {
-  const { background, padding, borderRadius, shadow, showCursor, cursorScale, cursorStyle, clickEffect } =
-    project.appearance;
-
-  // 1. Draw Background (Supports all Apple presets, grain textures, and gradients)
-  renderBackgroundToCanvas(ctx, canvasWidth, canvasHeight, background);
-
-  // 2. Calculate Video Inner Box with Padding
-  const scaleFactor = canvasWidth / 1920;
-  const padX = padding * scaleFactor;
-  const padY = padding * scaleFactor * (canvasHeight / canvasWidth > 0.6 ? 1 : 0.8);
-  const videoBoxW = canvasWidth - padX * 2;
-  const videoBoxH = canvasHeight - padY * 2;
-  const videoBoxX = padX;
-  const videoBoxY = padY;
-
-  // Preserve Source Video Intrinsic Aspect Ratio
-  const vidW = video.videoWidth || project.source.width || 1920;
-  const vidH = video.videoHeight || project.source.height || 1080;
-  const vidRatio = vidW / vidH;
-  const boxRatio = videoBoxW / videoBoxH;
-
-  let drawW = videoBoxW;
-  let drawH = videoBoxH;
-  let drawX = videoBoxX;
-  let drawY = videoBoxY;
-
-  if (Math.abs(vidRatio - boxRatio) > 0.01) {
-    if (vidRatio > boxRatio) {
-      drawW = videoBoxW;
-      drawH = videoBoxW / vidRatio;
-      drawY = videoBoxY + (videoBoxH - drawH) / 2;
-    } else {
-      drawH = videoBoxH;
-      drawW = videoBoxH * vidRatio;
-      drawX = videoBoxX + (videoBoxW - drawW) / 2;
-    }
-  }
-
-  // 3. Compute Zoom Transform with tweakable Easing & Motion Blur
-  const zoom = computeZoomTransformAtTime(currentTime, zoomSegments, 0.45, project.appearance);
-
-  ctx.save();
-
-  // Create rounded clipping path with drop shadow for the video window
-  const rad = borderRadius * scaleFactor;
-  ctx.beginPath();
-  ctx.roundRect(videoBoxX, videoBoxY, videoBoxW, videoBoxH, rad);
-
-  if (shadow > 0 && padding > 0) {
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.55)';
-    ctx.shadowBlur = shadow * scaleFactor * 1.2;
-    ctx.shadowOffsetY = shadow * 0.4 * scaleFactor;
-  }
-
-  ctx.fillStyle = '#000000';
-  ctx.fill();
-  ctx.clip();
-
-  // Draw Video with Virtual Camera Transform & Optical Motion Blur
-  ctx.save();
-  applyVirtualCameraTransform(ctx, drawX, drawY, drawW, drawH, zoom);
-
-  try {
-    if (zoom.isTransitioning && zoom.motionBlurEnabled && zoom.motionBlurPx > 0.2) {
-      const blurAmount = Math.min(18, Math.max(0.6, zoom.motionBlurPx * scaleFactor)).toFixed(1);
-      ctx.save();
-      ctx.filter = `blur(${blurAmount}px)`;
-      ctx.globalAlpha = 0.58;
-      ctx.drawImage(video, drawX, drawY, drawW, drawH);
-      ctx.restore();
-
-      ctx.save();
-      ctx.globalAlpha = 0.90;
-      ctx.drawImage(video, drawX, drawY, drawW, drawH);
-      ctx.restore();
-    } else {
-      ctx.drawImage(video, drawX, drawY, drawW, drawH);
-    }
-  } catch {}
-
-  // 4. Draw Click Ripple & Glow Animations in virtual camera space
-  if (metadata.clicks && metadata.clicks.length > 0) {
-    drawClickEffects(
-      ctx,
-      metadata.clicks,
-      currentTime,
-      drawW,
-      drawH,
-      clickEffect,
-      0.6,
-      drawX,
-      drawY
-    );
-  }
-
-  // 5. Draw Synthetic High-DPI Cursor in virtual camera space
-  if (showCursor && metadata.cursor && metadata.cursor.length > 0) {
-    const cur = interpolateCursorPosition(
-      metadata.cursor,
-      currentTime,
-      project.appearance.cursorOffsetMs || 0
-    );
-    if (cur.visible) {
-      const curScreenX = drawX + cur.x * drawW;
-      const curScreenY = drawY + cur.y * drawH;
-      const cursorZoomScale = Math.max(0.75, cursorScale * scaleFactor / Math.pow(zoom.scale, 0.3));
-      drawSyntheticCursor(ctx, curScreenX, curScreenY, cursorZoomScale, cursorStyle);
-    }
-  }
-
-  ctx.restore(); // restore virtual camera
-  ctx.restore(); // restore clip & background
 }

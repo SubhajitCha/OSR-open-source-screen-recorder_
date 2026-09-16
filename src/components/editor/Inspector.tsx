@@ -96,13 +96,19 @@ export const Inspector: React.FC<InspectorProps> = ({
     id: CompositionLayout;
     title: string;
     caption: string;
-    type: 'corner-cam' | 'end-to-end' | 'spaced' | 'beside';
+    type: 'end-to-end' | 'corner-cam' | 'spaced' | 'beside';
   }[] = [
     {
       id: 'overlay',
       title: 'End to End',
-      caption: 'Full canvas · 0 padding',
+      caption: 'Full screen · Corner edge',
       type: 'end-to-end',
+    },
+    {
+      id: 'corner-cam',
+      title: 'Floating Corner',
+      caption: 'Floating cam · Inset',
+      type: 'corner-cam',
     },
     {
       id: 'framed',
@@ -111,15 +117,9 @@ export const Inspector: React.FC<InspectorProps> = ({
       type: 'spaced',
     },
     {
-      id: 'corner-cam',
-      title: 'Floating Corner',
-      caption: 'Framed screen · Corner focus',
-      type: 'corner-cam',
-    },
-    {
       id: 'split',
       title: 'Beside',
-      caption: 'Two panes beside',
+      caption: 'Camera beside screen',
       type: 'beside',
     },
   ];
@@ -132,14 +132,14 @@ export const Inspector: React.FC<InspectorProps> = ({
         borderRadius: 0,
         shadow: 0,
       });
-    } else if (layoutId === 'framed') {
+    } else if (layoutId === 'corner-cam') {
       onUpdateAppearance({
         layout: layoutId,
-        padding: 44,
-        borderRadius: 16,
-        shadow: 30,
+        padding: 0,
+        borderRadius: 0,
+        shadow: 0,
       });
-    } else if (layoutId === 'corner-cam') {
+    } else if (layoutId === 'framed') {
       onUpdateAppearance({
         layout: layoutId,
         padding: 32,
@@ -149,7 +149,7 @@ export const Inspector: React.FC<InspectorProps> = ({
     } else if (layoutId === 'split') {
       onUpdateAppearance({
         layout: layoutId,
-        padding: 32,
+        padding: 24,
         borderRadius: 16,
         shadow: 25,
       });
@@ -168,9 +168,9 @@ export const Inspector: React.FC<InspectorProps> = ({
   return (
     <aside
       style={{ width: isCollapsed ? 0 : width }}
-      className={`shrink-0 bg-white dark:bg-[#121215] border-r border-slate-200 dark:border-zinc-800 flex flex-col h-full overflow-hidden select-none text-slate-800 dark:text-[#EDEDED] font-sans transition-[width] duration-150 relative ${
-        isCollapsed ? 'w-0 border-r-0 pointer-events-none' : ''
-      }`}
+      className={`shrink-0 bg-white dark:bg-[#121215] border-r border-slate-200 dark:border-zinc-800 flex flex-col h-full overflow-hidden select-none text-slate-800 dark:text-[#EDEDED] font-sans transition-[width] duration-300 ${
+        isCollapsed ? 'w-0 border-r-0 pointer-events-none ease-out' : 'ease-in'
+      } relative`}
     >
       {/* Sidebar Header */}
       <div className="px-4 py-3 border-b border-slate-200 dark:border-zinc-800 flex items-center justify-between transition-colors bg-slate-50/50 dark:bg-zinc-900/30 shrink-0">
@@ -204,7 +204,7 @@ export const Inspector: React.FC<InspectorProps> = ({
             className="p-3 flex items-center justify-between cursor-pointer hover:bg-slate-100/80 dark:hover:bg-zinc-800/60 transition-colors"
           >
             <div className="flex items-center gap-2">
-              <div className="p-1 rounded-md bg-[#8DB355]/15 text-[#8DB355]">
+              <div className="p-1 rounded-md bg-[#D90000]/12 text-[#D90000] dark:bg-[#D90000]/20 dark:text-[#FF6666]">
                 <Layers01Icon className="w-3.5 h-3.5" />
               </div>
               <span className="font-extrabold text-[11px] text-slate-900 dark:text-white tracking-wider uppercase">
@@ -235,30 +235,80 @@ export const Inspector: React.FC<InspectorProps> = ({
                           : 'bg-white dark:bg-zinc-800/80 border-slate-200 dark:border-zinc-700 hover:border-slate-300 dark:hover:border-zinc-600'
                       }`}
                     >
-                      {/* Mini Visual Diagram */}
-                      <div className="w-full h-11 mb-2 rounded-lg bg-slate-100 dark:bg-zinc-900/90 border border-slate-200/80 dark:border-zinc-700/60 relative overflow-hidden flex items-center justify-center p-1">
-                        {item.id === 'overlay' && (
-                          <div className="w-full h-full bg-[#8DB355]/25 rounded border border-[#8DB355]/60" />
-                        )}
-                        {item.id === 'framed' && (
-                          <div className="w-4/5 h-3/4 bg-[#8DB355]/25 rounded border border-[#8DB355]/60 shadow-xs" />
-                        )}
-                        {item.id === 'corner-cam' && (
-                          <div className="w-full h-full relative flex items-center justify-center">
-                            <div className="w-4/5 h-3/4 bg-[#8DB355]/25 rounded border border-[#8DB355]/50" />
-                            <div className="absolute right-1 bottom-1 w-3.5 h-3 bg-[#D90000]/70 rounded border border-[#D90000]" />
-                          </div>
-                        )}
-                        {item.id === 'split' && (
-                          <div className="w-full h-full flex gap-1 items-center justify-center">
-                            <div className="flex-1 h-3/4 bg-[#8DB355]/25 rounded border border-[#8DB355]/60" />
-                            <div className="w-1/3 h-3/4 bg-[#D90000]/70 rounded border border-[#D90000]" />
+                      {/* Graphical Layout Diagram */}
+                      <div
+                        className="relative w-full h-12 rounded-lg overflow-hidden border border-black/10 dark:border-white/10 mb-1.5 flex items-center justify-center transition-transform group-hover:scale-[1.02]"
+                        style={{
+                          background:
+                            item.type === 'end-to-end' || item.type === 'corner-cam'
+                              ? '#1e293b'
+                              : (typeof appearance.background === 'string' ? appearance.background : 'linear-gradient(145deg, #18181B 0%, #131316 50%, #0D0D0F 100%)'),
+                        }}
+                      >
+                        {/* 1. End to End (Screen edge-to-edge, camera sitting flush at corner) */}
+                        {item.type === 'end-to-end' && (
+                          <div className="relative w-full h-full bg-white dark:bg-zinc-800 flex flex-col items-center justify-center p-1.5">
+                            <div className="w-8 h-1 rounded-full bg-slate-300 dark:bg-zinc-600 mb-1" />
+                            <div className="w-5 h-1 rounded-full bg-slate-200 dark:bg-zinc-700" />
+
+                            <div className="absolute bottom-0 right-0 w-4.5 h-4.5 rounded-tl-md bg-slate-900 text-white border-t border-l border-white/20 flex items-center justify-center shadow-xs">
+                              <svg viewBox="0 0 24 24" fill="currentColor" className="w-2.5 h-2.5 text-[#bef264]">
+                                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                              </svg>
+                            </div>
                           </div>
                         )}
 
+                        {/* 2. Floating Corner (Screen edge-to-edge, floating camera with margin) */}
+                        {item.type === 'corner-cam' && (
+                          <div className="relative w-full h-full bg-white dark:bg-zinc-800 flex flex-col items-center justify-center p-1.5">
+                            <div className="w-8 h-1 rounded-full bg-slate-300 dark:bg-zinc-600 mb-1" />
+                            <div className="w-5 h-1 rounded-full bg-slate-200 dark:bg-zinc-700" />
+
+                            <div className="absolute bottom-1 right-1.5 w-4 h-4 rounded-md bg-slate-900 text-white border border-white/20 flex items-center justify-center shadow-md">
+                              <svg viewBox="0 0 24 24" fill="currentColor" className="w-2 h-2 text-[#bef264]">
+                                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                              </svg>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* 3. Spacing Around (Framed with visible background, corner camera) */}
+                        {item.type === 'spaced' && (
+                          <div className="relative w-full h-full flex items-center justify-center p-1.5">
+                            <div className="w-[82%] h-[82%] rounded-md bg-white dark:bg-zinc-900 border border-black/10 dark:border-white/10 shadow-sm flex flex-col items-center justify-center">
+                              <div className="w-6 h-1 rounded-full bg-slate-300 dark:bg-zinc-600 mb-0.5" />
+                              <div className="w-4 h-1 rounded-full bg-slate-200 dark:bg-zinc-700" />
+                            </div>
+
+                            <div className="absolute bottom-1 left-1.5 w-4.5 h-4.5 rounded-md bg-slate-900 text-white border border-white/20 flex items-center justify-center shadow-xs">
+                              <svg viewBox="0 0 24 24" fill="currentColor" className="w-2.5 h-2.5">
+                                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                              </svg>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* 4. Beside (Camera sits beside the screen) */}
+                        {item.type === 'beside' && (
+                          <div className="relative w-full h-full flex items-center justify-between p-1.5 gap-1">
+                            <div className="w-[28%] h-[82%] rounded-md bg-slate-900 text-white border border-white/20 flex items-center justify-center shadow-xs">
+                              <svg viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3 text-[#bef264]">
+                                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                              </svg>
+                            </div>
+
+                            <div className="flex-1 h-[82%] rounded-md bg-white dark:bg-zinc-900 border border-black/10 dark:border-white/10 shadow-sm flex flex-col items-center justify-center">
+                              <div className="w-7 h-1 rounded-full bg-slate-300 dark:bg-zinc-600 mb-0.5" />
+                              <div className="w-4 h-1 rounded-full bg-slate-200 dark:bg-zinc-700" />
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Active Selection Indicator */}
                         {isSelected && (
-                          <div className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-[#8DB355] text-white flex items-center justify-center shadow-xs">
-                            <Tick01Icon className="w-2 h-2" />
+                          <div className="absolute top-1 right-1 z-10 w-3.5 h-3.5 rounded-full bg-[#f97316] text-white flex items-center justify-center shadow-xs">
+                            <Tick01Icon className="w-2.5 h-2.5" />
                           </div>
                         )}
                       </div>
@@ -334,6 +384,110 @@ export const Inspector: React.FC<InspectorProps> = ({
                   className="w-full h-1.5 bg-slate-200 dark:bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-[#D90000]"
                 />
               </div>
+
+              {/* Camera Frame Controls (Position, Shape, Size) */}
+              {(currentLayout === 'corner-cam' || project.source.camBlob) && (
+                <div className="pt-2 border-t border-slate-200/80 dark:border-zinc-800 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">
+                      Presenter Camera
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => onUpdateAppearance({ cameraHidden: !appearance.cameraHidden })}
+                      className={`text-[10px] font-semibold px-2 py-0.5 rounded cursor-pointer border transition-colors ${
+                        appearance.cameraHidden
+                          ? 'bg-rose-500/10 text-rose-500 border-rose-500/30'
+                          : 'bg-[#8DB355]/10 text-[#8DB355] border-[#8DB355]/30'
+                      }`}
+                    >
+                      {appearance.cameraHidden ? 'Hidden' : 'Visible'}
+                    </button>
+                  </div>
+
+                  {!appearance.cameraHidden && (
+                    <>
+                      {/* Camera Position */}
+                      <div>
+                        <span className="block text-[10px] text-slate-600 dark:text-zinc-400 mb-1">Position</span>
+                        <div className="grid grid-cols-4 gap-1">
+                          {[
+                            { id: 'top-left', label: 'TL' },
+                            { id: 'top-right', label: 'TR' },
+                            { id: 'bottom-left', label: 'BL' },
+                            { id: 'bottom-right', label: 'BR' },
+                          ].map((pos) => (
+                            <button
+                              key={pos.id}
+                              type="button"
+                              onClick={() =>
+                                onUpdateAppearance({
+                                  cameraPosition: pos.id as 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right',
+                                })
+                              }
+                              className={`py-1 text-[10px] font-semibold rounded border transition-all cursor-pointer ${
+                                (appearance.cameraPosition || 'bottom-right') === pos.id
+                                  ? 'bg-[#D90000] border-[#D90000] text-white font-bold'
+                                  : 'bg-white dark:bg-zinc-800 border-slate-200 dark:border-zinc-700 text-slate-700 dark:text-zinc-300'
+                              }`}
+                            >
+                              {pos.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Camera Shape */}
+                      <div>
+                        <span className="block text-[10px] text-slate-600 dark:text-zinc-400 mb-1">Shape</span>
+                        <div className="grid grid-cols-3 gap-1">
+                          {[
+                            { id: 'circle', label: 'Circle' },
+                            { id: 'squircle', label: 'Squircle' },
+                            { id: 'square', label: 'Square' },
+                          ].map((sh) => (
+                            <button
+                              key={sh.id}
+                              type="button"
+                              onClick={() =>
+                                onUpdateAppearance({
+                                  cameraShape: sh.id as 'circle' | 'squircle' | 'square',
+                                })
+                              }
+                              className={`py-1 text-[10px] font-semibold rounded border transition-all cursor-pointer ${
+                                (appearance.cameraShape || 'circle') === sh.id
+                                  ? 'bg-[#8DB355] border-[#8DB355] text-white font-bold'
+                                  : 'bg-white dark:bg-zinc-800 border-slate-200 dark:border-zinc-700 text-slate-700 dark:text-zinc-300'
+                              }`}
+                            >
+                              {sh.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Camera Size Slider */}
+                      <div>
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-[10px] text-slate-600 dark:text-zinc-400">Size</span>
+                          <span className="font-mono text-[10px] text-[#8DB355] font-bold">
+                            {appearance.cameraSize || 25}%
+                          </span>
+                        </div>
+                        <input
+                          type="range"
+                          min="15"
+                          max="40"
+                          step="1"
+                          value={appearance.cameraSize || 25}
+                          onChange={(e) => onUpdateAppearance({ cameraSize: parseInt(e.target.value, 10) })}
+                          className="w-full h-1 bg-slate-200 dark:bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-[#D90000]"
+                        />
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -345,7 +499,7 @@ export const Inspector: React.FC<InspectorProps> = ({
             className="p-3 flex items-center justify-between cursor-pointer hover:bg-slate-100/80 dark:hover:bg-zinc-800/60 transition-colors"
           >
             <div className="flex items-center gap-2">
-              <div className="p-1 rounded-md bg-[#8DB355]/15 text-[#8DB355]">
+              <div className="p-1 rounded-md bg-[#D90000]/12 text-[#D90000] dark:bg-[#D90000]/20 dark:text-[#FF6666]">
                 <ColorsIcon className="w-3.5 h-3.5" />
               </div>
               <span className="font-extrabold text-[11px] text-slate-900 dark:text-white tracking-wider uppercase">
@@ -494,15 +648,18 @@ export const Inspector: React.FC<InspectorProps> = ({
         </div>
 
         {/* SECTION 4: ZOOM EFFECTS */}
-        <div ref={zoomSectionRef} className="border-b border-slate-200 dark:border-zinc-800">
-          <button
-            type="button"
+        <div ref={zoomSectionRef} className="bg-slate-50 dark:bg-zinc-900/60 rounded-xl border border-slate-200 dark:border-zinc-800 overflow-hidden shadow-xs">
+          <div
             onClick={() => toggleSection('zoom')}
-            className="w-full px-4 py-3 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-zinc-800/50 transition-colors cursor-pointer"
+            className="p-3 flex items-center justify-between cursor-pointer hover:bg-slate-100/80 dark:hover:bg-zinc-800/60 transition-colors"
           >
             <div className="flex items-center gap-2">
-              <Search01Icon className="w-4 h-4 text-[#D90000]" />
-              <span className="text-xs font-bold text-slate-700 dark:text-zinc-300">Zoom Effects</span>
+              <div className="p-1 rounded-md bg-[#D90000]/15 text-[#D90000]">
+                <Search01Icon className="w-3.5 h-3.5" />
+              </div>
+              <span className="font-extrabold text-[11px] text-slate-900 dark:text-white tracking-wider uppercase">
+                ZOOM EFFECTS
+              </span>
               {zoomSegments.length > 0 && (
                 <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#D90000]/10 text-[#D90000] font-bold">
                   {zoomSegments.length}
@@ -510,17 +667,17 @@ export const Inspector: React.FC<InspectorProps> = ({
               )}
             </div>
             {openSections.zoom ? (
-              <ArrowUp01Icon className="w-4 h-4 text-slate-400" />
+              <ArrowUp01Icon className="w-3.5 h-3.5 text-slate-400 dark:text-zinc-500" />
             ) : (
-              <ArrowDown01Icon className="w-4 h-4 text-slate-400" />
+              <ArrowDown01Icon className="w-3.5 h-3.5 text-slate-400 dark:text-zinc-500" />
             )}
-          </button>
+          </div>
 
           {openSections.zoom && (
-            <div className="p-4 pt-1 flex flex-col gap-4">
+            <div className="px-3 pb-3 pt-2 space-y-3 border-t border-slate-200 dark:border-zinc-800">
               {/* Selected Zoom Segment Controls if one is active */}
               {selectedZoom && onUpdateZoomSegment && (
-                <div className="p-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-[#D90000]/30 flex flex-col gap-3">
+                <div className="p-3 rounded-xl bg-white dark:bg-zinc-800/80 border border-[#D90000]/30 shadow-2xs flex flex-col gap-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5">
                       <div className="w-1.5 h-1.5 rounded-full bg-[#D90000] animate-pulse" />

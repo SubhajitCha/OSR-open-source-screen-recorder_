@@ -18,7 +18,9 @@ import {
 } from 'hugeicons-react';
 import {
   AppearanceSettings,
+  CompositionLayout,
   Project,
+  RecorderBackgroundConfig,
   RecordingMetadata,
   TimelineItem,
   VideoBookmark,
@@ -39,22 +41,30 @@ import { SavedRecording } from '../../types';
 
 interface VideoEditorProps {
   videoBlob: Blob;
+  screenBlob?: Blob;
+  camBlob?: Blob;
   duration: number;
   mimeType: string;
   bookmarks: VideoBookmark[];
   metadata?: RecordingMetadata;
   initialProject?: Project;
+  layout?: CompositionLayout;
+  background?: RecorderBackgroundConfig;
   onRecordAnother: () => void;
   onSavedToLibrary: () => void;
 }
 
 export const VideoEditor: React.FC<VideoEditorProps> = ({
   videoBlob,
+  screenBlob,
+  camBlob,
   duration,
   mimeType,
   bookmarks,
   metadata,
   initialProject,
+  layout = 'overlay',
+  background,
   onRecordAnother,
   onSavedToLibrary,
 }) => {
@@ -67,7 +77,24 @@ export const VideoEditor: React.FC<VideoEditorProps> = ({
       keyboard: [],
       bookmarks: bookmarks || [],
     };
-    return createInitialProject(videoBlob, duration, mimeType, safeMetadata, bookmarks || []);
+    const isEndToEnd = layout === 'overlay';
+    const initialAppearance: Partial<AppearanceSettings> = {
+      layout,
+      padding: isEndToEnd ? 0 : layout === 'framed' ? 44 : 32,
+      borderRadius: isEndToEnd ? 0 : 16,
+      shadow: isEndToEnd ? 0 : 25,
+      ...(background?.value ? { background: background.value } : {}),
+    };
+    return createInitialProject(
+      videoBlob,
+      duration,
+      mimeType,
+      safeMetadata,
+      bookmarks || [],
+      initialAppearance,
+      screenBlob,
+      camBlob
+    );
   });
 
   const [currentTime, setCurrentTime] = useState<number>(0);

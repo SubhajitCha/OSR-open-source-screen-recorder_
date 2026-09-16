@@ -302,14 +302,12 @@ export const RecorderToolbar: React.FC<RecorderToolbarProps> = ({
           >
             <div className="relative w-10 h-10 rounded-full bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/20 text-slate-600 dark:text-zinc-300 flex items-center justify-center transition-all duration-150 shadow-sm">
               <Layers01Icon className="w-5 h-5 stroke-[1.8]" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#8DB355] shadow-xs" />
             </div>
           </button>
 
           {/* Sleek Tooltip Label on Hover */}
           <div className="pointer-events-none absolute left-full ml-3 top-1/2 -translate-y-1/2 z-40 opacity-0 -translate-x-2.5 scale-95 group-hover:opacity-100 group-hover:translate-x-0 group-hover:scale-100 transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] whitespace-nowrap">
-            <div className="px-2.5 py-1 rounded-lg bg-slate-900/95 dark:bg-white/95 text-white dark:text-slate-950 text-xs font-semibold shadow-xl shadow-black/20 backdrop-blur-md border border-white/10 dark:border-black/10 flex items-center gap-1.5 select-none">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#8DB355]" />
+            <div className="px-2.5 py-1 rounded-lg bg-slate-900/95 dark:bg-white/95 text-white dark:text-slate-950 text-xs font-semibold shadow-xl shadow-black/20 backdrop-blur-md border border-white/10 dark:border-black/10 flex items-center select-none">
               <span>Layouts</span>
             </div>
           </div>
@@ -600,7 +598,6 @@ export const RecorderToolbar: React.FC<RecorderToolbarProps> = ({
           >
             <div className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/20 text-slate-600 dark:text-zinc-300 flex items-center justify-center transition-all duration-150 shadow-sm">
               <Layers01Icon className="w-5 h-5 stroke-[1.8]" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#8DB355] shadow-xs" />
             </div>
             <span className="text-xs font-semibold text-slate-600 dark:text-zinc-400 whitespace-nowrap">
               Layouts

@@ -40,6 +40,31 @@ export function createAudioMixer(
   analyserNode.fftSize = 64;
   analyserNode.smoothingTimeConstant = 0.8;
 
+  // Constant silent clock node to keep Web Audio destination pipeline ticking continuously
+  let clockOsc: OscillatorNode | ConstantSourceNode | null = null;
+  let silenceGain: GainNode | null = null;
+  try {
+    silenceGain = audioCtx.createGain();
+    silenceGain.gain.setValueAtTime(0, audioCtx.currentTime);
+    silenceGain.connect(destination);
+
+    if (typeof audioCtx.createConstantSource === 'function') {
+      const constSource = audioCtx.createConstantSource();
+      constSource.offset.setValueAtTime(0, audioCtx.currentTime);
+      constSource.connect(silenceGain);
+      constSource.start();
+      clockOsc = constSource;
+    } else {
+      const osc = audioCtx.createOscillator();
+      osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+      osc.connect(silenceGain);
+      osc.start();
+      clockOsc = osc;
+    }
+  } catch (err) {
+    console.warn('Silent audio clock node initialization notice:', err);
+  }
+
   let micSource: MediaStreamAudioSourceNode | null = null;
   let micGain: GainNode | null = null;
 
@@ -112,6 +137,17 @@ export function createAudioMixer(
   const cleanup = () => {
     try {
       document.removeEventListener('visibilitychange', handleAudioVisibility);
+      if (clockOsc) {
+        try {
+          clockOsc.stop();
+          clockOsc.disconnect();
+        } catch (_) {}
+      }
+      if (silenceGain) {
+        try {
+          silenceGain.disconnect();
+        } catch (_) {}
+      }
       if (micSource) {
         try {
           micSource.disconnect();

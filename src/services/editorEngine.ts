@@ -37,7 +37,10 @@ export function createInitialProject(
   duration: number,
   mimeType: string,
   metadata: RecordingMetadata,
-  bookmarks: VideoBookmark[]
+  bookmarks: VideoBookmark[],
+  initialAppearance?: Partial<AppearanceSettings>,
+  screenBlob?: Blob,
+  camBlob?: Blob
 ): Project {
   const projectId = `proj_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
   const title = `ScreenStudio_${new Date().toISOString().slice(0, 10)}_${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }).replace(':', '-')}`;
@@ -45,12 +48,19 @@ export function createInitialProject(
   // Start with clean timeline items without automatic zoom generation
   const timelineItems: TimelineItem[] = [];
 
+  const mergedAppearance: AppearanceSettings = {
+    ...DEFAULT_APPEARANCE,
+    ...(initialAppearance || {}),
+  };
+
   return {
     id: projectId,
     title,
     createdAt: Date.now(),
     source: {
       videoBlob,
+      screenBlob,
+      camBlob,
       duration,
       width: metadata.screenDimensions?.width || 1920,
       height: metadata.screenDimensions?.height || 1080,
@@ -59,7 +69,7 @@ export function createInitialProject(
     },
     metadata,
     timeline: timelineItems,
-    appearance: { ...DEFAULT_APPEARANCE },
+    appearance: mergedAppearance,
     bookmarks,
   };
 }

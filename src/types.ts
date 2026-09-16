@@ -34,7 +34,7 @@ export type ResolutionPreset = 'native' | '4k' | '1440p' | '1080p' | '720p';
 export type FrameRatePreset = 15 | 24 | 30 | 60;
 
 export type PipPosition = 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left' | 'custom';
-export type PipShape = 'rectangle' | 'circle' | 'rounded' | 'square';
+export type PipShape = 'rectangle' | 'circle' | 'rounded' | 'square' | 'squircle';
 export type PipSize = 'small' | 'medium' | 'large';
 
 export interface PipConfig {
@@ -175,6 +175,10 @@ export interface AppearanceSettings {
   zoomMotionBlur?: boolean;
   zoomMotionBlurIntensity?: number; // 0 to 100
   layout?: CompositionLayout;
+  cameraPosition?: PipPosition;
+  cameraSize?: number; // percentage (15 to 45)
+  cameraShape?: PipShape;
+  cameraHidden?: boolean;
   trimStart?: number;
   trimEnd?: number;
 }
@@ -185,6 +189,8 @@ export interface Project {
   createdAt: number;
   source: {
     videoBlob: Blob;
+    screenBlob?: Blob;
+    camBlob?: Blob;
     duration: number;
     width: number;
     height: number;

@@ -132,6 +132,8 @@ export default function App() {
   // Finished recording output data & Project model
   const [lastRecordingData, setLastRecordingData] = useState<{
     blob: Blob;
+    screenBlob?: Blob;
+    camBlob?: Blob;
     duration: number;
     mimeType: string;
     bookmarks: VideoBookmark[];
@@ -216,9 +218,9 @@ export default function App() {
       }
     }
 
-    // Auto-acquire microphone stream on initial load if mic is enabled
-    if (audioSettings.includeMic && !activeMicStream) {
-      handleEnableMicPreview(true).catch(() => {});
+    // Auto-acquire microphone stream on initial load if mic is enabled and not in editor mode
+    if (audioSettings.includeMic && !activeMicStream && recordingState !== 'editing') {
+      handleEnableMicPreview(true, true).catch(() => {});
     }
   }, []);
 
@@ -451,45 +453,36 @@ export default function App() {
     }
   }, [activeWebcamStream, showToast, updateActiveWebcamStream]);
 
-  const handleEnableMicPreview = useCallback(async (enable?: boolean) => {
-    const shouldEnable =
-      enable !== undefined ? enable : !activeMicStream || !audioSettings.includeMic;
-    if (!shouldEnable) {
-      if (activeMicStream) {
-        activeMicStream.getTracks().forEach((t) => {
-          try {
-            t.enabled = false;
-            t.stop();
-          } catch (_) {}
-        });
-        updateActiveMicStream(null);
-      }
-      setAudioSettings((prev) => ({ ...prev, includeMic: false }));
-      return;
-    }
-    try {
-      const micConstraints: MediaTrackConstraints = {
-        echoCancellation: audioSettings.echoCancellation,
-        noiseSuppression: audioSettings.noiseSuppression,
-        autoGainControl: audioSettings.autoGainControl,
-      };
-      if (audioSettings.micDeviceId) {
-        micConstraints.deviceId = { exact: audioSettings.micDeviceId };
-      }
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: micConstraints });
-      const audioTrack = stream.getAudioTracks()[0];
-      if (audioTrack) {
-        audioTrack.onended = () => {
+  const handleEnableMicPreview = useCallback(
+    async (enable?: boolean, isSilentAutoCheck = false) => {
+      const shouldEnable =
+        enable !== undefined ? enable : !activeMicStream || !audioSettings.includeMic;
+      if (!shouldEnable) {
+        if (activeMicStream) {
+          activeMicStream.getTracks().forEach((t) => {
+            try {
+              t.enabled = false;
+              t.stop();
+            } catch (_) {}
+          });
           updateActiveMicStream(null);
-          setAudioSettings((prev) => ({ ...prev, includeMic: false }));
-        };
+        }
+        setAudioSettings((prev) => ({ ...prev, includeMic: false }));
+        return;
       }
-      updateActiveMicStream(stream);
-      setAudioSettings((prev) => ({ ...prev, includeMic: true }));
-      return stream;
-    } catch {
+      if (recordingState === 'editing') {
+        return;
+      }
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const micConstraints: MediaTrackConstraints = {
+          echoCancellation: audioSettings.echoCancellation,
+          noiseSuppression: audioSettings.noiseSuppression,
+          autoGainControl: audioSettings.autoGainControl,
+        };
+        if (audioSettings.micDeviceId) {
+          micConstraints.deviceId = { exact: audioSettings.micDeviceId };
+        }
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: micConstraints });
         const audioTrack = stream.getAudioTracks()[0];
         if (audioTrack) {
           audioTrack.onended = () => {
@@ -501,10 +494,27 @@ export default function App() {
         setAudioSettings((prev) => ({ ...prev, includeMic: true }));
         return stream;
       } catch {
-        showToast('Could not access microphone', 'error');
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          const audioTrack = stream.getAudioTracks()[0];
+          if (audioTrack) {
+            audioTrack.onended = () => {
+              updateActiveMicStream(null);
+              setAudioSettings((prev) => ({ ...prev, includeMic: false }));
+            };
+          }
+          updateActiveMicStream(stream);
+          setAudioSettings((prev) => ({ ...prev, includeMic: true }));
+          return stream;
+        } catch {
+          if (!isSilentAutoCheck) {
+            showToast('Could not access microphone', 'error');
+          }
+        }
       }
-    }
-  }, [activeMicStream, audioSettings, showToast, updateActiveMicStream]);
+    },
+    [activeMicStream, audioSettings, recordingState, showToast, updateActiveMicStream]
+  );
 
   const handleSelectRecordingSetup = useCallback(
     (selectedMode: RecordingMode, suggestedLayout?: CompositionLayout) => {
@@ -1103,11 +1113,15 @@ export default function App() {
           <VideoEditor
             key={`video-editor-${lastRecordingData.blob.size}-${lastRecordingData.duration}`}
             videoBlob={lastRecordingData.blob}
+            screenBlob={lastRecordingData.screenBlob}
+            camBlob={lastRecordingData.camBlob}
             duration={lastRecordingData.duration}
             mimeType={lastRecordingData.mimeType}
             bookmarks={lastRecordingData.bookmarks}
             metadata={lastRecordingData.metadata}
             initialProject={lastRecordingData.project}
+            layout={compositionLayout}
+            background={background}
             onRecordAnother={() => {
               if (recorderEngineRef.current) {
                 recorderEngineRef.current.cleanupStreams();

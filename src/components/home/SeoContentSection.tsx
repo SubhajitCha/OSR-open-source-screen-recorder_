@@ -10,10 +10,10 @@ export const SeoContentSection: React.FC = () => {
   return (
     <section
       id="seo-knowledge-base"
-      aria-label="Comprehensive Online Screen Recorder & Font Finder Guide"
+      aria-label="Comprehensive Free Online Screen Recorder Guide"
       className="w-full border-t border-slate-200 dark:border-zinc-800/80 bg-slate-50/50 dark:bg-[#0c0e12] text-slate-800 dark:text-zinc-200 py-12 sm:py-16 px-4 sm:px-6 lg:px-8 transition-colors select-text"
     >
-      <div className="max-w-4xl mx-auto space-y-12">
+      <div className="max-w-5xl mx-auto space-y-12">
         {/* Header & Main Keyword Introduction */}
         <header className="space-y-4 text-center sm:text-left">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-red-100/70 text-[#D90000] dark:bg-red-950/40 dark:text-red-400 border border-red-200/60 dark:border-red-900/40">
@@ -22,120 +22,113 @@ export const SeoContentSection: React.FC = () => {
           </div>
 
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
-            The Ultimate Free Online Screen Recorder &amp; Font Finder from Image Suite
+            The Ultimate Free Online Screen Recorder for Video Creators, Educators &amp; Developers
           </h1>
 
           <p className="text-base sm:text-lg text-slate-600 dark:text-zinc-400 leading-relaxed">
-            In today’s fast-paced digital creation ecosystem, having an agile, browser-based <strong>online screen recorder</strong> is essential for educators, software developers, UI/UX designers, and video creators. Traditional desktop recording utilities often burden users with heavy system overhead, mandatory software installations, invasive background telemetry, and restrictive subscription paywalls. Our modern <strong>online screen recorder</strong> solves this problem entirely by operating natively within standard web browsers using cutting-edge MediaStream, WebCodecs, and HTML5 Canvas technologies. Without installing a single executable file, you can record crystal-clear 1080p and 4K displays, capture system audio alongside microphone narration, overlay a picture-in-picture webcam feed, and annotate on screen in real time. Beyond standard video capture, modern digital creators frequently need to extract visual assets, reverse-engineer interfaces, and identify typography discovered during screen recording sessions. That is why our platform pairs effortless screen capture with powerful typography workflows, allowing creators to capture any frame and seamlessly integrate with a <strong>font finder by image</strong>, explore a <strong>free font finder</strong>, or identify typography using an <strong>ai font finder</strong>.
+            In today’s fast-paced digital creation ecosystem, having an agile, browser-based <strong>online screen recorder</strong> is essential for software developers, product managers, educators, designers, and content creators. Traditional desktop recording utilities often burden users with heavy system overhead, mandatory software installations, invasive background telemetry, and restrictive subscription paywalls. Our modern <strong>free online screen recorder</strong> solves this problem entirely by operating natively within standard web browsers using cutting-edge MediaStream, WebCodecs, and HTML5 Canvas technologies. Without installing a single executable file, you can record crystal-clear 1080p and 4K displays, capture system audio alongside microphone narration, overlay a picture-in-picture webcam feed, annotate on screen in real time, and export directly in universal MP4 or lightweight WebM formats.
           </p>
         </header>
 
-        {/* Section 1: Screen Recording & Font Discovery */}
+        {/* Section 1: In-Browser vs Desktop */}
         <article className="space-y-4">
           <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2.5">
             <span className="w-1.5 h-6 bg-[#D90000] rounded-full" />
-            Why Designers Pair an Online Screen Recorder with Font Identification Tools
+            Why Choose an In-Browser Online Screen Recorder Over Desktop Bloatware
           </h2>
 
           <p className="text-sm sm:text-base text-slate-600 dark:text-zinc-300 leading-relaxed">
-            When auditing web applications, conducting competitive product analyses, or documenting software walkthroughs, designers frequently spot compelling typography in live websites, PDF documents, or streaming video content. In the past, discovering the name of a specific font seen in a video required inspecting messy CSS stylesheets or guessing font weights by eye. With our <strong>online screen recorder</strong>, you can capture any screen region at full native resolution, pause at the exact frame featuring the text, and feed the still image into a modern <strong>image font finder</strong>.
+            Traditional desktop screen capture applications demand substantial local disk storage, continuous background updater daemons, and administrative installation privileges. When you need to quickly record a bug reproduction, demonstrate a new feature to stakeholders, or produce an educational lecture, launching our <strong>free screen video recorder</strong> in your browser takes mere seconds.
           </p>
 
           <p className="text-sm sm:text-base text-slate-600 dark:text-zinc-300 leading-relaxed">
-            Whether you are seeking a <strong>font finder from image</strong> to recognize stylized headings or using a <strong>font finder from image free</strong> service to quickly match subtle serifs, high-definition screen captures are the critical foundation. Grainy or compressed screenshots fail optical character recognition and neural font matching models. By leveraging our <strong>online screen recorder</strong>’s pristine frame accuracy and native canvas rendering, your captured frames provide clean, uncompressed glyph outlines that make any <strong>free font finder</strong> or <strong>ai font finder</strong> dramatically more effective.
+            Because our application executes client-side through standard Web APIs—including <code>navigator.mediaDevices.getDisplayMedia</code> and <code>MediaRecorder</code>—it delivers native hardware-accelerated capture speeds with zero software installations. It runs seamlessly on Windows, macOS, Linux, and Chromebook devices, eliminating the frustration of cross-platform version discrepancies.
           </p>
         </article>
 
         {/* Section 2: Step-by-Step Workflow */}
         <article className="space-y-4 bg-white dark:bg-zinc-900/60 p-6 sm:p-8 rounded-2xl border border-slate-200/80 dark:border-zinc-800 shadow-sm">
           <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
-            Step-by-Step Workflow: Using Font Finder Upload Image with Video Captures
+            Step-by-Step Guide: How to Use Free Screen Video Recorder
           </h2>
 
           <p className="text-sm sm:text-base text-slate-600 dark:text-zinc-300 leading-relaxed">
-            Extracting font information from recorded media is straightforward when combining our recording engine with modern font detection platforms. Follow these four streamlined steps to identify unknown typefaces in seconds:
+            Recording your screen online with studio-grade fidelity takes just four straightforward steps:
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
             <div className="p-4 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-200/60 dark:border-zinc-700/60 space-y-1.5">
               <span className="text-xs font-bold text-[#D90000] dark:text-red-400 uppercase tracking-wider">Step 1</span>
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Record High-Resolution Footage</h3>
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Choose Your Capture Mode</h3>
               <p className="text-xs text-slate-600 dark:text-zinc-400">
-                Launch our <strong>online screen recorder</strong>, select your browser tab or application window, and record your demonstration or design audit at high frame rates.
+                Select from four dedicated capture presets: <strong>Screen &amp; Camera</strong> (simultaneous desktop and PIP webcam), <strong>Screen Only</strong>, <strong>Camera Only</strong>, or <strong>Audio Only</strong>.
               </p>
             </div>
 
             <div className="p-4 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-200/60 dark:border-zinc-700/60 space-y-1.5">
               <span className="text-xs font-bold text-[#D90000] dark:text-red-400 uppercase tracking-wider">Step 2</span>
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Capture the Keyframe</h3>
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Grant Screen &amp; Audio Permissions</h3>
               <p className="text-xs text-slate-600 dark:text-zinc-400">
-                Review your recording in our built-in video editor. Pause at the exact moment where the text appears clearly, and save the frame as a PNG snapshot.
+                Pick your desired monitor, individual application window, or browser tab. Enable the &quot;Share system audio&quot; toggle to record internal computer sound alongside your microphone narration.
               </p>
             </div>
 
             <div className="p-4 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-200/60 dark:border-zinc-700/60 space-y-1.5">
               <span className="text-xs font-bold text-[#D90000] dark:text-red-400 uppercase tracking-wider">Step 3</span>
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Prepare Your Image for Matching</h3>
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Record with Real-Time Tools</h3>
               <p className="text-xs text-slate-600 dark:text-zinc-400">
-                When using a <strong>font finder upload image</strong> workflow, crop the image tightly around a clean line of text with high contrast against its background.
+                Hit the red Record button. Enjoy unlimited recording duration without annoying watermarks, adjust your webcam bubble shape and position, and pause or resume on the fly.
               </p>
             </div>
 
             <div className="p-4 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-200/60 dark:border-zinc-700/60 space-y-1.5">
               <span className="text-xs font-bold text-[#D90000] dark:text-red-400 uppercase tracking-wider">Step 4</span>
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Query the Recognition Engine</h3>
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Trim &amp; Export Instantly</h3>
               <p className="text-xs text-slate-600 dark:text-zinc-400">
-                Submit your cropped frame to a <strong>font finder by image</strong> or <strong>ai font finder</strong>. Advanced engines isolate individual character geometry, detect kerning nuances, and return exact font families alongside visually similar alternatives.
+                Preview your finished video in the integrated studio timeline, trim unnecessary beginnings or pauses, and download directly as a universal MP4 (H.264/AAC) or fast WebM file.
               </p>
             </div>
           </div>
-
-          <p className="text-sm sm:text-base text-slate-600 dark:text-zinc-300 leading-relaxed pt-2">
-            If you only have partial character samples or want to test specific phrases, utilizing a <strong>font finder by text</strong> allows you to compare known character sequences against extensive digital type specimen catalogs.
-          </p>
         </article>
 
-        {/* Section 3: Google Fonts & WhatTheFont Alternatives */}
+        {/* Section 3: Advanced Capabilities */}
         <article className="space-y-4">
           <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2.5">
             <span className="w-1.5 h-6 bg-blue-600 rounded-full" />
-            Discovering Web Typography: Google Font Finder &amp; What The Font Finder Alternatives
+            Advanced Features: Picture-in-Picture, Dual Audio Mixing &amp; MP4 Muxing
           </h2>
 
           <p className="text-sm sm:text-base text-slate-600 dark:text-zinc-300 leading-relaxed">
-            Once your typography is identified, the next challenge is finding licensing terms or open-source equivalents that fit your project budget. Many digital designers immediately turn to a <strong>google font finder</strong> to discover web-safe, freely licensed alternatives hosted on Google Fonts. Google’s extensive open-source library contains thousands of versatile typography families, ranging from elegant editorial serifs like Playfair and Merriweather to robust geometric sans-serifs such as Inter, Poppins, and Montserrat.
+            OSR Studio is built for professional presentation fidelity. Presenters can position their live webcam feed in any corner of the screen, toggle between circle, square, and rounded rectangle frames, and customize canvas margins and backgrounds for polished tutorial presentations.
           </p>
 
           <p className="text-sm sm:text-base text-slate-600 dark:text-zinc-300 leading-relaxed">
-            If you are trying to match commercial typography or corporate brand identities, using a recognized <strong>what the font finder</strong> catalog or a specialized <strong>font finder free</strong> engine helps cross-reference millions of commercial font foundries, including Monotype, Adobe Fonts, and independent type design studios. Pairing an intuitive <strong>online screen recorder</strong> with a reliable <strong>what the font finder</strong> workflow ensures you never lose track of design inspiration found across web videos, design prototypes, or live software presentations.
+            Our multi-channel audio mixing pipeline leverages the browser’s Web Audio API to combine system audio (music, video playback, game sound, or meeting attendees) with your external USB or headset microphone, ensuring balanced levels with built-in visual volume meters and noise suppression.
           </p>
         </article>
 
         {/* Section 4: Privacy & Client-Side Advantages */}
         <article className="space-y-4 bg-slate-100/70 dark:bg-zinc-900/40 p-6 sm:p-8 rounded-2xl border border-slate-200/60 dark:border-zinc-800">
           <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
-            Key Capabilities of Our Browser-Based Online Screen Recorder
+            Uncompromising Privacy: 100% Client-Side In-Browser Processing
           </h2>
 
           <p className="text-sm sm:text-base text-slate-600 dark:text-zinc-300 leading-relaxed">
-            Our <strong>online screen recorder</strong> was engineered from the ground up to respect user autonomy, data confidentiality, and creative efficiency. Key highlights include:
+            Most commercial online recorders secretly stream your screen captures to cloud servers where your confidential data, business source code, and private conversations are stored. OSR Studio is architected with strict client-side isolation:
           </p>
 
           <ul className="space-y-2.5 text-sm sm:text-base text-slate-700 dark:text-zinc-300 list-disc list-inside">
             <li>
-              <strong>100% Client-Side Recording &amp; Processing:</strong> Unlike cloud-based screen recorders that upload your private video captures to remote servers, our <strong>online screen recorder</strong> runs completely in your browser memory. Your video footage, microphone audio, and webcam streams never touch a third-party server.
+              <strong>Zero Cloud Uploads:</strong> Every byte of video and audio is processed and stored strictly within your browser’s local sandbox and IndexedDB storage.
             </li>
             <li>
-              <strong>Multi-Track Audio Mixing:</strong> Seamlessly mix system audio from webinars or video meetings with crisp microphone input, complete with real-time audio meters and noise suppression.
+              <strong>No Account Required:</strong> No login walls, email harvesting, or credit card requirements. Start recording immediately with a single click.
             </li>
             <li>
-              <strong>Picture-in-Picture Webcam &amp; Smart Layouts:</strong> Present with confidence using customizable webcam bubble overlays, split-screen video modes, and responsive aspect ratios tailored for YouTube, TikTok, and Twitter.
+              <strong>No Watermarks &amp; Unlimited Duration:</strong> We never imprint promotional logos over your footage or artificially cut off your recording after five minutes.
             </li>
             <li>
-              <strong>Flexible Export Formats:</strong> Enjoy instant zero-latency downloads in lightweight WebM format or universal MP4 containers with H.264 video and AAC audio.
-            </li>
-            <li>
-              <strong>Built-In Studio Editor:</strong> Trim unwanted pauses, apply automatic smart zooms to cursor clicks, add custom canvas backgrounds, and generate instant video thumbnails on demand.
+              <strong>Progressive Web App (PWA):</strong> Install OSR Studio as a standalone desktop app from your browser address bar for instant offline access even without an active internet connection.
             </li>
           </ul>
         </article>
@@ -144,7 +137,7 @@ export const SeoContentSection: React.FC = () => {
         <article className="space-y-4">
           <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2.5">
             <span className="w-1.5 h-6 bg-emerald-500 rounded-full" />
-            Frequently Asked Questions About Our Online Screen Recorder &amp; Font Tools
+            Frequently Asked Questions About Our Free Online Screen Recorder
           </h2>
 
           <div className="space-y-3 pt-2">
@@ -226,24 +219,122 @@ export const SeoContentSection: React.FC = () => {
           </div>
         </article>
 
-        {/* Footer Summary / Quick Keywords Index */}
-        <footer className="pt-6 border-t border-slate-200/80 dark:border-zinc-800/80 text-center space-y-3">
-          <p className="text-xs text-slate-500 dark:text-zinc-400">
-            OSR Studio — Empowering digital creators with high-fidelity, privacy-first screen capture, frame inspection, and typography discovery.
-          </p>
-          <div className="flex flex-wrap justify-center gap-1.5 text-[11px] text-slate-600 dark:text-zinc-300">
-            <span className="px-2 py-0.5 rounded-md bg-slate-200/70 dark:bg-zinc-800 font-medium">online screen recorder</span>
-            <span className="px-2 py-0.5 rounded-md bg-slate-200/70 dark:bg-zinc-800 font-medium">font finder by image</span>
-            <span className="px-2 py-0.5 rounded-md bg-slate-200/70 dark:bg-zinc-800 font-medium">free font finder</span>
-            <span className="px-2 py-0.5 rounded-md bg-slate-200/70 dark:bg-zinc-800 font-medium">font finder from image free</span>
-            <span className="px-2 py-0.5 rounded-md bg-slate-200/70 dark:bg-zinc-800 font-medium">font finder free</span>
-            <span className="px-2 py-0.5 rounded-md bg-slate-200/70 dark:bg-zinc-800 font-medium">font finder from image</span>
-            <span className="px-2 py-0.5 rounded-md bg-slate-200/70 dark:bg-zinc-800 font-medium">ai font finder</span>
-            <span className="px-2 py-0.5 rounded-md bg-slate-200/70 dark:bg-zinc-800 font-medium">font finder upload image</span>
-            <span className="px-2 py-0.5 rounded-md bg-slate-200/70 dark:bg-zinc-800 font-medium">font finder by text</span>
-            <span className="px-2 py-0.5 rounded-md bg-slate-200/70 dark:bg-zinc-800 font-medium">google font finder</span>
-            <span className="px-2 py-0.5 rounded-md bg-slate-200/70 dark:bg-zinc-800 font-medium">what the font finder</span>
-            <span className="px-2 py-0.5 rounded-md bg-slate-200/70 dark:bg-zinc-800 font-medium">image font finder</span>
+        {/* Section 6: Proper Professional Footer */}
+        <footer className="pt-12 border-t border-slate-200/90 dark:border-zinc-800/90 space-y-10">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-left">
+            {/* Brand Column */}
+            <div className="md:col-span-1 space-y-3">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-black flex items-center justify-center p-1 border border-white/10">
+                  <div className="w-3.5 h-3.5 rounded-full bg-gradient-to-tr from-[#8DB355] to-[#FFEA93] p-[1px] flex items-center justify-center">
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#D90000]" />
+                  </div>
+                </div>
+                <span className="font-extrabold text-base tracking-tight text-slate-900 dark:text-white">
+                  OSR Studio
+                </span>
+              </div>
+              <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed">
+                Free, privacy-first online screen recorder operating 100% inside your browser. Capture screen, webcam, and system audio with zero watermarks and no duration limits.
+              </p>
+              <div className="flex items-center gap-2 pt-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span>100% Client-Side &amp; Private</span>
+              </div>
+            </div>
+
+            {/* Column 1: Recording Presets */}
+            <div className="space-y-2.5">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
+                Recording Modes
+              </h3>
+              <ul className="space-y-1.5 text-xs text-slate-600 dark:text-zinc-400">
+                <li>Screen &amp; Webcam PIP</li>
+                <li>Full Desktop &amp; Window Capture</li>
+                <li>Individual Chrome Tab Sharing</li>
+                <li>Dedicated Camera Only Mode</li>
+                <li>High-Fidelity Audio Narration</li>
+              </ul>
+            </div>
+
+            {/* Column 2: Studio Tools */}
+            <div className="space-y-2.5">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
+                Studio Capabilities
+              </h3>
+              <ul className="space-y-1.5 text-xs text-slate-600 dark:text-zinc-400">
+                <li>Multi-Channel System Audio Mixing</li>
+                <li>WebCodecs MP4 &amp; WebM Export</li>
+                <li>Non-Destructive Video Trimmer</li>
+                <li>Custom Canvas Backgrounds &amp; Radii</li>
+                <li>Offline Progressive Web App (PWA)</li>
+              </ul>
+            </div>
+
+            {/* Column 3: Popular Use Cases */}
+            <div className="space-y-2.5">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
+                Popular Use Cases
+              </h3>
+              <ul className="space-y-1.5 text-xs text-slate-600 dark:text-zinc-400">
+                <li>Product Demos &amp; Walkthroughs</li>
+                <li>Software Engineering Code Reviews</li>
+                <li>Online Lectures &amp; Video Courses</li>
+                <li>Asynchronous Meeting Recordings</li>
+                <li>Bug Reporting &amp; QA Testing</li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Authentic Application Keywords Index for SEO */}
+          <div className="pt-6 border-t border-slate-200/60 dark:border-zinc-800/60 space-y-3 text-center sm:text-left">
+            <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400">
+              Related Search Terms &amp; Topics
+            </h4>
+            <div className="flex flex-wrap justify-center sm:justify-start gap-1.5 text-[11px] text-slate-600 dark:text-zinc-300">
+              {[
+                'online screen recorder',
+                'free online screen recorder',
+                'screen recorder chrome',
+                'best free online screen recorder',
+                'free screen video recorder',
+                'record screen online',
+                'screen recorder no watermark',
+                'how to use free screen video recorder',
+                'record screen with audio',
+                'browser screen recorder',
+                'screen and camera recorder',
+                'free screen recorder download',
+                'unlimited screen recorder',
+                'mp4 screen recorder',
+                'webcam picture in picture recorder',
+                'safe screen recorder',
+              ].map((kw, i) => (
+                <span
+                  key={i}
+                  className="px-2.5 py-1 rounded-md bg-white dark:bg-zinc-800/90 border border-slate-200/80 dark:border-zinc-700/60 font-medium text-slate-700 dark:text-zinc-300 shadow-2xs hover:border-[#D90000]/40 transition-colors"
+                >
+                  {kw}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Copyright & Security Disclaimer */}
+          <div className="pt-4 border-t border-slate-200/50 dark:border-zinc-800/50 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 dark:text-zinc-400 text-center sm:text-left">
+            <p>
+              &copy; {new Date().getFullYear()} OSR Studio. All video and audio streams are processed and rendered entirely client-side on your local device.
+            </p>
+            <div className="flex items-center gap-4 text-[11px]">
+              <span className="flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                Zero Cloud Uploads
+              </span>
+              <span>&bull;</span>
+              <span>No Watermark</span>
+              <span>&bull;</span>
+              <span>Free Forever</span>
+            </div>
           </div>
         </footer>
       </div>

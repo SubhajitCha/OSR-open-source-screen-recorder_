@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
+import { ActiveView } from '../../types';
 
-export const SeoContentSection: React.FC = () => {
+interface SeoContentSectionProps {
+  onNavigate?: (view: ActiveView) => void;
+}
+
+export const SeoContentSection: React.FC<SeoContentSectionProps> = ({ onNavigate }) => {
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
 
   const toggleFaq = (index: number) => {
@@ -218,125 +223,6 @@ export const SeoContentSection: React.FC = () => {
             ))}
           </div>
         </article>
-
-        {/* Section 6: Proper Professional Footer */}
-        <footer className="pt-12 border-t border-slate-200/90 dark:border-zinc-800/90 space-y-10">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-left">
-            {/* Brand Column */}
-            <div className="md:col-span-1 space-y-3">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-black flex items-center justify-center p-1 border border-white/10">
-                  <div className="w-3.5 h-3.5 rounded-full bg-gradient-to-tr from-[#8DB355] to-[#FFEA93] p-[1px] flex items-center justify-center">
-                    <div className="w-1.5 h-1.5 rounded-full bg-[#D90000]" />
-                  </div>
-                </div>
-                <span className="font-extrabold text-base tracking-tight text-slate-900 dark:text-white">
-                  OSR Studio
-                </span>
-              </div>
-              <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed">
-                Free, privacy-first online screen recorder operating 100% inside your browser. Capture screen, webcam, and system audio with zero watermarks and no duration limits.
-              </p>
-              <div className="flex items-center gap-2 pt-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span>100% Client-Side &amp; Private</span>
-              </div>
-            </div>
-
-            {/* Column 1: Recording Presets */}
-            <div className="space-y-2.5">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
-                Recording Modes
-              </h3>
-              <ul className="space-y-1.5 text-xs text-slate-600 dark:text-zinc-400">
-                <li>Screen &amp; Webcam PIP</li>
-                <li>Full Desktop &amp; Window Capture</li>
-                <li>Individual Chrome Tab Sharing</li>
-                <li>Dedicated Camera Only Mode</li>
-                <li>High-Fidelity Audio Narration</li>
-              </ul>
-            </div>
-
-            {/* Column 2: Studio Tools */}
-            <div className="space-y-2.5">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
-                Studio Capabilities
-              </h3>
-              <ul className="space-y-1.5 text-xs text-slate-600 dark:text-zinc-400">
-                <li>Multi-Channel System Audio Mixing</li>
-                <li>WebCodecs MP4 &amp; WebM Export</li>
-                <li>Non-Destructive Video Trimmer</li>
-                <li>Custom Canvas Backgrounds &amp; Radii</li>
-                <li>Offline Progressive Web App (PWA)</li>
-              </ul>
-            </div>
-
-            {/* Column 3: Popular Use Cases */}
-            <div className="space-y-2.5">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
-                Popular Use Cases
-              </h3>
-              <ul className="space-y-1.5 text-xs text-slate-600 dark:text-zinc-400">
-                <li>Product Demos &amp; Walkthroughs</li>
-                <li>Software Engineering Code Reviews</li>
-                <li>Online Lectures &amp; Video Courses</li>
-                <li>Asynchronous Meeting Recordings</li>
-                <li>Bug Reporting &amp; QA Testing</li>
-              </ul>
-            </div>
-          </div>
-
-          {/* Authentic Application Keywords Index for SEO */}
-          <div className="pt-6 border-t border-slate-200/60 dark:border-zinc-800/60 space-y-3 text-center sm:text-left">
-            <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400">
-              Related Search Terms &amp; Topics
-            </h4>
-            <div className="flex flex-wrap justify-center sm:justify-start gap-1.5 text-[11px] text-slate-600 dark:text-zinc-300">
-              {[
-                'online screen recorder',
-                'free online screen recorder',
-                'screen recorder chrome',
-                'best free online screen recorder',
-                'free screen video recorder',
-                'record screen online',
-                'screen recorder no watermark',
-                'how to use free screen video recorder',
-                'record screen with audio',
-                'browser screen recorder',
-                'screen and camera recorder',
-                'free screen recorder download',
-                'unlimited screen recorder',
-                'mp4 screen recorder',
-                'webcam picture in picture recorder',
-                'safe screen recorder',
-              ].map((kw, i) => (
-                <span
-                  key={i}
-                  className="px-2.5 py-1 rounded-md bg-white dark:bg-zinc-800/90 border border-slate-200/80 dark:border-zinc-700/60 font-medium text-slate-700 dark:text-zinc-300 shadow-2xs hover:border-[#D90000]/40 transition-colors"
-                >
-                  {kw}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          {/* Copyright & Security Disclaimer */}
-          <div className="pt-4 border-t border-slate-200/50 dark:border-zinc-800/50 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 dark:text-zinc-400 text-center sm:text-left">
-            <p>
-              &copy; {new Date().getFullYear()} OSR Studio. All video and audio streams are processed and rendered entirely client-side on your local device.
-            </p>
-            <div className="flex items-center gap-4 text-[11px]">
-              <span className="flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                Zero Cloud Uploads
-              </span>
-              <span>&bull;</span>
-              <span>No Watermark</span>
-              <span>&bull;</span>
-              <span>Free Forever</span>
-            </div>
-          </div>
-        </footer>
       </div>
     </section>
   );

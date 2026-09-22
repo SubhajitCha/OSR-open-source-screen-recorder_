@@ -1,0 +1,26 @@
+{
+  "name": "OSR — Free Online Screen Recorder",
+  "short_name": "OSR Studio",
+  "description": "Free online screen recorder with webcam PIP, system audio mixing, instant MP4 export, and video trimming with zero cloud uploads.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#09090b",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

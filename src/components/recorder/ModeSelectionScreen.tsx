@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { CompositionLayout, RecordingMode } from '../../types';
+import { ActiveView, CompositionLayout, RecordingMode } from '../../types';
 import { SeoContentSection } from '../home/SeoContentSection';
 
 interface ModeSelectionScreenProps {
   onSelectSetup: (mode: RecordingMode, layout: CompositionLayout) => void;
   currentMode?: RecordingMode;
+  onSelectView?: (view: ActiveView) => void;
 }
 
 interface VisualModeOption {
@@ -16,6 +17,7 @@ interface VisualModeOption {
 export const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
   onSelectSetup,
   currentMode = 'screen_cam',
+  onSelectView,
 }) => {
   const [imgError, setImgError] = useState(false);
 
@@ -204,7 +206,7 @@ export const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
       {/* ─────────────────────────────────────────────────────────────
           ON-PAGE SEO CONTENT & COMPREHENSIVE TOOL GUIDE
          ───────────────────────────────────────────────────────────── */}
-      <SeoContentSection />
+      <SeoContentSection onNavigate={onSelectView} />
     </div>
   );
 };

@@ -1,4 +1,15 @@
-export type ActiveView = 'studio' | 'library' | 'docs' | 'services' | 'logbook';
+export type ActiveView =
+  | 'studio'
+  | 'library'
+  | 'docs'
+  | 'services'
+  | 'logbook'
+  | 'privacy'
+  | 'about'
+  | 'terms'
+  | 'contact'
+  | '404'
+  | '500';
 
 export type RecordingMode = 'screen' | 'screen_cam' | 'cam_only' | 'audio_only';
 

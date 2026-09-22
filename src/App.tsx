@@ -37,10 +37,52 @@ import { TechDocsPage } from './components/TechDocsPage';
 import { LogbookPage } from './components/LogbookPage';
 import { RecordingReviewScreen } from './components/recorder/RecordingReviewScreen';
 import { ModeSelectionScreen } from './components/recorder/ModeSelectionScreen';
+import { PrivacyPolicyPage } from './components/pages/PrivacyPolicyPage';
+import { AboutUsPage } from './components/pages/AboutUsPage';
+import { TermsConditionsPage } from './components/pages/TermsConditionsPage';
+import { ContactUsPage } from './components/pages/ContactUsPage';
+import { NotFoundPage } from './components/pages/NotFoundPage';
+import { ServerErrorPage } from './components/pages/ServerErrorPage';
+import { AppFooter } from './components/AppFooter';
 
 export default function App() {
-  // Navigation & Views
-  const [activeView, setActiveView] = useState<ActiveView>('studio');
+  // Navigation & Views with deep-link hash/search support
+  const getInitialView = (): ActiveView => {
+    try {
+      if (typeof window !== 'undefined') {
+        const hash = window.location.hash.replace(/^#\/?/, '').toLowerCase();
+        const searchParams = new URLSearchParams(window.location.search);
+        const viewParam = (searchParams.get('view') || hash || '').toLowerCase();
+
+        const validViews: ActiveView[] = [
+          'studio',
+          'library',
+          'docs',
+          'services',
+          'logbook',
+          'privacy',
+          'about',
+          'terms',
+          'contact',
+          '404',
+          '500',
+        ];
+
+        if (viewParam) {
+          if (validViews.includes(viewParam as ActiveView)) {
+            return viewParam as ActiveView;
+          }
+          // If a non-empty route/param was requested but does not exist, route to 404
+          return '404';
+        }
+      }
+    } catch {
+      // ignore
+    }
+    return 'studio';
+  };
+
+  const [activeView, setActiveView] = useState<ActiveView>(getInitialView);
   const [hasSelectedInitialMode, setHasSelectedInitialMode] = useState<boolean>(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
   const [recordingsCount, setRecordingsCount] = useState<number>(0);
@@ -243,6 +285,48 @@ export default function App() {
           .catch(() => {});
       } catch (_) {}
     }
+  }, []);
+
+  // Hash and popstate listener for back/forward browser navigation and direct URLs
+  useEffect(() => {
+    const handleUrlChange = () => {
+      try {
+        const hash = window.location.hash.replace(/^#\/?/, '').toLowerCase();
+        const searchParams = new URLSearchParams(window.location.search);
+        const viewParam = (searchParams.get('view') || hash || '').toLowerCase();
+
+        const validViews: ActiveView[] = [
+          'studio',
+          'library',
+          'docs',
+          'services',
+          'logbook',
+          'privacy',
+          'about',
+          'terms',
+          'contact',
+          '404',
+          '500',
+        ];
+
+        if (viewParam) {
+          if (validViews.includes(viewParam as ActiveView)) {
+            setActiveView(viewParam as ActiveView);
+          } else {
+            setActiveView('404');
+          }
+        }
+      } catch {
+        // ignore
+      }
+    };
+
+    window.addEventListener('hashchange', handleUrlChange);
+    window.addEventListener('popstate', handleUrlChange);
+    return () => {
+      window.removeEventListener('hashchange', handleUrlChange);
+      window.removeEventListener('popstate', handleUrlChange);
+    };
   }, []);
 
   // Sync runtime context with logbook observer
@@ -1107,6 +1191,78 @@ export default function App() {
               setRecordingState('idle');
             }}
           />
+        ) : activeView === 'privacy' ? (
+          /* VIEW 5: Privacy Policy Page */
+          <PrivacyPolicyPage
+            onOpenStudio={() => {
+              setActiveView('studio');
+              setRecordingState('idle');
+            }}
+            onNavigate={(view) => {
+              setActiveView(view);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          />
+        ) : activeView === 'about' ? (
+          /* VIEW 6: About Us Page */
+          <AboutUsPage
+            onOpenStudio={() => {
+              setActiveView('studio');
+              setRecordingState('idle');
+            }}
+            onNavigate={(view) => {
+              setActiveView(view);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          />
+        ) : activeView === 'terms' ? (
+          /* VIEW 7: Terms & Conditions Page */
+          <TermsConditionsPage
+            onOpenStudio={() => {
+              setActiveView('studio');
+              setRecordingState('idle');
+            }}
+            onNavigate={(view) => {
+              setActiveView(view);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          />
+        ) : activeView === 'contact' ? (
+          /* VIEW 8: Contact Us Page */
+          <ContactUsPage
+            onOpenStudio={() => {
+              setActiveView('studio');
+              setRecordingState('idle');
+            }}
+            onNavigate={(view) => {
+              setActiveView(view);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          />
+        ) : activeView === '404' ? (
+          /* VIEW 9: 404 Not Found Page */
+          <NotFoundPage
+            onOpenStudio={() => {
+              setActiveView('studio');
+              setRecordingState('idle');
+            }}
+            onNavigate={(view) => {
+              setActiveView(view);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          />
+        ) : activeView === '500' ? (
+          /* VIEW 10: 500 Server / Application Error Page */
+          <ServerErrorPage
+            onOpenStudio={() => {
+              setActiveView('studio');
+              setRecordingState('idle');
+            }}
+            onNavigate={(view) => {
+              setActiveView(view);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          />
         ) : recordingState === 'review' && lastRecordingData ? (
           /* VIEW 5: In-Screen Recording Review with Download, Edit, Retake, Delete options */
           <RecordingReviewScreen
@@ -1184,6 +1340,10 @@ export default function App() {
               handleSwitchMode(selectedMode, suggestedLayout);
             }}
             currentMode={mode}
+            onSelectView={(selectedView) => {
+              setActiveView(selectedView);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
           />
         ) : (
           /* STEP 2: Main Studio Recorder Dashboard with live toggles */
@@ -1234,6 +1394,16 @@ export default function App() {
           />
         )}
       </main>
+
+      {/* Global Persistent Footer across all views */}
+      <AppFooter
+        activeView={activeView}
+        isRecording={recordingState === 'recording' || recordingState === 'paused'}
+        onNavigate={(view) => {
+          setActiveView(view);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+      />
 
       {/* Countdown Overlay Modal */}
       {recordingState === 'countdown' && (

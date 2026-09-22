@@ -2,6 +2,7 @@ import { Project } from '../types';
 import { extractCutSegments, extractZoomSegments } from './editorEngine';
 import { fixWebmDuration } from './webmDurationFixer';
 import { drawCompositionScene } from './layoutRenderer';
+import { ensureMp4Blob } from './mp4Converter';
 
 export interface ExportProgress {
   progress: number; // 0 to 100
@@ -265,6 +266,24 @@ export async function renderProjectToVideo(
             finalBlob = await fixWebmDuration(finalBlob, effectiveDuration * 1000);
           } catch {
             // ignore
+          }
+
+          if (options.format === 'mp4' && !finalBlob.type.includes('mp4')) {
+            onProgress({
+              progress: 98,
+              renderedSeconds: Math.round(effectiveDuration),
+              totalSeconds: Math.round(effectiveDuration),
+              stage: 'finalizing',
+            });
+            try {
+              finalBlob = await ensureMp4Blob(finalBlob, {
+                fps: options.fps,
+                bitrateMbps: options.bitrateMbps,
+                bitrateMode: 'variable',
+              });
+            } catch (convErr) {
+              console.warn('MP4 conversion error in exportRenderer:', convErr);
+            }
           }
 
           onProgress({

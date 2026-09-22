@@ -1,3 +1,5 @@
+import { ensureMp4Blob } from './mp4Converter';
+
 export async function captureVideoSnapshot(
   videoBlob: Blob,
   timestamp: number
@@ -60,6 +62,24 @@ export function downloadBlob(blob: Blob, filename: string): void {
   a.click();
   document.body.removeChild(a);
   setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+/**
+ * Ensures video is converted to standard H.264 VBR + AAC MP4 before triggering browser download
+ */
+export async function downloadAsMp4(
+  blob: Blob,
+  suggestedNameWithoutExt: string,
+  onProgress?: (progress: number) => void,
+  duration?: number
+): Promise<void> {
+  const cleanName = suggestedNameWithoutExt.replace(/\.(webm|mp4)$/i, '');
+  const mp4Blob = await ensureMp4Blob(blob, {
+    duration: duration && duration > 0 ? duration : undefined,
+    fps: 30,
+    onProgress: onProgress ? (p) => onProgress(Math.round(p.progress * 100)) : undefined,
+  });
+  downloadBlob(mp4Blob, `${cleanName}.mp4`);
 }
 
 export async function saveWithFileSystemApi(blob: Blob, suggestedName: string): Promise<boolean> {

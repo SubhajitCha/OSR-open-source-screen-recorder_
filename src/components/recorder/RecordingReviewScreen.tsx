@@ -13,9 +13,12 @@ import {
   Tick01Icon,
   CheckmarkCircle02Icon,
   PencilEdit02Icon,
+  Cancel01Icon,
+  SparklesIcon,
 } from 'hugeicons-react';
 import { formatBytes } from '../../services/db';
 import { downloadBlob } from '../../services/videoTrimmer';
+import { convertWebmToMp4, ensureMp4Blob } from '../../services/mp4Converter';
 import { CompositionLayout, RecorderBackgroundConfig, RecordingMetadata, VideoBookmark } from '../../types';
 
 interface RecordingReviewScreenProps {
@@ -62,11 +65,17 @@ export const RecordingReviewScreen: React.FC<RecordingReviewScreenProps> = ({
   const [isSaved, setIsSaved] = useState<boolean>(false);
   const [videoContainerWidth, setVideoContainerWidth] = useState<number | null>(null);
 
+  // MP4 Client-Side Conversion State (only converted when user clicks download)
+  const [mp4Blob, setMp4Blob] = useState<Blob | null>(() => (mimeType.includes('mp4') ? videoBlob : null));
+  const [isConvertingMp4, setIsConvertingMp4] = useState<boolean>(false);
+  const [conversionProgress, setConversionProgress] = useState<number>(0);
+  const [conversionStatus, setConversionStatus] = useState<string>('');
+  const [isDownloadMenuOpen, setIsDownloadMenuOpen] = useState<boolean>(false);
+
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const titleInputRef = useRef<HTMLInputElement | null>(null);
 
-  const fileExt = mimeType.includes('mp4') ? 'mp4' : 'webm';
   const formatLabel = mimeType.includes('mp4') ? 'MP4 (H.264/AAC)' : 'WebM (VP9/Opus)';
 
   // Synchronize title bar width with the exact rendered width of the video preview
@@ -172,12 +181,60 @@ export const RecordingReviewScreen: React.FC<RecordingReviewScreenProps> = ({
     }
   };
 
-  const handleDirectDownload = () => {
-    const filename = `${title.trim() || 'ScreenRecording'}.${fileExt}`;
+  const handleDownloadWebm = () => {
+    const filename = `${title.trim() || 'ScreenRecording'}.webm`;
     downloadBlob(videoBlob, filename);
     setIsDownloaded(true);
+    setIsDownloadMenuOpen(false);
     if (onDownload) onDownload();
     setTimeout(() => setIsDownloaded(false), 4000);
+  };
+
+  const handleDownloadMp4 = async () => {
+    if (mp4Blob) {
+      const filename = `${title.trim() || 'ScreenRecording'}.mp4`;
+      downloadBlob(mp4Blob, filename);
+      setIsDownloaded(true);
+      setIsDownloadMenuOpen(false);
+      if (onDownload) onDownload();
+      setTimeout(() => setIsDownloaded(false), 4000);
+      return;
+    }
+
+    if (isConvertingMp4) return;
+
+    setIsConvertingMp4(true);
+    setConversionProgress(5);
+    setConversionStatus('Initializing MP4 transcode...');
+
+    try {
+      const converted = await convertWebmToMp4(videoBlob, {
+        duration: duration > 0 ? duration : undefined,
+        fps: 30,
+        onProgress: (p) => {
+          setConversionProgress(Math.round(p.progress * 100));
+          if (p.message) setConversionStatus(p.message);
+        },
+      });
+      setMp4Blob(converted);
+      const filename = `${title.trim() || 'ScreenRecording'}.mp4`;
+      downloadBlob(converted, filename);
+      setIsDownloaded(true);
+      setIsDownloadMenuOpen(false);
+      if (onDownload) onDownload();
+      setTimeout(() => setIsDownloaded(false), 4000);
+    } catch (err) {
+      console.warn('MP4 conversion error, falling back to WebM download:', err);
+      const filename = `${title.trim() || 'ScreenRecording'}.webm`;
+      downloadBlob(videoBlob, filename);
+      setIsDownloaded(true);
+      setIsDownloadMenuOpen(false);
+      if (onDownload) onDownload();
+      setTimeout(() => setIsDownloaded(false), 4000);
+    } finally {
+      setIsConvertingMp4(false);
+      setConversionStatus('');
+    }
   };
 
   return (
@@ -418,7 +475,7 @@ export const RecordingReviewScreen: React.FC<RecordingReviewScreenProps> = ({
         </div>
 
         {/* Vertical Buttons beside Video Window: centered with the preview screen, compact vertical gap */}
-        <aside className="shrink-0 flex flex-col items-center justify-center gap-2 sm:gap-2.5 z-30 w-10 sm:w-11 select-none md:translate-y-3">
+        <aside className="shrink-0 flex flex-col items-center justify-center gap-2 sm:gap-2.5 z-40 w-10 sm:w-11 select-none md:translate-y-3">
           {/* 1. RETAKE BUTTON */}
             <div className="relative flex items-center justify-center group">
               <button
@@ -505,19 +562,25 @@ export const RecordingReviewScreen: React.FC<RecordingReviewScreenProps> = ({
               </div>
             </div>
 
-            {/* 4. DOWNLOAD BUTTON */}
-            <div className="relative flex items-center justify-center group">
+            {/* 4. DOWNLOAD BUTTON WITH FORMAT CHOICES */}
+            <div className="relative flex items-center justify-center">
               <button
                 id="action-download-recording"
                 type="button"
-                onClick={handleDirectDownload}
-                title={`Download ${fileExt.toUpperCase()} video (${formatBytes(videoBlob.size)})`}
+                onClick={() => setIsDownloadMenuOpen((prev) => !prev)}
+                title={
+                  isConvertingMp4
+                    ? `Converting to MP4 (${conversionProgress}%)...`
+                    : 'Download Recording (MP4 or WebM)'
+                }
                 className="cursor-pointer"
               >
                 <div
                   className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center transition-all duration-150 shadow-sm hover:scale-105 active:scale-95 ${
                     isDownloaded
                       ? 'bg-[#8DB355] text-white shadow-md shadow-[#8DB355]/30'
+                      : isConvertingMp4
+                      ? 'bg-amber-500 text-white shadow-md shadow-amber-500/25 animate-pulse'
                       : 'bg-[#D90000] hover:bg-[#b80000] text-white shadow-md shadow-[#D90000]/25'
                   }`}
                 >
@@ -529,17 +592,106 @@ export const RecordingReviewScreen: React.FC<RecordingReviewScreenProps> = ({
                 </div>
               </button>
 
-              {/* Sleek Tooltip Label on Hover */}
-              <div className="pointer-events-none absolute left-full ml-3 top-1/2 -translate-y-1/2 z-40 opacity-0 -translate-x-2.5 scale-95 group-hover:opacity-100 group-hover:translate-x-0 group-hover:scale-100 transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] whitespace-nowrap">
-                <div className="px-2.5 py-1 rounded-lg bg-slate-900/95 dark:bg-white/95 text-white dark:text-slate-950 text-xs font-semibold shadow-xl shadow-black/20 backdrop-blur-md border border-white/10 dark:border-black/10 flex items-center gap-1.5 select-none">
-                  <span
-                    className={`w-1.5 h-1.5 rounded-full ${
-                      isDownloaded ? 'bg-[#8DB355]' : 'bg-[#D90000]'
-                    }`}
-                  />
-                  <span>{isDownloaded ? 'Downloaded' : `Download ${fileExt.toUpperCase()}`}</span>
+              {/* Sleek Tooltip Label on Hover (when menu is closed) */}
+              {!isDownloadMenuOpen && (
+                <div className="pointer-events-none absolute left-full ml-3 top-1/2 -translate-y-1/2 z-40 opacity-0 -translate-x-2.5 scale-95 hover:opacity-100 group-hover:opacity-100 group-hover:translate-x-0 group-hover:scale-100 transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] whitespace-nowrap">
+                  <div className="px-2.5 py-1 rounded-lg bg-slate-900/95 dark:bg-white/95 text-white dark:text-slate-950 text-xs font-semibold shadow-xl shadow-black/20 backdrop-blur-md border border-white/10 dark:border-black/10 flex items-center gap-1.5 select-none">
+                    <span
+                      className={`w-1.5 h-1.5 rounded-full ${
+                        isDownloaded
+                          ? 'bg-[#8DB355]'
+                          : isConvertingMp4
+                          ? 'bg-amber-400'
+                          : 'bg-[#D90000]'
+                      }`}
+                    />
+                    <span>
+                      {isDownloaded
+                        ? 'Downloaded'
+                        : isConvertingMp4
+                        ? `Converting MP4 (${conversionProgress}%)`
+                        : 'Download (MP4 / WebM)'}
+                    </span>
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {/* Sleek Format Selector Popover */}
+              {isDownloadMenuOpen && (
+                <>
+                  <div
+                    className="fixed inset-0 z-40 bg-transparent"
+                    onClick={() => {
+                      if (!isConvertingMp4) setIsDownloadMenuOpen(false);
+                    }}
+                  />
+                  <div className="absolute left-full ml-3 bottom-0 z-50 w-44 sm:w-48 p-2 bg-white dark:bg-[#12141a] rounded-2xl shadow-2xl border border-slate-200 dark:border-zinc-800 animate-in fade-in zoom-in-95 duration-150 select-none">
+                    <div className="flex items-center justify-between px-1.5 py-1 mb-1 border-b border-slate-100 dark:border-zinc-800/80">
+                      <span className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">
+                        Format
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setIsDownloadMenuOpen(false)}
+                        disabled={isConvertingMp4}
+                        className="p-1 -mr-1 rounded-md text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer disabled:opacity-50"
+                        title="Close format menu"
+                      >
+                        <Cancel01Icon className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+
+                    <div className="space-y-1">
+                      {/* Option 1: MP4 */}
+                      <button
+                        type="button"
+                        onClick={handleDownloadMp4}
+                        disabled={isConvertingMp4}
+                        className="w-full flex flex-col p-2 rounded-xl border border-slate-200/80 dark:border-zinc-800 hover:border-[#D90000] dark:hover:border-[#D90000] bg-slate-50/70 dark:bg-zinc-900/60 hover:bg-red-50/40 dark:hover:bg-red-950/20 transition-all cursor-pointer group/opt text-left"
+                      >
+                        <div className="flex items-center justify-between w-full">
+                          <span className="font-bold text-xs text-slate-900 dark:text-white">
+                            MP4
+                          </span>
+                          <span className="px-1.5 py-0.5 text-[9px] font-bold rounded-md bg-[#D90000]/10 text-[#D90000] border border-[#D90000]/20">
+                            Universal
+                          </span>
+                        </div>
+
+                        {isConvertingMp4 && (
+                          <div className="mt-1.5 w-full pt-1.5 border-t border-slate-200/60 dark:border-zinc-800">
+                            <div className="flex items-center justify-between text-[10px] font-bold text-amber-600 dark:text-amber-400 mb-1">
+                              <span className="truncate mr-1">{conversionStatus || 'Converting...'}</span>
+                              <span>{conversionProgress}%</span>
+                            </div>
+                            <div className="w-full h-1 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
+                              <div
+                                className="h-full bg-gradient-to-r from-amber-500 to-[#D90000] transition-all duration-150 rounded-full"
+                                style={{ width: `${conversionProgress}%` }}
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </button>
+
+                      {/* Option 2: WebM */}
+                      <button
+                        type="button"
+                        onClick={handleDownloadWebm}
+                        disabled={isConvertingMp4}
+                        className="w-full flex items-center justify-between p-2 rounded-xl border border-slate-200/80 dark:border-zinc-800 hover:border-slate-400 dark:hover:border-zinc-600 bg-slate-50/70 dark:bg-zinc-900/60 hover:bg-slate-100/60 dark:hover:bg-zinc-800/40 transition-all cursor-pointer group/opt text-left"
+                      >
+                        <span className="font-bold text-xs text-slate-900 dark:text-white">
+                          WebM
+                        </span>
+                        <span className="px-1.5 py-0.5 text-[9px] font-bold rounded-md bg-slate-200 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300">
+                          Original
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </aside>
         </div>

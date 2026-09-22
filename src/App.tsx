@@ -189,6 +189,8 @@ export default function App() {
     autoGainControl: true,
   });
 
+  const [isMicBlocked, setIsMicBlocked] = useState<boolean>(false);
+
   const [videoSettings, setVideoSettings] = useState<VideoSettings>({
     resolution: 'native',
     fps: 60,
@@ -221,6 +223,25 @@ export default function App() {
     // Auto-acquire microphone stream on initial load if mic is enabled and not in editor mode
     if (audioSettings.includeMic && !activeMicStream && recordingState !== 'editing') {
       handleEnableMicPreview(true, true).catch(() => {});
+    }
+
+    // Monitor browser microphone permission changes
+    if (typeof navigator !== 'undefined' && navigator.permissions && navigator.permissions.query) {
+      try {
+        navigator.permissions
+          .query({ name: 'microphone' as PermissionName })
+          .then((permissionStatus) => {
+            setIsMicBlocked(permissionStatus.state === 'denied');
+            permissionStatus.onchange = () => {
+              const isDenied = permissionStatus.state === 'denied';
+              setIsMicBlocked(isDenied);
+              if (permissionStatus.state === 'granted') {
+                handleEnableMicPreview(true, true).catch(() => {});
+              }
+            };
+          })
+          .catch(() => {});
+      } catch (_) {}
     }
   }, []);
 
@@ -492,6 +513,7 @@ export default function App() {
         }
         updateActiveMicStream(stream);
         setAudioSettings((prev) => ({ ...prev, includeMic: true }));
+        setIsMicBlocked(false);
         return stream;
       } catch {
         try {
@@ -505,15 +527,15 @@ export default function App() {
           }
           updateActiveMicStream(stream);
           setAudioSettings((prev) => ({ ...prev, includeMic: true }));
+          setIsMicBlocked(false);
           return stream;
         } catch {
-          if (!isSilentAutoCheck) {
-            showToast('Could not access microphone', 'error');
-          }
+          // Microphone is disabled or denied by the browser
+          setIsMicBlocked(true);
         }
       }
     },
-    [activeMicStream, audioSettings, recordingState, showToast, updateActiveMicStream]
+    [activeMicStream, audioSettings, recordingState, updateActiveMicStream]
   );
 
   const handleSelectRecordingSetup = useCallback(
@@ -1196,6 +1218,7 @@ export default function App() {
             onShareScreen={handleShareScreenPreview}
             onStopSharingScreen={handleStopSharingScreen}
             onToggleCamera={handleToggleCameraPreview}
+            isMicBlocked={isMicBlocked}
             onEnableMic={handleEnableMicPreview}
             onToggleMic={handleEnableMicPreview}
             layout={compositionLayout}

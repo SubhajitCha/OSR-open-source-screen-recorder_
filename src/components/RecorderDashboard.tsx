@@ -39,6 +39,7 @@ interface RecorderDashboardProps {
   onShareScreen?: () => void;
   onStopSharingScreen?: () => void;
   onToggleCamera?: (active: boolean) => void;
+  isMicBlocked?: boolean;
   onEnableMic?: () => void;
   onToggleMic?: (active: boolean) => void;
   // Composition Props
@@ -79,6 +80,7 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
   onShareScreen,
   onStopSharingScreen,
   onToggleCamera,
+  isMicBlocked = false,
   onEnableMic,
   onToggleMic,
   layout,
@@ -216,7 +218,9 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
               isScreenActive={isScreenActive}
               onToggleScreen={handleInternalToggleScreen}
               isMicActive={isMicActive}
+              isMicBlocked={isMicBlocked}
               onToggleMic={handleInternalToggleMic}
+              onEnableMic={onEnableMic}
               micStream={micStream}
               onOpenSettings={onOpenSettings}
               disabled={isRecording}

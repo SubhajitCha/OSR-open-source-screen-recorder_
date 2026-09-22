@@ -192,8 +192,18 @@ export const VideoEditor: React.FC<VideoEditorProps> = ({
 
   // Play / Pause Toggle
   const togglePlay = useCallback(() => {
-    setIsPlaying((prev) => !prev);
-  }, []);
+    setIsPlaying((prev) => {
+      const willPlay = !prev;
+      if (willPlay) {
+        const trimEnd = project.source.trimEnd ?? project.source.duration;
+        const trimStart = project.source.trimStart ?? 0;
+        if (currentTime >= trimEnd - 0.1) {
+          setCurrentTime(trimStart);
+        }
+      }
+      return willPlay;
+    });
+  }, [currentTime, project.source.duration, project.source.trimEnd, project.source.trimStart]);
 
   // Toggle Fullscreen Viewport Mode
   const toggleFullscreen = useCallback(() => {
@@ -525,6 +535,8 @@ export const VideoEditor: React.FC<VideoEditorProps> = ({
               project={project}
               currentTime={currentTime}
               isPlaying={isPlaying}
+              volume={volume}
+              isMuted={isMuted}
               onTimeUpdate={(t) => setCurrentTime(t)}
               selectedZoomId={selectedZoomId}
               onUpdateZoomTarget={handleUpdateZoomTarget}

@@ -2,11 +2,14 @@ import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { Project } from '../../types';
 import { extractCutSegments, extractZoomSegments } from '../../services/editorEngine';
 import { drawCompositionScene } from '../../services/layoutRenderer';
+import { generateThumbnailFromBlob } from '../../services/db';
 
 interface PreviewCanvasProps {
   project: Project;
   currentTime: number;
   isPlaying: boolean;
+  volume?: number;
+  isMuted?: boolean;
   onTimeUpdate: (time: number) => void;
   onDurationLoaded?: (duration: number) => void;
   selectedZoomId?: string | null;
@@ -17,6 +20,8 @@ export const PreviewCanvas: React.FC<PreviewCanvasProps> = ({
   project,
   currentTime,
   isPlaying,
+  volume = 100,
+  isMuted = false,
   onTimeUpdate,
   onDurationLoaded,
   selectedZoomId,
@@ -30,12 +35,30 @@ export const PreviewCanvas: React.FC<PreviewCanvasProps> = ({
   const [camVideoLoaded, setCamVideoLoaded] = useState(false);
   const [videoSrc, setVideoSrc] = useState<string>('');
   const [camVideoSrc, setCamVideoSrc] = useState<string>('');
+  const [thumbnailUrl, setThumbnailUrl] = useState<string>('');
   const [isDraggingTarget, setIsDraggingTarget] = useState(false);
   const [containerSize, setContainerSize] = useState({ width: 960, height: 540 });
 
   const zoomSegments = extractZoomSegments(project.timeline);
   const cutSegments = extractCutSegments(project.timeline);
   const metadata = project.metadata || { cursor: [], clicks: [], keyboard: [], bookmarks: [] };
+
+  // Generate instant poster thumbnail from videoBlob so canvas is never pitch dark
+  useEffect(() => {
+    let active = true;
+    const blob = project.source.videoBlob;
+    if (!blob) return;
+    generateThumbnailFromBlob(blob, 0.08)
+      .then((thumb) => {
+        if (active && thumb) {
+          setThumbnailUrl(thumb);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [project.source.videoBlob]);
 
   // Setup main video object URL (prefer isolated screenBlob if multi-track, else composite videoBlob)
   useEffect(() => {
@@ -90,21 +113,42 @@ export const PreviewCanvas: React.FC<PreviewCanvasProps> = ({
     };
   }, []);
 
+  // Synchronize audio volume and mute state in real-time
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.volume = Math.max(0, Math.min(1, volume / 100));
+      videoRef.current.muted = isMuted || volume === 0;
+    }
+  }, [volume, isMuted]);
+
   // Sync video elements time with currentTime prop
   useEffect(() => {
-    if (videoRef.current && Math.abs(videoRef.current.currentTime - currentTime) > 0.15) {
-      videoRef.current.currentTime = currentTime;
+    if (videoRef.current && Math.abs(videoRef.current.currentTime - currentTime) > 0.05) {
+      const targetTime = currentTime === 0 ? 0.05 : currentTime;
+      videoRef.current.currentTime = targetTime;
     }
-    if (camVideoRef.current && Math.abs(camVideoRef.current.currentTime - currentTime) > 0.15) {
-      camVideoRef.current.currentTime = currentTime;
+    if (camVideoRef.current && Math.abs(camVideoRef.current.currentTime - currentTime) > 0.05) {
+      const targetTime = currentTime === 0 ? 0.05 : currentTime;
+      camVideoRef.current.currentTime = targetTime;
     }
   }, [currentTime]);
 
-  // Play / Pause sync across both tracks
+  // Play / Pause sync across both tracks with audio policy handling
   useEffect(() => {
     if (videoRef.current && videoLoaded) {
       if (isPlaying) {
-        videoRef.current.play().catch(() => {});
+        videoRef.current.volume = Math.max(0, Math.min(1, volume / 100));
+        videoRef.current.muted = isMuted || volume === 0;
+        const playPromise = videoRef.current.play();
+        if (playPromise !== undefined) {
+          playPromise.catch((err) => {
+            console.warn('Playback with audio prevented by browser, attempting muted play:', err);
+            if (videoRef.current) {
+              videoRef.current.muted = true;
+              videoRef.current.play().catch(() => {});
+            }
+          });
+        }
       } else {
         videoRef.current.pause();
       }
@@ -116,7 +160,7 @@ export const PreviewCanvas: React.FC<PreviewCanvasProps> = ({
         camVideoRef.current.pause();
       }
     }
-  }, [isPlaying, videoLoaded, camVideoLoaded]);
+  }, [isPlaying, videoLoaded, camVideoLoaded, volume, isMuted]);
 
   // Handle video time updates & cuts skipping & trim bounds
   const handleVideoTimeUpdate = useCallback(() => {
@@ -193,7 +237,7 @@ export const PreviewCanvas: React.FC<PreviewCanvasProps> = ({
     const canvas = canvasRef.current;
     const video = videoRef.current;
     if (!canvas || !video) return;
-    if (!videoLoaded && video.readyState < 2) return;
+    if (video.readyState < 1 && video.videoWidth === 0) return;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
@@ -204,26 +248,31 @@ export const PreviewCanvas: React.FC<PreviewCanvasProps> = ({
       height: canvas.height,
       screenVideo: video,
       camVideo: camVideoRef.current,
-      currentTime,
+      currentTime: video.currentTime || currentTime,
       project,
       zoomSegments,
       metadata,
       selectedZoomId,
     });
-  }, [project, currentTime, zoomSegments, metadata, selectedZoomId, videoLoaded]);
+  }, [project, currentTime, zoomSegments, metadata, selectedZoomId]);
 
-  // Request Animation Frame when playing or currentTime changes
+  // Request Animation Frame when playing or currentTime/assets change
   useEffect(() => {
     let animId: number;
-    const loop = () => {
-      renderCanvasFrame();
-      if (isPlaying) {
+    if (isPlaying) {
+      const loop = () => {
+        renderCanvasFrame();
         animId = requestAnimationFrame(loop);
-      }
-    };
-    animId = requestAnimationFrame(loop);
+      };
+      animId = requestAnimationFrame(loop);
+    } else {
+      renderCanvasFrame();
+      animId = requestAnimationFrame(() => {
+        renderCanvasFrame();
+      });
+    }
     return () => cancelAnimationFrame(animId);
-  }, [isPlaying, renderCanvasFrame]);
+  }, [isPlaying, renderCanvasFrame, currentTime, videoLoaded, camVideoLoaded, containerSize]);
 
   // Helper to map canvas pointer events to normalized video coordinates
   const getNormalizedVideoCoords = (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -301,9 +350,8 @@ export const PreviewCanvas: React.FC<PreviewCanvasProps> = ({
         <video
           ref={videoRef}
           src={videoSrc}
-          className="hidden"
+          className="absolute opacity-0 pointer-events-none w-px h-px -z-50"
           playsInline
-          muted
           preload="auto"
           onLoadedMetadata={() => {
             if (videoRef.current) {
@@ -311,10 +359,28 @@ export const PreviewCanvas: React.FC<PreviewCanvasProps> = ({
               if (videoRef.current.duration && isFinite(videoRef.current.duration)) {
                 onDurationLoaded?.(videoRef.current.duration);
               }
+              videoRef.current.volume = Math.max(0, Math.min(1, volume / 100));
+              videoRef.current.muted = isMuted || volume === 0;
+
+              // Immediately prime the WebM decoder to the initial frame so canvas is never black
+              const initialSeek = currentTime > 0 ? currentTime : 0.05;
+              try {
+                videoRef.current.currentTime = initialSeek;
+              } catch (_) {}
             }
           }}
-          onLoadedData={() => setVideoLoaded(true)}
-          onCanPlay={() => setVideoLoaded(true)}
+          onLoadedData={() => {
+            setVideoLoaded(true);
+            renderCanvasFrame();
+          }}
+          onCanPlay={() => {
+            setVideoLoaded(true);
+            renderCanvasFrame();
+          }}
+          onSeeked={() => {
+            setVideoLoaded(true);
+            renderCanvasFrame();
+          }}
           onTimeUpdate={handleVideoTimeUpdate}
           onEnded={() => onTimeUpdate(project.source.duration)}
         />
@@ -325,17 +391,31 @@ export const PreviewCanvas: React.FC<PreviewCanvasProps> = ({
         <video
           ref={camVideoRef}
           src={camVideoSrc}
-          className="hidden"
+          className="absolute opacity-0 pointer-events-none w-px h-px -z-50"
           playsInline
           muted
           preload="auto"
           onLoadedMetadata={() => {
             if (camVideoRef.current) {
               setCamVideoLoaded(true);
+              const initialSeek = currentTime > 0 ? currentTime : 0.05;
+              try {
+                camVideoRef.current.currentTime = initialSeek;
+              } catch (_) {}
             }
           }}
-          onLoadedData={() => setCamVideoLoaded(true)}
-          onCanPlay={() => setCamVideoLoaded(true)}
+          onLoadedData={() => {
+            setCamVideoLoaded(true);
+            renderCanvasFrame();
+          }}
+          onCanPlay={() => {
+            setCamVideoLoaded(true);
+            renderCanvasFrame();
+          }}
+          onSeeked={() => {
+            setCamVideoLoaded(true);
+            renderCanvasFrame();
+          }}
         />
       ) : null}
 
@@ -360,6 +440,24 @@ export const PreviewCanvas: React.FC<PreviewCanvasProps> = ({
           onMouseDown={handleCanvasMouseDown}
           onMouseMove={handleCanvasMouseMove}
         />
+
+        {/* Instant Fallback Poster / Loading Overlay until video decoder presents first frame */}
+        {!videoLoaded && (
+          <div className="absolute inset-0 flex items-center justify-center bg-zinc-950 z-20 pointer-events-none transition-opacity duration-200">
+            {thumbnailUrl ? (
+              <img
+                src={thumbnailUrl}
+                alt="Video preview thumbnail"
+                className="w-full h-full object-contain"
+              />
+            ) : (
+              <div className="flex flex-col items-center gap-2.5">
+                <div className="w-8 h-8 rounded-full border-2 border-red-500/30 border-t-red-500 animate-spin" />
+                <span className="text-xs text-zinc-400 font-medium tracking-wide">Loading video preview...</span>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -21,6 +21,7 @@ import { SavedRecording, VideoBookmark } from '../types';
 import { saveRecordingToDB, generateThumbnailFromBlob, formatBytes } from '../services/db';
 import {
   downloadBlob,
+  downloadAsMp4,
   trimVideoClientSide,
 } from '../services/videoTrimmer';
 
@@ -241,10 +242,25 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
     }
   };
 
-  const handleDownloadLocal = () => {
+  const [isConvertingDownload, setIsConvertingDownload] = useState(false);
+  const [downloadProgress, setDownloadProgress] = useState(0);
+
+  const handleDownloadWebm = () => {
     const cleanTitle = title.trim().replace(/[/\\?%*:|"<>]/g, '_') || 'recording';
-    const filename = `${cleanTitle}.${fileExtension}`;
-    downloadBlob(currentBlob, filename);
+    downloadBlob(currentBlob, `${cleanTitle}.webm`);
+  };
+
+  const handleDownloadMp4 = async () => {
+    const cleanTitle = title.trim().replace(/[/\\?%*:|"<>]/g, '_') || 'recording';
+    setIsConvertingDownload(true);
+    setDownloadProgress(5);
+    try {
+      await downloadAsMp4(currentBlob, cleanTitle, (p) => setDownloadProgress(p), currentDuration > 0 ? currentDuration : undefined);
+    } catch {
+      downloadBlob(currentBlob, `${cleanTitle}.mp4`);
+    } finally {
+      setIsConvertingDownload(false);
+    }
   };
 
   const handleApplyTrim = async () => {
@@ -396,12 +412,26 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
             </button>
 
             <button
-              id="download-local-btn"
-              onClick={handleDownloadLocal}
-              className="flex items-center gap-2 px-5 py-2 text-xs font-black text-white dark:text-black bg-blue-600 dark:bg-white hover:bg-blue-700 dark:hover:bg-zinc-200 rounded-full shadow-md shadow-blue-500/25 dark:shadow-white/10 transition-all cursor-pointer active:scale-95"
+              id="download-webm-btn"
+              onClick={handleDownloadWebm}
+              className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300 shadow-xs transition-all cursor-pointer active:scale-95"
+              title="Instant download of original WebM recording"
+            >
+              <Download01Icon className="w-3.5 h-3.5 stroke-[2]" />
+              <span>Download WebM</span>
+            </button>
+
+            <button
+              id="download-mp4-btn"
+              onClick={handleDownloadMp4}
+              disabled={isConvertingDownload}
+              className="flex items-center gap-2 px-5 py-2 text-xs font-black text-white dark:text-black bg-blue-600 dark:bg-white hover:bg-blue-700 dark:hover:bg-zinc-200 rounded-full shadow-md shadow-blue-500/25 dark:shadow-white/10 transition-all cursor-pointer active:scale-95 disabled:opacity-75"
+              title="Convert and download as standard H.264 / AAC MP4"
             >
               <Download01Icon className="w-4 h-4 stroke-[2.5]" />
-              <span>Download Local</span>
+              <span>
+                {isConvertingDownload ? `Converting MP4 (${downloadProgress}%)...` : 'Download MP4'}
+              </span>
             </button>
           </div>
         </div>

@@ -26,7 +26,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
     resolutionPreset: '1080p',
     fps: 60,
     bitrateMbps: 12,
-    format: 'webm',
+    format: 'mp4',
   });
 
   const [isExporting, setIsExporting] = useState(false);
@@ -169,8 +169,22 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                 </div>
               </div>
 
-              {/* Framerate & Bitrate */}
-              <div className="grid grid-cols-2 gap-3">
+              {/* Framerate, Bitrate & Format */}
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="block font-bold text-[#A1A1AA] uppercase tracking-wider text-[10px] mb-1.5">
+                    Format
+                  </label>
+                  <select
+                    value={options.format}
+                    onChange={(e) => setOptions({ ...options, format: e.target.value as 'mp4' | 'webm' })}
+                    className="w-full bg-[#141418] border border-[#282830] rounded-xl px-3 py-2.5 text-xs font-semibold text-white focus:outline-none focus:border-[#D90000]"
+                  >
+                    <option value="mp4">MP4 (H.264 / AAC)</option>
+                    <option value="webm">WebM (VP9 / Opus)</option>
+                  </select>
+                </div>
+
                 <div>
                   <label className="block font-bold text-[#A1A1AA] uppercase tracking-wider text-[10px] mb-1.5">
                     Frame Rate
@@ -194,8 +208,8 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                     onChange={(e) => setOptions({ ...options, bitrateMbps: parseInt(e.target.value, 10) })}
                     className="w-full bg-[#141418] border border-[#282830] rounded-xl px-3 py-2.5 text-xs font-semibold text-white focus:outline-none focus:border-[#D90000]"
                   >
-                    <option value={12}>12 Mbps (High Quality)</option>
-                    <option value={20}>20 Mbps (Maximum)</option>
+                    <option value={12}>12 Mbps (High)</option>
+                    <option value={20}>20 Mbps (Max)</option>
                     <option value={8}>8 Mbps (Compact)</option>
                   </select>
                 </div>

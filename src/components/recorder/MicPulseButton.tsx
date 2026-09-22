@@ -3,6 +3,7 @@ import { Mic01Icon, MicOff01Icon, ArrowDown01Icon } from 'hugeicons-react';
 
 interface MicPulseButtonProps {
   isMicActive: boolean;
+  isMicBlocked?: boolean;
   micStream?: MediaStream | null;
   disabled?: boolean;
   onClick: () => void;
@@ -20,6 +21,7 @@ interface MicPulseButtonProps {
  */
 export const MicPulseButton: React.FC<MicPulseButtonProps> = ({
   isMicActive,
+  isMicBlocked = false,
   micStream,
   disabled = false,
   onClick,
@@ -307,7 +309,9 @@ export const MicPulseButton: React.FC<MicPulseButtonProps> = ({
           onClick();
         }}
         title={
-          isMicActive
+          isMicBlocked
+            ? 'Microphone blocked by browser — click to allow'
+            : isMicActive
             ? 'Mute microphone (revokes access)'
             : 'Unmute microphone (requests access)'
         }
@@ -318,13 +322,15 @@ export const MicPulseButton: React.FC<MicPulseButtonProps> = ({
           className={`relative ${
             size === 'sm' ? 'w-10 h-10' : 'w-12 h-12 sm:w-13 sm:h-13'
           } rounded-full flex items-center justify-center transition-colors duration-150 shadow-md will-change-transform ${
-            isMicActive
+            isMicBlocked
+              ? 'bg-red-500/15 dark:bg-red-950/40 text-red-500 dark:text-red-400 border border-red-500/40 hover:bg-red-500/25'
+              : isMicActive
               ? 'bg-[#8DB355] hover:bg-[#7a9d47] text-white shadow-md shadow-[#8DB355]/25'
               : 'bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/20 text-slate-500 dark:text-zinc-400 border border-slate-300/80 dark:border-white/10'
           }`}
         >
           <div ref={iconWrapperRef} className="flex items-center justify-center will-change-transform">
-            {isMicActive ? (
+            {isMicActive && !isMicBlocked ? (
               <Mic01Icon className={size === 'sm' ? 'w-5 h-5 stroke-[2]' : 'w-5 h-5 sm:w-6 sm:h-6 stroke-[2]'} />
             ) : (
               <MicOff01Icon className={size === 'sm' ? 'w-5 h-5 stroke-[2]' : 'w-5 h-5 sm:w-6 sm:h-6 stroke-[2]'} />

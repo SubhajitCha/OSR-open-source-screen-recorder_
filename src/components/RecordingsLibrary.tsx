@@ -24,7 +24,7 @@ import {
   getStorageInfo,
   formatBytes,
 } from '../services/db';
-import { downloadBlob } from '../services/videoTrimmer';
+import { downloadBlob, downloadAsMp4 } from '../services/videoTrimmer';
 
 interface RecordingsLibraryProps {
   onSelectRecordingForEdit?: (recording: SavedRecording) => void;
@@ -49,6 +49,8 @@ export const RecordingsLibrary: React.FC<RecordingsLibraryProps> = ({
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string } | null>(null);
   const [showClearAllModal, setShowClearAllModal] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
+  const [downloadMenuId, setDownloadMenuId] = useState<string | null>(null);
+  const [convertingId, setConvertingId] = useState<string | null>(null);
 
   const [storageInfo, setStorageInfo] = useState<{
     formattedUsage: string;
@@ -407,17 +409,64 @@ export const RecordingsLibrary: React.FC<RecordingsLibraryProps> = ({
                     )}
                   </div>
 
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1 relative">
                     <button
-                      onClick={() => {
-                        const ext = rec.mimeType.includes('mp4') ? 'mp4' : 'webm';
-                        downloadBlob(rec.blob, `${rec.title.replace(/\s+/g, '_')}.${ext}`);
-                      }}
-                      className="p-1.5 text-slate-400 dark:text-zinc-500 hover:text-slate-700 dark:hover:text-zinc-200 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
-                      title="Download Video File"
+                      onClick={() => setDownloadMenuId(downloadMenuId === rec.id ? null : rec.id)}
+                      className={`p-1.5 rounded-full transition-colors cursor-pointer ${
+                        downloadMenuId === rec.id
+                          ? 'bg-slate-200 dark:bg-zinc-700 text-slate-900 dark:text-white'
+                          : 'text-slate-400 dark:text-zinc-500 hover:text-slate-700 dark:hover:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-800'
+                      }`}
+                      title="Download (MP4 or WebM)"
                     >
                       <Download01Icon className="w-4 h-4" />
                     </button>
+
+                    {downloadMenuId === rec.id && (
+                      <>
+                        <div
+                          className="fixed inset-0 z-30"
+                          onClick={() => setDownloadMenuId(null)}
+                        />
+                        <div className="absolute right-0 bottom-full mb-2 z-40 w-48 p-1.5 bg-white dark:bg-[#181a20] rounded-xl shadow-xl border border-slate-200 dark:border-zinc-800 animate-in fade-in zoom-in-95 duration-100">
+                          <button
+                            onClick={async () => {
+                              const cleanTitle = rec.title.replace(/\s+/g, '_');
+                              setConvertingId(rec.id);
+                              try {
+                                await downloadAsMp4(rec.blob, cleanTitle, undefined, rec.duration > 0 ? rec.duration : undefined);
+                              } catch {
+                                downloadBlob(rec.blob, `${cleanTitle}.mp4`);
+                              } finally {
+                                setConvertingId(null);
+                                setDownloadMenuId(null);
+                              }
+                            }}
+                            disabled={convertingId === rec.id}
+                            className="w-full text-left px-2.5 py-1.5 text-xs font-semibold text-slate-800 dark:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-800/80 rounded-lg flex items-center justify-between cursor-pointer transition-colors"
+                          >
+                            <span>{convertingId === rec.id ? 'Converting...' : 'Download MP4'}</span>
+                            <span className="text-[9px] px-1.5 py-0.5 rounded bg-[#D90000]/10 text-[#D90000] font-bold">
+                              H.264
+                            </span>
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              const cleanTitle = rec.title.replace(/\s+/g, '_');
+                              downloadBlob(rec.blob, `${cleanTitle}.webm`);
+                              setDownloadMenuId(null);
+                            }}
+                            className="w-full text-left px-2.5 py-1.5 text-xs font-semibold text-slate-800 dark:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-800/80 rounded-lg flex items-center justify-between cursor-pointer transition-colors"
+                          >
+                            <span>Download WebM</span>
+                            <span className="text-[9px] px-1.5 py-0.5 rounded bg-slate-100 dark:bg-zinc-800 text-slate-500 font-bold">
+                              Fast
+                            </span>
+                          </button>
+                        </div>
+                      </>
+                    )}
 
                     <button
                       onClick={() => setDeleteTarget({ id: rec.id, title: rec.title })}
@@ -567,13 +616,34 @@ export const RecordingsLibrary: React.FC<RecordingsLibraryProps> = ({
                 )}
                 <button
                   onClick={() => {
-                    const ext = activePlayback.mimeType.includes('mp4') ? 'mp4' : 'webm';
-                    downloadBlob(activePlayback.blob, `${activePlayback.title.replace(/\s+/g, '_')}.${ext}`);
+                    const cleanTitle = activePlayback.title.replace(/\s+/g, '_');
+                    downloadBlob(activePlayback.blob, `${cleanTitle}.webm`);
                   }}
-                  className="flex items-center gap-2 px-5 py-2 font-bold text-white bg-[#D90000] hover:bg-[#b80000] rounded-full shadow-md shadow-[#D90000]/25 cursor-pointer transition-all active:scale-95"
+                  className="flex items-center gap-1.5 px-4 py-2 font-bold text-slate-700 dark:text-zinc-200 bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 rounded-full border border-slate-200 dark:border-zinc-700 shadow-xs cursor-pointer transition-colors"
+                  title="Download original WebM capture (Instant)"
                 >
                   <Download01Icon className="w-4 h-4" />
-                  <span>Download File</span>
+                  <span>Download WebM</span>
+                </button>
+
+                <button
+                  onClick={async () => {
+                    const cleanTitle = activePlayback.title.replace(/\s+/g, '_');
+                    setConvertingId(activePlayback.id);
+                    try {
+                      await downloadAsMp4(activePlayback.blob, cleanTitle, undefined, activePlayback.duration > 0 ? activePlayback.duration : undefined);
+                    } catch {
+                      downloadBlob(activePlayback.blob, `${cleanTitle}.mp4`);
+                    } finally {
+                      setConvertingId(null);
+                    }
+                  }}
+                  disabled={convertingId === activePlayback.id}
+                  className="flex items-center gap-2 px-5 py-2 font-bold text-white bg-[#D90000] hover:bg-[#b80000] rounded-full shadow-md shadow-[#D90000]/25 cursor-pointer transition-all active:scale-95 disabled:opacity-75"
+                  title="Convert and download as MP4 (H.264 / AAC)"
+                >
+                  <Download01Icon className="w-4 h-4" />
+                  <span>{convertingId === activePlayback.id ? 'Converting MP4...' : 'Download MP4'}</span>
                 </button>
               </div>
             </div>

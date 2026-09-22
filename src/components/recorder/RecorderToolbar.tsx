@@ -11,6 +11,7 @@ import {
   ArrowUp01Icon,
   SparklesIcon,
   ArrowDown01Icon,
+  AlertCircleIcon,
 } from 'hugeicons-react';
 import {
   CompositionLayout,
@@ -51,7 +52,9 @@ interface RecorderToolbarProps {
   isScreenActive?: boolean;
   onToggleScreen?: (active: boolean) => void;
   isMicActive?: boolean;
+  isMicBlocked?: boolean;
   onToggleMic?: (active: boolean) => void;
+  onEnableMic?: () => void;
   micStream?: MediaStream | null;
   onOpenSettings?: () => void;
   disabled?: boolean;
@@ -91,7 +94,9 @@ export const RecorderToolbar: React.FC<RecorderToolbarProps> = ({
   isScreenActive = false,
   onToggleScreen,
   isMicActive = false,
+  isMicBlocked = false,
   onToggleMic,
+  onEnableMic,
   micStream = null,
   onOpenSettings,
   disabled = false,
@@ -195,16 +200,20 @@ export const RecorderToolbar: React.FC<RecorderToolbarProps> = ({
           />
         </div>
 
-        {/* 2. MIC BUTTON (Reactive pulse toggle + Dropdown + Sleek Hover Badge) */}
+        {/* 2. MIC BUTTON (Reactive pulse toggle + Dropdown + Sleek Hover Badge + Blocked Indicator) */}
         <div className="relative flex items-center justify-center group">
           <div className="relative flex items-center justify-center">
             <MicPulseButton
               size="sm"
               isMicActive={isMicActive}
+              isMicBlocked={isMicBlocked}
               micStream={micStream}
               disabled={disabled}
               onClick={() => {
-                if (onToggleMic) {
+                if (isMicBlocked) {
+                  if (onEnableMic) onEnableMic();
+                  else if (onToggleMic) onToggleMic(true);
+                } else if (onToggleMic) {
                   onToggleMic(!isMicActive);
                 } else {
                   onUpdateAudioSettings({ includeMic: !audioSettings.includeMic });
@@ -215,17 +224,40 @@ export const RecorderToolbar: React.FC<RecorderToolbarProps> = ({
             />
           </div>
 
-          {/* Sleek Tooltip Label on Hover */}
-          <div className="pointer-events-none absolute left-full ml-3 top-1/2 -translate-y-1/2 z-40 opacity-0 -translate-x-2.5 scale-95 group-hover:opacity-100 group-hover:translate-x-0 group-hover:scale-100 transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] whitespace-nowrap">
-            <div className="px-2.5 py-1 rounded-lg bg-slate-900/95 dark:bg-white/95 text-white dark:text-slate-950 text-xs font-semibold shadow-xl shadow-black/20 backdrop-blur-md border border-white/10 dark:border-black/10 flex items-center gap-1.5 select-none">
-              <span
-                className={`w-1.5 h-1.5 rounded-full ${
-                  isMicActive ? 'bg-[#8DB355]' : 'bg-[#D90000]'
-                }`}
-              />
-              <span>{isMicActive ? 'Mute Mic' : 'Unmute Mic'}</span>
+          {/* If microphone is blocked by browser, show small persistent format beside the mic button */}
+          {isMicBlocked ? (
+            <div
+              id="mic-permission-error-pill"
+              className="absolute left-full ml-3 top-1/2 -translate-y-1/2 z-50 flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-red-50 dark:bg-[#1a0808] text-[#D90000] dark:text-red-400 border border-red-200 dark:border-red-900/60 shadow-xl shadow-red-950/15 backdrop-blur-md text-[11px] font-medium whitespace-nowrap animate-in fade-in slide-in-from-left-2 duration-200"
+            >
+              <AlertCircleIcon className="w-3.5 h-3.5 shrink-0 text-[#D90000]" />
+              <span>Mic blocked by browser</span>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (onEnableMic) onEnableMic();
+                  else if (onToggleMic) onToggleMic(true);
+                }}
+                className="ml-1 px-1.5 py-0.5 text-[10px] font-bold bg-[#D90000] hover:bg-[#b80000] text-white rounded-md transition-colors cursor-pointer"
+                title="Retry requesting microphone access"
+              >
+                Allow
+              </button>
             </div>
-          </div>
+          ) : (
+            /* Sleek Tooltip Label on Hover (when not blocked) */
+            <div className="pointer-events-none absolute left-full ml-3 top-1/2 -translate-y-1/2 z-40 opacity-0 -translate-x-2.5 scale-95 group-hover:opacity-100 group-hover:translate-x-0 group-hover:scale-100 transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] whitespace-nowrap">
+              <div className="px-2.5 py-1 rounded-lg bg-slate-900/95 dark:bg-white/95 text-white dark:text-slate-950 text-xs font-semibold shadow-xl shadow-black/20 backdrop-blur-md border border-white/10 dark:border-black/10 flex items-center gap-1.5 select-none">
+                <span
+                  className={`w-1.5 h-1.5 rounded-full ${
+                    isMicActive ? 'bg-[#8DB355]' : 'bg-[#D90000]'
+                  }`}
+                />
+                <span>{isMicActive ? 'Mute Mic' : 'Unmute Mic'}</span>
+              </div>
+            </div>
+          )}
 
           <MicPopover
             isOpen={activePopover === 'mic'}
@@ -488,10 +520,14 @@ export const RecorderToolbar: React.FC<RecorderToolbarProps> = ({
           <MicPulseButton
             size="sm"
             isMicActive={isMicActive}
+            isMicBlocked={isMicBlocked}
             micStream={micStream}
             disabled={disabled}
             onClick={() => {
-              if (onToggleMic) {
+              if (isMicBlocked) {
+                if (onEnableMic) onEnableMic();
+                else if (onToggleMic) onToggleMic(true);
+              } else if (onToggleMic) {
                 onToggleMic(!isMicActive);
               } else {
                 onUpdateAudioSettings({ includeMic: !audioSettings.includeMic });
@@ -501,22 +537,37 @@ export const RecorderToolbar: React.FC<RecorderToolbarProps> = ({
             onTogglePopover={() => togglePopover('mic')}
           />
 
-          <span
-            className={`text-xs font-semibold whitespace-nowrap mt-1 cursor-pointer ${
-              isMicActive
-                ? 'text-[#8DB355] dark:text-[#a2c86b]'
-                : 'text-[#D90000]'
-            }`}
-            onClick={() => {
-              if (onToggleMic) {
-                onToggleMic(!isMicActive);
-              } else {
-                onUpdateAudioSettings({ includeMic: !audioSettings.includeMic });
-              }
-            }}
-          >
-            {isMicActive ? 'Mute Mic' : 'Unmute Mic'}
-          </span>
+          {isMicBlocked ? (
+            <div
+              id="mic-blocked-badge-horizontal"
+              className="flex items-center gap-1 px-1.5 py-0.5 mt-1 rounded-md bg-red-50 dark:bg-[#1a0808] text-[#D90000] dark:text-red-400 border border-red-200 dark:border-red-900/60 text-[10px] font-semibold whitespace-nowrap cursor-pointer"
+              onClick={() => {
+                if (onEnableMic) onEnableMic();
+                else if (onToggleMic) onToggleMic(true);
+              }}
+              title="Microphone blocked by browser — click to allow"
+            >
+              <AlertCircleIcon className="w-2.5 h-2.5 text-[#D90000] shrink-0" />
+              <span>Mic blocked</span>
+            </div>
+          ) : (
+            <span
+              className={`text-xs font-semibold whitespace-nowrap mt-1 cursor-pointer ${
+                isMicActive
+                  ? 'text-[#8DB355] dark:text-[#a2c86b]'
+                  : 'text-[#D90000]'
+              }`}
+              onClick={() => {
+                if (onToggleMic) {
+                  onToggleMic(!isMicActive);
+                } else {
+                  onUpdateAudioSettings({ includeMic: !audioSettings.includeMic });
+                }
+              }}
+            >
+              {isMicActive ? 'Mute Mic' : 'Unmute Mic'}
+            </span>
+          )}
 
           <MicPopover
             isOpen={activePopover === 'mic'}

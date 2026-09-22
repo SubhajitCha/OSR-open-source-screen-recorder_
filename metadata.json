@@ -1,6 +1,6 @@
 {
   "name": "OSR — Open Source Screen Recorder",
-  "description": "Free, open-source, privacy-first web screen recorder with webcam PIP, microphone & system audio mixing, keyboard shortcuts, IndexedDB offline history, and zero server uploads.",
+  "description": "Free online screen recorder with webcam PIP, system audio mixing, MP4 export, and font finder from image tools with zero cloud uploads.",
   "requestFramePermissions": ["camera", "microphone", "display-capture"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

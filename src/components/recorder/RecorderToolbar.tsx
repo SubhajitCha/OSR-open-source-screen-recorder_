@@ -22,6 +22,7 @@ import {
   PrompterConfig,
   AudioSettings,
   VideoSettings,
+  RecordingMode,
 } from '../../types';
 import { ScreenPopover } from './popovers/ScreenPopover';
 import { CameraPopover } from './popovers/CameraPopover';
@@ -47,6 +48,7 @@ interface RecorderToolbarProps {
   onUpdateSmartConfig: (updates: Partial<SmartRecordingConfig>) => void;
   prompter: PrompterConfig;
   onUpdatePrompter: (updates: Partial<PrompterConfig>) => void;
+  mode?: RecordingMode;
   isCameraActive: boolean;
   onToggleCamera: (active: boolean) => void;
   isScreenActive?: boolean;
@@ -89,6 +91,7 @@ export const RecorderToolbar: React.FC<RecorderToolbarProps> = ({
   onUpdateSmartConfig,
   prompter,
   onUpdatePrompter,
+  mode = 'screen_cam',
   isCameraActive,
   onToggleCamera,
   isScreenActive = false,
@@ -351,6 +354,7 @@ export const RecorderToolbar: React.FC<RecorderToolbarProps> = ({
             onSelectLayout={onSelectLayout}
             background={background}
             placement={popoverPlacement}
+            mode={mode}
           />
         </div>
 
@@ -662,6 +666,7 @@ export const RecorderToolbar: React.FC<RecorderToolbarProps> = ({
             onSelectLayout={onSelectLayout}
             background={background}
             placement={popoverPlacement}
+            mode={mode}
           />
         </div>
 

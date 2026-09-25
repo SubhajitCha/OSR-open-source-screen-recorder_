@@ -1,0 +1,8 @@
+# Robots.txt for OSR — Free Online Screen Recorder
+# https://www.robotstxt.org/
+
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://ais-dev-zcab2idtiydctfpjgdbs6l-316118312972.asia-southeast1.run.app/sitemap.xml

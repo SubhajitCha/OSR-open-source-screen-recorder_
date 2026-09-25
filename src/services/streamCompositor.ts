@@ -402,23 +402,24 @@ export function createStreamCompositor(
           pipConfig.borderColor || 'rgba(255, 255, 255, 0.35)'
         );
       }
-    } else if (currentLayout === 'framed') {
+    } else if (currentLayout === 'framed' || currentLayout === 'spaced-far') {
       // -------------------------------------------------------------
-      // LAYOUT 2: FRAMED (Spacing around screen with background visible behind it + corner camera)
+      // LAYOUT 2: FRAMED / SPACED-FAR (Spacing around screen with background visible behind it)
       // -------------------------------------------------------------
       renderBackgroundToCanvas(ctx, width, height, currentBackground.value);
 
       // Inset Screen Card with Margins/Padding
-      const padX = width * 0.07;
-      const padY = height * 0.07;
-      const scrW = width * 0.86;
-      const scrH = height * 0.86;
-      const scrRadius = 18 * (width / 1920);
+      const marginRatio = currentLayout === 'spaced-far' ? 0.15 : 0.07;
+      const padX = width * marginRatio;
+      const padY = height * marginRatio;
+      const scrW = width * (1 - marginRatio * 2);
+      const scrH = height * (1 - marginRatio * 2);
+      const scrRadius = (currentLayout === 'spaced-far' ? 22 : 18) * (width / 1920);
 
       // Soft drop shadow behind screen
       ctx.save();
       ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
-      ctx.shadowBlur = 32 * (width / 1920);
+      ctx.shadowBlur = (currentLayout === 'spaced-far' ? 36 : 32) * (width / 1920);
       ctx.shadowOffsetY = 8 * (width / 1920);
       ctx.fillStyle = '#090a0f';
       ctx.beginPath();
@@ -426,7 +427,7 @@ export function createStreamCompositor(
       ctx.fill();
       ctx.restore();
 
-      // Clip & Draw Screen
+      // Clip & Draw Main Video Source
       ctx.save();
       ctx.beginPath();
       drawRoundedRectPath(ctx, padX, padY, scrW, scrH, scrRadius);
@@ -434,6 +435,8 @@ export function createStreamCompositor(
       if (isScreenReady) {
         ctx.drawImage(screenVideo, padX, padY, scrW, scrH);
         hasDrawnScreenFrame = true;
+      } else if (isCameraReady && cameraVideo && !screenStream) {
+        ctx.drawImage(cameraVideo, padX, padY, scrW, scrH);
       }
       ctx.restore();
 
@@ -446,8 +449,8 @@ export function createStreamCompositor(
       ctx.stroke();
       ctx.restore();
 
-      // Corner Camera Bubble
-      if (isCameraReady && cameraVideo) {
+      // Corner Camera Bubble (only in dual-source mode where both screen and camera are active)
+      if (isCameraReady && cameraVideo && isScreenReady) {
         drawCameraOnCanvas(
           ctx,
           cameraVideo,
@@ -464,17 +467,19 @@ export function createStreamCompositor(
       }
     } else {
       // -------------------------------------------------------------
-      // LAYOUT 1: OVERLAY / END-TO-END (Full display capture, camera sits on corner)
+      // LAYOUT 1: OVERLAY / END-TO-END (Full display capture)
       // -------------------------------------------------------------
       if (isScreenReady) {
         ctx.drawImage(screenVideo, 0, 0, width, height);
         hasDrawnScreenFrame = true;
+      } else if (isCameraReady && cameraVideo && !screenStream) {
+        ctx.drawImage(cameraVideo, 0, 0, width, height);
       } else if (!hasDrawnScreenFrame) {
         ctx.fillStyle = '#0f172a';
         ctx.fillRect(0, 0, width, height);
       }
 
-      if (isCameraReady && cameraVideo && currentLayout !== 'screen') {
+      if (isCameraReady && cameraVideo && isScreenReady && currentLayout !== 'screen') {
         drawCameraOnCanvas(
           ctx,
           cameraVideo,

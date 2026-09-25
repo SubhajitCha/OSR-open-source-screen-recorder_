@@ -112,12 +112,22 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
     if (!nextActive) {
       if (mode === 'screen_cam') {
         onSelectMode('screen');
-        onSelectLayout('screen');
+        if (layout === 'spaced-far') {
+          onSelectLayout('spaced-far');
+        } else if (layout === 'framed') {
+          onSelectLayout('framed');
+        } else {
+          onSelectLayout('overlay');
+        }
       }
     } else {
       if (mode === 'screen') {
         onSelectMode('screen_cam');
-        onSelectLayout('overlay');
+        if (layout === 'framed') {
+          onSelectLayout('framed');
+        } else {
+          onSelectLayout('overlay');
+        }
       }
     }
   };
@@ -190,14 +200,19 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
             <RecorderToolbar
               orientation="vertical"
               layout={layout}
+              mode={mode}
               onSelectLayout={(l) => {
                 onSelectLayout(l);
+                if (mode === 'screen' || mode === 'cam_only' || mode === 'audio_only') {
+                  // In single-source modes, stay strictly in the current mode; do not switch mode or open camera
+                  return;
+                }
                 if (l === 'screen') {
-                  if (mode !== 'screen') onSelectMode('screen');
+                  onSelectMode('screen');
                 } else if (l === 'cam-only') {
-                  if (mode !== 'cam_only') onSelectMode('cam_only');
+                  onSelectMode('cam_only');
                 } else {
-                  if (mode !== 'screen_cam') onSelectMode('screen_cam');
+                  onSelectMode('screen_cam');
                 }
               }}
               aspectRatio={aspectRatio}

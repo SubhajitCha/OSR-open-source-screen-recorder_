@@ -98,6 +98,9 @@ export const RecordingCanvas: React.FC<RecordingCanvasProps> = ({
 
   // Screen transform layer rectangle (percentages)
   const [screenRect, setScreenRect] = useState<LayerRect>(() => {
+    if (layout === 'spaced-far') {
+      return { x: 15, y: 15, width: 70, height: 70 };
+    }
     if (layout === 'framed') {
       return { x: 7, y: 7, width: 86, height: 86 };
     }
@@ -117,7 +120,9 @@ export const RecordingCanvas: React.FC<RecordingCanvasProps> = ({
 
   // Synchronize screenRect and camRect with active layout preset
   useEffect(() => {
-    if (layout === 'framed') {
+    if (layout === 'spaced-far') {
+      setScreenRect({ x: 15, y: 15, width: 70, height: 70 });
+    } else if (layout === 'framed') {
       setScreenRect({ x: 7, y: 7, width: 86, height: 86 });
     } else {
       setScreenRect({ x: 0, y: 0, width: 100, height: 100 });
@@ -253,7 +258,9 @@ export const RecordingCanvas: React.FC<RecordingCanvasProps> = ({
     if (!videoEl || !videoEl.videoWidth || !videoEl.videoHeight) return;
     setScreenResolution({ width: videoEl.videoWidth, height: videoEl.videoHeight });
 
-    if (layout === 'framed') {
+    if (layout === 'spaced-far') {
+      setScreenRect({ x: 15, y: 15, width: 70, height: 70 });
+    } else if (layout === 'framed') {
       setScreenRect({ x: 7, y: 7, width: 86, height: 86 });
     } else {
       setScreenRect({ x: 0, y: 0, width: 100, height: 100 });
@@ -370,7 +377,9 @@ export const RecordingCanvas: React.FC<RecordingCanvasProps> = ({
 
   const isScreenTweaked = useMemo(() => {
     const defaultRect =
-      layout === 'framed'
+      layout === 'spaced-far'
+        ? { x: 15, y: 15, width: 70, height: 70 }
+        : layout === 'framed'
         ? { x: 7, y: 7, width: 86, height: 86 }
         : { x: 0, y: 0, width: 100, height: 100 };
 
@@ -384,7 +393,9 @@ export const RecordingCanvas: React.FC<RecordingCanvasProps> = ({
 
   const resetScreenTransform = () => {
     setAlignmentGuides({ x: false, y: false });
-    if (layout === 'framed') {
+    if (layout === 'spaced-far') {
+      setScreenRect({ x: 15, y: 15, width: 70, height: 70 });
+    } else if (layout === 'framed') {
       setScreenRect({ x: 7, y: 7, width: 86, height: 86 });
     } else {
       setScreenRect({ x: 0, y: 0, width: 100, height: 100 });
@@ -607,7 +618,7 @@ export const RecordingCanvas: React.FC<RecordingCanvasProps> = ({
                 >
                   <div
                     className={`relative w-full h-full flex items-center justify-center bg-zinc-950/60 overflow-hidden group select-none transition-[border-color,box-shadow,background-color] duration-150 ${
-                      layout === 'framed'
+                      layout === 'framed' || layout === 'spaced-far'
                         ? 'rounded-2xl ring-1 ring-white/10 shadow-2xl shadow-black/50'
                         : 'rounded-2xl'
                     }`}
@@ -679,7 +690,7 @@ export const RecordingCanvas: React.FC<RecordingCanvasProps> = ({
                 </AdjustableLayerBox>
 
                 {/* 3B. ADJUSTABLE CAMERA LAYER (OVERLAY / CORNER-CAM / FRAMED) */}
-                {(layout === 'overlay' || layout === 'corner-cam' || layout === 'framed' || webcamStream) && (
+                {mode === 'screen_cam' && (layout === 'overlay' || layout === 'corner-cam' || layout === 'framed' || layout === 'spaced-far' || webcamStream) && (
                   <AdjustableLayerBox
                     id="adjustable-camera-layer"
                     isSelected={selectedLayer === 'cam'}

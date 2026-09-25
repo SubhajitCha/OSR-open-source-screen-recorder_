@@ -13,7 +13,7 @@ export type ActiveView =
 
 export type RecordingMode = 'screen' | 'screen_cam' | 'cam_only' | 'audio_only';
 
-export type CompositionLayout = 'screen' | 'overlay' | 'framed' | 'corner-cam' | 'split' | 'split-vertical' | 'cam-only';
+export type CompositionLayout = 'screen' | 'overlay' | 'framed' | 'spaced-far' | 'corner-cam' | 'split' | 'split-vertical' | 'cam-only';
 
 export type RecorderAspectRatio = '16:9' | '9:16' | '1:1' | '4:5' | '4:3';
 

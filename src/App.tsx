@@ -52,7 +52,18 @@ export default function App() {
       if (typeof window !== 'undefined') {
         const hash = window.location.hash.replace(/^#\/?/, '').toLowerCase();
         const searchParams = new URLSearchParams(window.location.search);
-        const viewParam = (searchParams.get('view') || hash || '').toLowerCase();
+        const rawPath = window.location.pathname.replace(/^\/+|\/+$/g, '').toLowerCase();
+
+        let requested = (searchParams.get('view') || hash || rawPath || '').toLowerCase();
+
+        // Standardize common SEO path aliases
+        if (requested === 'about-us') requested = 'about';
+        if (requested === 'privacy-policy') requested = 'privacy';
+        if (requested === 'terms-conditions' || requested === 'terms-of-service') requested = 'terms';
+        if (requested === 'contact-us') requested = 'contact';
+        if (requested === 'documentation') requested = 'docs';
+        if (requested === 'status') requested = 'services';
+        if (requested === 'recordings') requested = 'library';
 
         const validViews: ActiveView[] = [
           'studio',
@@ -68,9 +79,9 @@ export default function App() {
           '500',
         ];
 
-        if (viewParam) {
-          if (validViews.includes(viewParam as ActiveView)) {
-            return viewParam as ActiveView;
+        if (requested) {
+          if (validViews.includes(requested as ActiveView)) {
+            return requested as ActiveView;
           }
           // If a non-empty route/param was requested but does not exist, route to 404
           return '404';
@@ -262,12 +273,7 @@ export default function App() {
       }
     }
 
-    // Auto-acquire microphone stream on initial load if mic is enabled and not in editor mode
-    if (audioSettings.includeMic && !activeMicStream && recordingState !== 'editing') {
-      handleEnableMicPreview(true, true).catch(() => {});
-    }
-
-    // Monitor browser microphone permission changes
+    // Monitor browser microphone permission changes passively (without prompting or auto-acquiring)
     if (typeof navigator !== 'undefined' && navigator.permissions && navigator.permissions.query) {
       try {
         navigator.permissions
@@ -275,17 +281,26 @@ export default function App() {
           .then((permissionStatus) => {
             setIsMicBlocked(permissionStatus.state === 'denied');
             permissionStatus.onchange = () => {
-              const isDenied = permissionStatus.state === 'denied';
-              setIsMicBlocked(isDenied);
-              if (permissionStatus.state === 'granted') {
-                handleEnableMicPreview(true, true).catch(() => {});
-              }
+              setIsMicBlocked(permissionStatus.state === 'denied');
             };
           })
           .catch(() => {});
       } catch (_) {}
     }
   }, []);
+
+  // Cleanup media access when navigating away from studio or unmounting unless actively recording
+  useEffect(() => {
+    if (activeView !== 'studio' && recordingState !== 'recording' && recordingState !== 'paused') {
+      stopAllActiveMediaAccess();
+    }
+  }, [activeView, recordingState, stopAllActiveMediaAccess]);
+
+  useEffect(() => {
+    return () => {
+      stopAllActiveMediaAccess();
+    };
+  }, [stopAllActiveMediaAccess]);
 
   // Hash and popstate listener for back/forward browser navigation and direct URLs
   useEffect(() => {
@@ -1395,15 +1410,17 @@ export default function App() {
         )}
       </main>
 
-      {/* Global Persistent Footer across all views */}
-      <AppFooter
-        activeView={activeView}
-        isRecording={recordingState === 'recording' || recordingState === 'paused'}
-        onNavigate={(view) => {
-          setActiveView(view);
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }}
-      />
+      {/* Footer is only displayed on the main home page */}
+      {activeView === 'studio' && recordingState !== 'editing' && (
+        <AppFooter
+          activeView={activeView}
+          isRecording={recordingState === 'recording' || recordingState === 'paused'}
+          onNavigate={(view) => {
+            setActiveView(view);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+        />
+      )}
 
       {/* Countdown Overlay Modal */}
       {recordingState === 'countdown' && (

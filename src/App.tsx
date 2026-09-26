@@ -544,6 +544,7 @@ export default function App() {
         video: {
           width: { ideal: 1280, max: 1920 },
           height: { ideal: 720, max: 1080 },
+          frameRate: { ideal: 30, max: 60 },
           facingMode: 'user',
         },
       });
@@ -557,7 +558,11 @@ export default function App() {
       return stream;
     } catch {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            frameRate: { ideal: 30, max: 60 },
+          },
+        });
         const videoTrack = stream.getVideoTracks()[0];
         if (videoTrack) {
           videoTrack.onended = () => {

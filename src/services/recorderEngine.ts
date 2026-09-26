@@ -151,12 +151,17 @@ export class RecorderEngine {
               video: {
                 width: { ideal: 1280, max: 1920 },
                 height: { ideal: 720, max: 1080 },
+                frameRate: { ideal: videoSettings.fps || 30, max: 60 },
                 facingMode: 'user',
               },
             });
           } catch {
             try {
-              this.webcamStream = await navigator.mediaDevices.getUserMedia({ video: true });
+              this.webcamStream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                  frameRate: { ideal: videoSettings.fps || 30, max: 60 },
+                },
+              });
             } catch (err) {
               console.warn('Camera permission denied or device not found:', err);
               if (mode === 'cam_only') {

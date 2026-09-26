@@ -87,7 +87,9 @@ export const RecordingCanvas: React.FC<RecordingCanvasProps> = ({
   const innerStageRef = useRef<HTMLDivElement | null>(null);
   const webcamVideoRef = useRef<HTMLVideoElement | null>(null);
   const camOnlyVideoRef = useRef<HTMLVideoElement | null>(null);
+  const splitCamVideoRef = useRef<HTMLVideoElement | null>(null);
   const screenVideoRef = useRef<HTMLVideoElement | null>(null);
+  const splitScreenVideoRef = useRef<HTMLVideoElement | null>(null);
   const prompterScrollRef = useRef<HTMLDivElement | null>(null);
 
   // Layer selection for direct manipulation (cyan outline + 4 corner handles)
@@ -269,53 +271,49 @@ export const RecordingCanvas: React.FC<RecordingCanvasProps> = ({
 
   // Camera dimensions and positioning are unified and managed via calculatePipMetrics above
 
-  // Attach webcam stream with explicit cleanup to release hardware handles
+  // Attach webcam stream to all active camera video elements
   useEffect(() => {
-    const webcamVideo = webcamVideoRef.current;
-    const camOnlyVideo = camOnlyVideoRef.current;
-
-    if (webcamVideo) {
-      if (webcamStream && webcamVideo.srcObject !== webcamStream) {
-        webcamVideo.srcObject = webcamStream;
-        webcamVideo.play().catch(() => {});
-      } else if (!webcamStream && webcamVideo.srcObject) {
-        webcamVideo.pause();
-        webcamVideo.srcObject = null;
+    const camVideos = [webcamVideoRef.current, camOnlyVideoRef.current, splitCamVideoRef.current];
+    camVideos.forEach((v) => {
+      if (v) {
+        if (webcamStream && v.srcObject !== webcamStream) {
+          v.srcObject = webcamStream;
+          v.play().catch(() => {});
+        } else if (!webcamStream && v.srcObject) {
+          v.pause();
+          v.srcObject = null;
+        }
       }
-    }
-    if (camOnlyVideo) {
-      if (webcamStream && camOnlyVideo.srcObject !== webcamStream) {
-        camOnlyVideo.srcObject = webcamStream;
-        camOnlyVideo.play().catch(() => {});
-      } else if (!webcamStream && camOnlyVideo.srcObject) {
-        camOnlyVideo.pause();
-        camOnlyVideo.srcObject = null;
-      }
-    }
+    });
   }, [webcamStream, layout, mode]);
 
-  // Attach screen stream with explicit cleanup
+  // Attach screen stream to all active screen video elements with hardware sync
   useEffect(() => {
-    const screenVideo = screenVideoRef.current;
-    if (screenVideo) {
-      screenVideo.srcObject = screenStream || null;
-      if (screenStream) {
-        screenVideo.play().catch(() => {});
-        if (screenVideo.videoWidth > 0) {
-          handleScreenMetadata(screenVideo);
+    const scrVideos = [screenVideoRef.current, splitScreenVideoRef.current];
+    scrVideos.forEach((v) => {
+      if (v) {
+        if (screenStream && v.srcObject !== screenStream) {
+          v.srcObject = screenStream;
+          v.play().catch(() => {});
+          if (v.videoWidth > 0) {
+            handleScreenMetadata(v);
+          }
+        } else if (!screenStream && v.srcObject) {
+          v.pause();
+          v.srcObject = null;
         }
-      } else {
-        screenVideo.pause();
       }
-    }
+    });
 
     return () => {
-      if (screenVideo) {
-        screenVideo.pause();
-        screenVideo.srcObject = null;
-      }
+      scrVideos.forEach((v) => {
+        if (v) {
+          v.pause();
+          v.srcObject = null;
+        }
+      });
     };
-  }, [screenStream, handleScreenMetadata]);
+  }, [screenStream, handleScreenMetadata, layout]);
 
   // Teleprompter auto-scroll logic
   useEffect(() => {
@@ -479,23 +477,13 @@ export const RecordingCanvas: React.FC<RecordingCanvasProps> = ({
                     disabled={isRecording}
                     onAlignChange={setAlignmentGuides}
                   >
-                    <div className="relative w-full h-full flex items-center justify-center bg-black/90 shadow-2xl overflow-hidden rounded-lg ring-1 ring-white/10">
+                    <div className="relative w-full h-full flex items-center justify-center bg-black/90 shadow-2xl overflow-hidden rounded-lg ring-1 ring-white/10 [transform:translateZ(0)]">
                       <video
-                        ref={(el) => {
-                          camOnlyVideoRef.current = el;
-                          if (el) {
-                            if (webcamStream && el.srcObject !== webcamStream) {
-                              el.srcObject = webcamStream;
-                              el.play().catch(() => {});
-                            } else if (!webcamStream && el.srcObject) {
-                              el.srcObject = null;
-                            }
-                          }
-                        }}
+                        ref={camOnlyVideoRef}
                         autoPlay
                         muted
                         playsInline
-                        className={`w-full h-full object-cover rounded-lg ${
+                        className={`w-full h-full object-cover rounded-lg [transform:translateZ(0)] ${
                           pipConfig.mirror ? 'scale-x-[-1]' : ''
                         }`}
                       />
@@ -532,22 +520,13 @@ export const RecordingCanvas: React.FC<RecordingCanvasProps> = ({
                 <div className="relative w-[26%] h-[84%] max-h-[90%] rounded-2xl overflow-hidden flex items-center justify-center bg-zinc-950 shadow-2xl shadow-black/60 ring-1 ring-white/20 shrink-0 isolate [transform:translateZ(0)]">
                   {webcamStream ? (
                     <video
+                      ref={splitCamVideoRef}
                       autoPlay
                       muted
                       playsInline
-                      className={`w-full h-full object-cover rounded-2xl ${
+                      className={`w-full h-full object-cover rounded-2xl [transform:translateZ(0)] ${
                         pipConfig.mirror ? 'scale-x-[-1]' : ''
                       }`}
-                      ref={(el) => {
-                        if (el) {
-                          if (webcamStream && el.srcObject !== webcamStream) {
-                            el.srcObject = webcamStream;
-                            el.play().catch(() => {});
-                          } else if (!webcamStream && el.srcObject) {
-                            el.srcObject = null;
-                          }
-                        }
-                      }}
                     />
                   ) : (
                     <div className="p-4 flex flex-col items-center justify-center text-center">
@@ -564,20 +543,14 @@ export const RecordingCanvas: React.FC<RecordingCanvasProps> = ({
                     <>
                       {/* LIVE SCREEN VIDEO (subtle preview running behind frosted glass shield) */}
                       <video
-                        ref={(el) => {
-                          screenVideoRef.current = el;
-                          if (el && screenStream && el.srcObject !== screenStream) {
-                            el.srcObject = screenStream;
-                            el.play().catch(() => {});
-                          }
-                        }}
+                        ref={splitScreenVideoRef}
                         autoPlay
                         muted
                         playsInline
                         onLoadedMetadata={(e) => {
                           handleScreenMetadata(e.currentTarget);
                         }}
-                        className="absolute inset-0 w-full h-full object-cover pointer-events-none rounded-2xl opacity-90"
+                        className="absolute inset-0 w-full h-full object-cover pointer-events-none rounded-2xl opacity-90 [transform:translateZ(0)]"
                       />
 
                       {/* CLEAN STABLE SHIELD WITH GREEN CHECKMARK */}
@@ -627,20 +600,14 @@ export const RecordingCanvas: React.FC<RecordingCanvasProps> = ({
                       <>
                         {/* 1. LIVE SCREEN VIDEO (subtle preview running behind frosted glass shield) */}
                         <video
-                          ref={(el) => {
-                            screenVideoRef.current = el;
-                            if (el && screenStream && el.srcObject !== screenStream) {
-                              el.srcObject = screenStream;
-                              el.play().catch(() => {});
-                            }
-                          }}
+                          ref={screenVideoRef}
                           autoPlay
                           muted
                           playsInline
                           onLoadedMetadata={(e) => {
                             handleScreenMetadata(e.currentTarget);
                           }}
-                          className="absolute inset-0 w-full h-full object-cover pointer-events-none rounded-2xl opacity-90"
+                          className="absolute inset-0 w-full h-full object-cover pointer-events-none rounded-2xl opacity-90 [transform:translateZ(0)]"
                         />
 
                         {/* CLEAN STABLE SHIELD WITH GREEN CHECKMARK (Prevents infinite mirror GPU jitter) */}
@@ -713,7 +680,7 @@ export const RecordingCanvas: React.FC<RecordingCanvasProps> = ({
                     onAlignChange={setAlignmentGuides}
                   >
                     <div
-                      className="relative w-full h-full flex items-center justify-center bg-black/90 shadow-2xl overflow-hidden transition-[border-color,box-shadow] duration-150"
+                      className="relative w-full h-full flex items-center justify-center bg-black/90 shadow-2xl overflow-hidden transition-[border-color,box-shadow] duration-150 [transform:translateZ(0)]"
                       style={{
                         borderRadius:
                           pipConfig.shape === 'circle'
@@ -730,21 +697,11 @@ export const RecordingCanvas: React.FC<RecordingCanvasProps> = ({
                     >
                       {webcamStream ? (
                         <video
-                          ref={(el) => {
-                            webcamVideoRef.current = el;
-                            if (el) {
-                              if (webcamStream && el.srcObject !== webcamStream) {
-                                el.srcObject = webcamStream;
-                                el.play().catch(() => {});
-                              } else if (!webcamStream && el.srcObject) {
-                                el.srcObject = null;
-                              }
-                            }
-                          }}
+                          ref={webcamVideoRef}
                           autoPlay
                           muted
                           playsInline
-                          className={`w-full h-full object-cover ${
+                          className={`w-full h-full object-cover [transform:translateZ(0)] ${
                             pipConfig.mirror ? 'scale-x-[-1]' : ''
                           }`}
                         />

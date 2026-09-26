@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import {
   PipConfig,
   PipShape,
@@ -29,13 +29,11 @@ export const DraggableCameraBubble: React.FC<DraggableCameraBubbleProps> = ({
   isRecording = false,
 }) => {
   // Determine size pixel dimensions
-  const getDimensions = () => {
+  const { width, height } = useMemo(() => {
     if (pipConfig.size === 'small') return { width: 140, height: 140 };
     if (pipConfig.size === 'large') return { width: 260, height: 260 };
     return { width: 190, height: 190 }; // medium
-  };
-
-  const { width, height } = getDimensions();
+  }, [pipConfig.size]);
 
   const [position, setPosition] = useState<{ x: number; y: number }>(() => {
     const paddingX = Math.round(window.innerWidth * 0.03);
@@ -57,6 +55,8 @@ export const DraggableCameraBubble: React.FC<DraggableCameraBubbleProps> = ({
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const docPipWindowRef = useRef<Window | null>(null);
+  const rafIdRef = useRef<number | null>(null);
+  const pendingPipUpdate = useRef<Partial<PipConfig> | null>(null);
 
   // Sync position from preset config if not actively dragging
   useEffect(() => {
@@ -90,8 +90,8 @@ export const DraggableCameraBubble: React.FC<DraggableCameraBubbleProps> = ({
     }
   }, [stream]);
 
-  // Mouse Drag handlers
-  const handleMouseDown = (e: React.MouseEvent) => {
+  // Pointer Drag handlers
+  const handlePointerDown = (e: React.PointerEvent) => {
     if ((e.target as HTMLElement).closest('button')) return;
     setIsDragging(true);
     setDragOffset({
@@ -100,8 +100,8 @@ export const DraggableCameraBubble: React.FC<DraggableCameraBubbleProps> = ({
     });
   };
 
-  const handleMouseMove = useCallback(
-    (e: MouseEvent) => {
+  const handlePointerMove = useCallback(
+    (e: PointerEvent) => {
       if (!isDragging) return;
 
       const maxX = window.innerWidth - width - 16;
@@ -116,32 +116,51 @@ export const DraggableCameraBubble: React.FC<DraggableCameraBubbleProps> = ({
       const pctX = Math.round((newX / (window.innerWidth - width)) * 100);
       const pctY = Math.round((newY / (window.innerHeight - height)) * 100);
 
-      onUpdatePipConfig({
+      pendingPipUpdate.current = {
         position: 'custom',
         customX: Math.max(0, Math.min(100, pctX)),
         customY: Math.max(0, Math.min(100, pctY)),
-      });
+      };
+
+      if (rafIdRef.current === null) {
+        rafIdRef.current = requestAnimationFrame(() => {
+          if (pendingPipUpdate.current) {
+            onUpdatePipConfig(pendingPipUpdate.current);
+            pendingPipUpdate.current = null;
+          }
+          rafIdRef.current = null;
+        });
+      }
     },
     [isDragging, dragOffset, width, height, onUpdatePipConfig]
   );
 
-  const handleMouseUp = useCallback(() => {
+  const handlePointerUp = useCallback(() => {
     setIsDragging(false);
-  }, []);
+    if (rafIdRef.current !== null) {
+      cancelAnimationFrame(rafIdRef.current);
+      rafIdRef.current = null;
+    }
+    // Flush any pending update
+    if (pendingPipUpdate.current) {
+      onUpdatePipConfig(pendingPipUpdate.current);
+      pendingPipUpdate.current = null;
+    }
+  }, [onUpdatePipConfig]);
 
   useEffect(() => {
     if (isDragging) {
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', handleMouseUp);
+      window.addEventListener('pointermove', handlePointerMove);
+      window.addEventListener('pointerup', handlePointerUp);
     } else {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', handlePointerUp);
     }
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', handlePointerUp);
     };
-  }, [isDragging, handleMouseMove, handleMouseUp]);
+  }, [isDragging, handlePointerMove, handlePointerUp]);
 
   // Launch True OS-Level Floating Picture-in-Picture window (Floats across all desktop apps & screens)
   const handleRequestOsPip = async () => {
@@ -273,6 +292,10 @@ export const DraggableCameraBubble: React.FC<DraggableCameraBubbleProps> = ({
   // Cleanup PiP on unmount (e.g. when recording stops)
   useEffect(() => {
     return () => {
+      if (rafIdRef.current !== null) {
+        cancelAnimationFrame(rafIdRef.current);
+        rafIdRef.current = null;
+      }
       if (docPipWindowRef.current) {
         try {
           docPipWindowRef.current.close();
@@ -292,7 +315,7 @@ export const DraggableCameraBubble: React.FC<DraggableCameraBubbleProps> = ({
     <div
       ref={containerRef}
       id="floating-camera-bubble"
-      onMouseDown={handleMouseDown}
+      onPointerDown={handlePointerDown}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       style={{
@@ -300,6 +323,9 @@ export const DraggableCameraBubble: React.FC<DraggableCameraBubbleProps> = ({
         top: `${position.y}px`,
         width: `${width}px`,
         height: `${height}px`,
+        willChange: 'transform',
+        transform: 'translateZ(0)',
+        touchAction: 'none',
       }}
       className={`fixed z-50 cursor-grab active:cursor-grabbing select-none transition-shadow duration-150 ${
         isDragging ? 'shadow-2xl scale-[1.03]' : 'shadow-xl'
@@ -341,6 +367,7 @@ export const DraggableCameraBubble: React.FC<DraggableCameraBubbleProps> = ({
             autoPlay
             muted
             playsInline
+            style={{ willChange: 'auto' }}
             className={`w-full h-full object-cover pointer-events-none ${
               pipConfig.mirror ? '-scale-x-100' : ''
             }`}

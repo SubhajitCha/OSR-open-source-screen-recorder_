@@ -51,7 +51,11 @@ export const AdjustableLayerBox: React.FC<AdjustableLayerBoxProps> = ({
     startX: number;
     startY: number;
     startRect: LayerRect;
+    containerWidth: number;
+    containerHeight: number;
   } | null>(null);
+  const rafIdRef = useRef<number | null>(null);
+  const pendingRectRef = useRef<LayerRect | null>(null);
 
   const handlePointerDown = (
     e: React.PointerEvent,
@@ -63,36 +67,54 @@ export const AdjustableLayerBox: React.FC<AdjustableLayerBoxProps> = ({
 
     (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
 
+    const container = containerRef.current?.getBoundingClientRect();
+    const containerWidth = container && container.width > 0 ? container.width : 1920;
+    const containerHeight = container && container.height > 0 ? container.height : 1080;
+
     dragStartRef.current = {
       type: handleType,
       startX: e.clientX,
       startY: e.clientY,
       startRect: { ...rect },
+      containerWidth,
+      containerHeight,
     };
   };
 
+  const scheduleRectUpdate = useCallback((newRect: LayerRect) => {
+    pendingRectRef.current = newRect;
+    if (rafIdRef.current === null) {
+      rafIdRef.current = requestAnimationFrame(() => {
+        if (pendingRectRef.current) {
+          onChangeRect(pendingRectRef.current);
+          pendingRectRef.current = null;
+        }
+        rafIdRef.current = null;
+      });
+    }
+  }, [onChangeRect]);
+
   const handlePointerMove = useCallback(
     (e: PointerEvent) => {
-      if (!dragStartRef.current || !containerRef.current) return;
+      if (!dragStartRef.current) return;
 
-      const container = containerRef.current.getBoundingClientRect();
-      if (container.width <= 0 || container.height <= 0) return;
+      const { type, startRect, startX, startY, containerWidth, containerHeight } = dragStartRef.current;
+      if (containerWidth <= 0 || containerHeight <= 0) return;
 
-      const { type, startRect, startX, startY } = dragStartRef.current;
-      const startXPx = (startRect.x / 100) * container.width;
-      const startYPx = (startRect.y / 100) * container.height;
-      const startWidthPx = (startRect.width / 100) * container.width;
-      const startHeightPx = (startRect.height / 100) * container.height;
+      const startXPx = (startRect.x / 100) * containerWidth;
+      const startYPx = (startRect.y / 100) * containerHeight;
+      const startWidthPx = (startRect.width / 100) * containerWidth;
+      const startHeightPx = (startRect.height / 100) * containerHeight;
       const layerAspect = startWidthPx / (startHeightPx || 1);
-      const containerAspect = container.width / (container.height || 1);
+      const containerAspect = containerWidth / (containerHeight || 1);
 
       const deltaXPx = e.clientX - startX;
       const deltaYPx = e.clientY - startY;
 
       if (type === 'move') {
-        const deltaX = (deltaXPx / container.width) * 100;
-        const deltaY = (deltaYPx / container.height) * 100;
-        
+        const deltaX = (deltaXPx / containerWidth) * 100;
+        const deltaY = (deltaYPx / containerHeight) * 100;
+
         // Unrestricted placement: anywhere on the stage canvas
         const rawX = startRect.x + deltaX;
         const rawY = startRect.y + deltaY;
@@ -101,8 +123,8 @@ export const AdjustableLayerBox: React.FC<AdjustableLayerBoxProps> = ({
         // Center of the frame is (rawX + startRect.width / 2)
         // Center of the stage/canvas is 50%
         // Magnetic snap threshold for center alignment only (~10px):
-        const snapThresholdXPct = (10 / container.width) * 100;
-        const snapThresholdYPct = (10 / container.height) * 100;
+        const snapThresholdXPct = (10 / containerWidth) * 100;
+        const snapThresholdYPct = (10 / containerHeight) * 100;
 
         const centerDiffX = (rawX + startRect.width / 2) - 50;
         const centerDiffY = (rawY + startRect.height / 2) - 50;
@@ -127,7 +149,7 @@ export const AdjustableLayerBox: React.FC<AdjustableLayerBoxProps> = ({
 
         onAlignChange?.({ x: isSnappedX, y: isSnappedY });
 
-        onChangeRect({
+        scheduleRectUpdate({
           ...startRect,
           x: Math.round(clampedX * 10) / 10,
           y: Math.round(clampedY * 10) / 10,
@@ -135,7 +157,7 @@ export const AdjustableLayerBox: React.FC<AdjustableLayerBoxProps> = ({
       } else {
         onAlignChange?.({ x: false, y: false });
         if (type === 'se') {
-        let newWidthPct = Math.max(minWidthPct, Math.min(100, startRect.width + (deltaXPx / container.width) * 100));
+        let newWidthPct = Math.max(minWidthPct, Math.min(100, startRect.width + (deltaXPx / containerWidth) * 100));
         let newHeightPct: number;
 
         if (lockAspectRatio) {
@@ -145,7 +167,7 @@ export const AdjustableLayerBox: React.FC<AdjustableLayerBoxProps> = ({
             newWidthPct = (newHeightPct * layerAspect) / containerAspect;
           }
         } else {
-          newHeightPct = Math.max(minHeightPct, Math.min(100, startRect.height + (deltaYPx / container.height) * 100));
+          newHeightPct = Math.max(minHeightPct, Math.min(100, startRect.height + (deltaYPx / containerHeight) * 100));
         }
 
         // Auto-adjust x, y if stretched beyond canvas boundary while preserving scale
@@ -158,14 +180,14 @@ export const AdjustableLayerBox: React.FC<AdjustableLayerBoxProps> = ({
           newY = Math.max(0, 100 - newHeightPct);
         }
 
-        onChangeRect({
+        scheduleRectUpdate({
           x: Math.round(newX * 10) / 10,
           y: Math.round(newY * 10) / 10,
           width: Math.round(newWidthPct * 10) / 10,
           height: Math.round(newHeightPct * 10) / 10,
         });
       } else if (type === 'ne') {
-        let newWidthPct = Math.max(minWidthPct, Math.min(100, startRect.width + (deltaXPx / container.width) * 100));
+        let newWidthPct = Math.max(minWidthPct, Math.min(100, startRect.width + (deltaXPx / containerWidth) * 100));
         let newHeightPct: number;
 
         if (lockAspectRatio) {
@@ -175,7 +197,7 @@ export const AdjustableLayerBox: React.FC<AdjustableLayerBoxProps> = ({
             newWidthPct = (newHeightPct * layerAspect) / containerAspect;
           }
         } else {
-          newHeightPct = Math.max(minHeightPct, Math.min(100, startRect.height - (deltaYPx / container.height) * 100));
+          newHeightPct = Math.max(minHeightPct, Math.min(100, startRect.height - (deltaYPx / containerHeight) * 100));
         }
 
         const bottomAnchor = startRect.y + startRect.height;
@@ -188,14 +210,14 @@ export const AdjustableLayerBox: React.FC<AdjustableLayerBoxProps> = ({
           newY = 0;
         }
 
-        onChangeRect({
+        scheduleRectUpdate({
           x: Math.round(newX * 10) / 10,
           y: Math.round(newY * 10) / 10,
           width: Math.round(newWidthPct * 10) / 10,
           height: Math.round(newHeightPct * 10) / 10,
         });
       } else if (type === 'sw') {
-        let newWidthPct = Math.max(minWidthPct, Math.min(100, startRect.width - (deltaXPx / container.width) * 100));
+        let newWidthPct = Math.max(minWidthPct, Math.min(100, startRect.width - (deltaXPx / containerWidth) * 100));
         let newHeightPct: number;
 
         if (lockAspectRatio) {
@@ -205,7 +227,7 @@ export const AdjustableLayerBox: React.FC<AdjustableLayerBoxProps> = ({
             newWidthPct = (newHeightPct * layerAspect) / containerAspect;
           }
         } else {
-          newHeightPct = Math.max(minHeightPct, Math.min(100, startRect.height + (deltaYPx / container.height) * 100));
+          newHeightPct = Math.max(minHeightPct, Math.min(100, startRect.height + (deltaYPx / containerHeight) * 100));
         }
 
         const rightAnchor = startRect.x + startRect.width;
@@ -218,14 +240,14 @@ export const AdjustableLayerBox: React.FC<AdjustableLayerBoxProps> = ({
           newY = Math.max(0, 100 - newHeightPct);
         }
 
-        onChangeRect({
+        scheduleRectUpdate({
           x: Math.round(newX * 10) / 10,
           y: Math.round(newY * 10) / 10,
           width: Math.round(newWidthPct * 10) / 10,
           height: Math.round(newHeightPct * 10) / 10,
         });
       } else if (type === 'nw') {
-        let newWidthPct = Math.max(minWidthPct, Math.min(100, startRect.width - (deltaXPx / container.width) * 100));
+        let newWidthPct = Math.max(minWidthPct, Math.min(100, startRect.width - (deltaXPx / containerWidth) * 100));
         let newHeightPct: number;
 
         if (lockAspectRatio) {
@@ -235,7 +257,7 @@ export const AdjustableLayerBox: React.FC<AdjustableLayerBoxProps> = ({
             newWidthPct = (newHeightPct * layerAspect) / containerAspect;
           }
         } else {
-          newHeightPct = Math.max(minHeightPct, Math.min(100, startRect.height - (deltaYPx / container.height) * 100));
+          newHeightPct = Math.max(minHeightPct, Math.min(100, startRect.height - (deltaYPx / containerHeight) * 100));
         }
 
         const rightAnchor = startRect.x + startRect.width;
@@ -245,7 +267,7 @@ export const AdjustableLayerBox: React.FC<AdjustableLayerBoxProps> = ({
         if (newX < 0) newX = 0;
         if (newY < 0) newY = 0;
 
-        onChangeRect({
+        scheduleRectUpdate({
           x: Math.round(newX * 10) / 10,
           y: Math.round(newY * 10) / 10,
           width: Math.round(newWidthPct * 10) / 10,
@@ -254,20 +276,33 @@ export const AdjustableLayerBox: React.FC<AdjustableLayerBoxProps> = ({
       }
     }
   },
-  [containerRef, minWidthPct, minHeightPct, lockAspectRatio, onChangeRect, onAlignChange]
+  [minWidthPct, minHeightPct, lockAspectRatio, scheduleRectUpdate, onAlignChange]
 );
 
 const handlePointerUp = useCallback(() => {
   dragStartRef.current = null;
   onAlignChange?.({ x: false, y: false });
-}, [onAlignChange]);
+
+  if (rafIdRef.current !== null) {
+    cancelAnimationFrame(rafIdRef.current);
+    rafIdRef.current = null;
+  }
+  if (pendingRectRef.current) {
+    onChangeRect(pendingRectRef.current);
+    pendingRectRef.current = null;
+  }
+}, [onAlignChange, onChangeRect]);
 
 useEffect(() => {
-  window.addEventListener('pointermove', handlePointerMove);
+  window.addEventListener('pointermove', handlePointerMove, { passive: true });
   window.addEventListener('pointerup', handlePointerUp);
   return () => {
     window.removeEventListener('pointermove', handlePointerMove);
     window.removeEventListener('pointerup', handlePointerUp);
+    if (rafIdRef.current !== null) {
+      cancelAnimationFrame(rafIdRef.current);
+      rafIdRef.current = null;
+    }
     onAlignChange?.({ x: false, y: false });
   };
 }, [handlePointerMove, handlePointerUp, onAlignChange]);
@@ -295,6 +330,8 @@ useEffect(() => {
         top: `${rect.y}%`,
         width: `${rect.width}%`,
         height: `${rect.height}%`,
+        willChange: 'left, top, width, height',
+        transform: 'translateZ(0)',
       }}
       className={`absolute z-30 select-none group touch-none ${
         disabled ? 'cursor-default' : 'cursor-grab active:cursor-grabbing'

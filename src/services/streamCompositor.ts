@@ -165,6 +165,13 @@ export function createStreamCompositor(
   const frameIntervalMs = 1000 / (targetFps || 30);
   let hasDrawnScreenFrame = false;
 
+  // Cached video track reference and resolution — avoid calling getSettings() every frame
+  let cachedVideoTrack = screenStream.getVideoTracks()[0] || null;
+  let lastResWidth = cachedVideoTrack?.getSettings()?.width || 1920;
+  let lastResHeight = cachedVideoTrack?.getSettings()?.height || 1080;
+  let frameCounter = 0;
+  const RESOLUTION_CHECK_INTERVAL = 60; // Check every 60 frames instead of every frame
+
   // Active off-screen container in DOM to keep Chromium media pipelines running in background
   const hiddenContainer = document.createElement('div');
   hiddenContainer.style.position = 'fixed';
@@ -223,6 +230,11 @@ export function createStreamCompositor(
     desynchronized: true,
   });
 
+  if (ctx) {
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'low'; // 'low' is fastest for real-time compositing
+  }
+
   // Ensure video playback begins smoothly
   screenVideo.play().catch(() => {});
   if (cameraVideo) {
@@ -253,16 +265,21 @@ export function createStreamCompositor(
 
     lastFrameTime = timestamp;
 
-    // Adjust canvas dimensions to match the screen track resolution dynamically
-    const videoTrack = screenStream.getVideoTracks()[0];
-    if (videoTrack && videoTrack.readyState === 'live') {
-      const settings = videoTrack.getSettings();
-      const targetW = settings.width || 1920;
-      const targetH = settings.height || 1080;
-      if (canvas.width !== targetW || canvas.height !== targetH) {
-        canvas.width = targetW;
-        canvas.height = targetH;
-        needsPipRecalc = true;
+    // Check resolution periodically instead of every frame
+    frameCounter++;
+    if (frameCounter >= RESOLUTION_CHECK_INTERVAL) {
+      frameCounter = 0;
+      if (cachedVideoTrack && cachedVideoTrack.readyState === 'live') {
+        const settings = cachedVideoTrack.getSettings();
+        const targetW = settings.width || 1920;
+        const targetH = settings.height || 1080;
+        if (targetW !== lastResWidth || targetH !== lastResHeight) {
+          lastResWidth = targetW;
+          lastResHeight = targetH;
+          canvas.width = targetW;
+          canvas.height = targetH;
+          needsPipRecalc = true;
+        }
       }
     }
 
@@ -565,7 +582,7 @@ export function createStreamCompositor(
     if (document.hidden && now - lastFrameTime >= frameIntervalMs - 2) {
       drawFrame(now);
     }
-  }, Math.max(25, Math.floor(frameIntervalMs)));
+  }, Math.max(100, Math.floor(frameIntervalMs * 2)));
 
   // Immediate recovery on tab visibility change
   const handleVisibilityChange = () => {

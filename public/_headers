@@ -1,0 +1,4 @@
+# Prevent the *.pages.dev preview domain from being indexed
+# (production custom domain freescreenrecord.com is not affected)
+https://open-source-screen-recorder.pages.dev/*
+  X-Robots-Tag: noindex

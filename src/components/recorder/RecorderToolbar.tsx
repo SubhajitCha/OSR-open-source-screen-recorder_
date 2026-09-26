@@ -325,38 +325,40 @@ export const RecorderToolbar: React.FC<RecorderToolbarProps> = ({
         {/* ── SUBTLE HORIZONTAL DIVIDER ── */}
         <div className="w-6 h-[1.5px] bg-slate-300/80 dark:bg-white/15 rounded-full my-0.5" />
 
-        {/* 4. LAYOUTS BUTTON (Popover trigger + Sleek Hover Badge) */}
-        <div className="relative flex items-center justify-center group">
-          <button
-            type="button"
-            onClick={() => {
-              if (!disabled) togglePopover('layout');
-            }}
-            title="Choose Recording Composition Layout"
-            className={`cursor-pointer ${disabled ? 'opacity-35 cursor-not-allowed' : ''}`}
-          >
-            <div className="relative w-10 h-10 rounded-full bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/20 text-slate-600 dark:text-zinc-300 flex items-center justify-center transition-all duration-150 shadow-sm">
-              <Layers01Icon className="w-5 h-5 stroke-[1.8]" />
-            </div>
-          </button>
+        {/* 4. LAYOUTS BUTTON (Popover trigger + Sleek Hover Badge) - Hidden in Audio Only Mode */}
+        {mode !== 'audio_only' && (
+          <div className="relative flex items-center justify-center group">
+            <button
+              type="button"
+              onClick={() => {
+                if (!disabled) togglePopover('layout');
+              }}
+              title="Choose Recording Composition Layout"
+              className={`cursor-pointer ${disabled ? 'opacity-35 cursor-not-allowed' : ''}`}
+            >
+              <div className="relative w-10 h-10 rounded-full bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/20 text-slate-600 dark:text-zinc-300 flex items-center justify-center transition-all duration-150 shadow-sm">
+                <Layers01Icon className="w-5 h-5 stroke-[1.8]" />
+              </div>
+            </button>
 
-          {/* Sleek Tooltip Label on Hover */}
-          <div className="pointer-events-none absolute left-full ml-3 top-1/2 -translate-y-1/2 z-40 opacity-0 -translate-x-2.5 scale-95 group-hover:opacity-100 group-hover:translate-x-0 group-hover:scale-100 transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] whitespace-nowrap">
-            <div className="px-2.5 py-1 rounded-lg bg-slate-900/95 dark:bg-white/95 text-white dark:text-slate-950 text-xs font-semibold shadow-xl shadow-black/20 backdrop-blur-md border border-white/10 dark:border-black/10 flex items-center select-none">
-              <span>Layouts</span>
+            {/* Sleek Tooltip Label on Hover */}
+            <div className="pointer-events-none absolute left-full ml-3 top-1/2 -translate-y-1/2 z-40 opacity-0 -translate-x-2.5 scale-95 group-hover:opacity-100 group-hover:translate-x-0 group-hover:scale-100 transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] whitespace-nowrap">
+              <div className="px-2.5 py-1 rounded-lg bg-slate-900/95 dark:bg-white/95 text-white dark:text-slate-950 text-xs font-semibold shadow-xl shadow-black/20 backdrop-blur-md border border-white/10 dark:border-black/10 flex items-center select-none">
+                <span>Layouts</span>
+              </div>
             </div>
+
+            <LayoutPopover
+              isOpen={activePopover === 'layout'}
+              onClose={() => setActivePopover(null)}
+              layout={layout}
+              onSelectLayout={onSelectLayout}
+              background={background}
+              placement={popoverPlacement}
+              mode={mode}
+            />
           </div>
-
-          <LayoutPopover
-            isOpen={activePopover === 'layout'}
-            onClose={() => setActivePopover(null)}
-            layout={layout}
-            onSelectLayout={onSelectLayout}
-            background={background}
-            placement={popoverPlacement}
-            mode={mode}
-          />
-        </div>
+        )}
 
         {/* 5. BACKGROUND BUTTON (Popover trigger + Swatch + Sleek Hover Badge) */}
         <div className="relative flex items-center justify-center group">
@@ -634,41 +636,43 @@ export const RecorderToolbar: React.FC<RecorderToolbarProps> = ({
 
       {/* ── SECTION 2: Studio Controls (Layouts, Background, Settings) ── */}
       <div className="flex items-center gap-2 sm:gap-3.5">
-        {/* 4. LAYOUTS BUTTON */}
-        <div className="relative flex flex-col items-center">
-          <button
-            type="button"
-            disabled={disabled}
-            onClick={() => {
-              if (!disabled) {
-                togglePopover('layout');
-              }
-            }}
-            title="Choose Recording Composition Layout"
-            className={`group flex flex-col items-center gap-1 transition-all ${
-              disabled
-                ? 'opacity-35 cursor-not-allowed'
-                : 'cursor-pointer hover:opacity-90'
-            }`}
-          >
-            <div className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/20 text-slate-600 dark:text-zinc-300 flex items-center justify-center transition-all duration-150 shadow-sm">
-              <Layers01Icon className="w-5 h-5 stroke-[1.8]" />
-            </div>
-            <span className="text-xs font-semibold text-slate-600 dark:text-zinc-400 whitespace-nowrap">
-              Layouts
-            </span>
-          </button>
+        {/* 4. LAYOUTS BUTTON - Hidden in Audio Only Mode */}
+        {mode !== 'audio_only' && (
+          <div className="relative flex flex-col items-center">
+            <button
+              type="button"
+              disabled={disabled}
+              onClick={() => {
+                if (!disabled) {
+                  togglePopover('layout');
+                }
+              }}
+              title="Choose Recording Composition Layout"
+              className={`group flex flex-col items-center gap-1 transition-all ${
+                disabled
+                  ? 'opacity-35 cursor-not-allowed'
+                  : 'cursor-pointer hover:opacity-90'
+              }`}
+            >
+              <div className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/20 text-slate-600 dark:text-zinc-300 flex items-center justify-center transition-all duration-150 shadow-sm">
+                <Layers01Icon className="w-5 h-5 stroke-[1.8]" />
+              </div>
+              <span className="text-xs font-semibold text-slate-600 dark:text-zinc-400 whitespace-nowrap">
+                Layouts
+              </span>
+            </button>
 
-          <LayoutPopover
-            isOpen={activePopover === 'layout'}
-            onClose={() => setActivePopover(null)}
-            layout={layout}
-            onSelectLayout={onSelectLayout}
-            background={background}
-            placement={popoverPlacement}
-            mode={mode}
-          />
-        </div>
+            <LayoutPopover
+              isOpen={activePopover === 'layout'}
+              onClose={() => setActivePopover(null)}
+              layout={layout}
+              onSelectLayout={onSelectLayout}
+              background={background}
+              placement={popoverPlacement}
+              mode={mode}
+            />
+          </div>
+        )}
 
         {/* 5. BACKGROUND BUTTON */}
         <div className="relative flex flex-col items-center">

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Layers01Icon, Cancel01Icon, CheckmarkCircle01Icon } from 'hugeicons-react';
 import { CompositionLayout, RecorderBackgroundConfig, RecordingMode } from '../../../types';
+import { DEFAULT_BACKGROUND_VALUE } from '../../../services/backgroundPresets';
 
 interface LayoutPopoverProps {
   isOpen: boolean;
@@ -21,9 +22,9 @@ export const LayoutPopover: React.FC<LayoutPopoverProps> = ({
   placement = 'left',
   mode = 'screen_cam',
 }) => {
-  if (!isOpen) return null;
+  if (!isOpen || mode === 'audio_only') return null;
 
-  const isSingleSource = mode === 'screen' || mode === 'cam_only' || mode === 'audio_only';
+  const isSingleSource = mode === 'screen' || mode === 'cam_only';
 
   // Single-source layout presets (Screen only or Camera only: End to End, Little zoomed out, Little bit more zoomed out)
   const singleSourcePresets: {
@@ -76,8 +77,7 @@ export const LayoutPopover: React.FC<LayoutPopoverProps> = ({
     },
   ];
 
-  const currentBgValue =
-    background?.value || 'linear-gradient(145deg, #18181B 0%, #131316 50%, #0D0D0F 100%)';
+  const currentBgValue = background?.value || DEFAULT_BACKGROUND_VALUE;
 
   const positionClass =
     placement === 'left'

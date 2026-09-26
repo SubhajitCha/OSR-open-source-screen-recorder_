@@ -127,20 +127,20 @@ export const AudioWaveformVisualizer: React.FC<AudioWaveformVisualizerProps> = (
   }, [stream, isMuted]);
 
   return (
-    <div className="w-full h-full bg-gradient-to-b from-[#18181B] via-[#131316] to-[#0D0D0F] flex flex-col items-center justify-center p-6 text-white relative select-none overflow-hidden">
+    <div className="w-full h-full bg-transparent flex flex-col items-center justify-center p-6 text-white relative select-none overflow-hidden">
       {/* Ambient background glow */}
       <div className="absolute inset-0 pointer-events-none opacity-20">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-48 bg-white/[0.03] blur-3xl rounded-full" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-48 bg-white/[0.05] blur-3xl rounded-full" />
       </div>
 
       {/* Top Status Pill */}
-      <div className="relative z-10 flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.06] border border-white/10 backdrop-blur-md mb-6">
+      <div className="relative z-10 flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/40 dark:bg-black/50 border border-white/20 backdrop-blur-xl mb-6 shadow-lg shadow-black/20">
         <span
           className={`w-2 h-2 rounded-full ${
             isActive && !isMuted ? 'bg-orange-400 animate-pulse' : 'bg-amber-400'
           }`}
         />
-        <span className="text-xs font-semibold text-zinc-300">
+        <span className="text-xs font-semibold text-white/95">
           {isMuted
             ? 'Microphone Muted'
             : isActive
@@ -148,7 +148,7 @@ export const AudioWaveformVisualizer: React.FC<AudioWaveformVisualizerProps> = (
             : 'Audio Only Recording Mode'}
         </span>
         {isActive && !isMuted && (
-          <span className="text-[10px] font-mono text-zinc-400 pl-1 border-l border-white/10">
+          <span className="text-[10px] font-mono text-white/80 pl-1.5 border-l border-white/20">
             {decibels} dB
           </span>
         )}
@@ -159,10 +159,10 @@ export const AudioWaveformVisualizer: React.FC<AudioWaveformVisualizerProps> = (
         {bars.map((height, idx) => (
           <div
             key={idx}
-            className="w-1.5 sm:w-2 bg-white rounded-full transition-all duration-75 ease-out shadow-sm"
+            className="w-1.5 sm:w-2 bg-white rounded-full transition-all duration-75 ease-out shadow-md shadow-black/25"
             style={{
               height: `${height}px`,
-              opacity: isMuted ? 0.3 : Math.max(0.4, Math.min(1, height / 70)),
+              opacity: isMuted ? 0.35 : Math.max(0.45, Math.min(1, height / 70)),
             }}
           />
         ))}
@@ -172,22 +172,22 @@ export const AudioWaveformVisualizer: React.FC<AudioWaveformVisualizerProps> = (
       <div className="relative z-10 mt-6 flex flex-col items-center text-center space-y-2">
         {!stream ? (
           <div className="flex flex-col items-center space-y-2">
-            <p className="text-xs text-zinc-400 max-w-sm">
+            <p className="text-xs text-white/80 max-w-sm drop-shadow-sm">
               Click below to grant microphone access for crystal clear studio voice capture.
             </p>
             {onEnableMic && (
               <button
                 type="button"
                 onClick={onEnableMic}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 active:scale-95 text-white font-medium text-xs transition-all border border-white/15 shadow-md cursor-pointer"
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/20 hover:bg-white/30 active:scale-95 text-white font-medium text-xs transition-all border border-white/30 backdrop-blur-md shadow-lg shadow-black/20 cursor-pointer"
               >
-                <Mic01Icon className="w-4 h-4 text-zinc-300" />
+                <Mic01Icon className="w-4 h-4 text-white" />
                 <span>Enable Microphone</span>
               </button>
             )}
           </div>
         ) : (
-          <p className="text-xs text-zinc-400">
+          <p className="text-xs text-white/85 drop-shadow-sm font-medium">
             {isRecording
               ? 'Recording voice audio... Speak naturally into your microphone.'
               : 'Voice input detected and ready. Press Record to start.'}

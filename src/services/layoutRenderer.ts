@@ -1,7 +1,7 @@
 import { AppearanceSettings, CompositionLayout, PipConfig, Project, RecordingMetadata, ZoomSegment } from '../types';
 import { computeZoomTransformAtTime, applyVirtualCameraTransform } from './zoomEngine';
 import { drawClickEffects, drawSyntheticCursor, interpolateCursorPosition } from './cursorEngine';
-import { renderBackgroundToCanvas } from './backgroundPresets';
+import { renderBackgroundToCanvas, DEFAULT_BACKGROUND_VALUE } from './backgroundPresets';
 import { calculatePipMetrics } from './pipCoordinates';
 
 export interface DrawSceneOptions {
@@ -192,7 +192,7 @@ export function drawCompositionScene({
   const bgValue =
     typeof background === 'string' && background.length > 0
       ? background
-      : 'linear-gradient(145deg, #18181B 0%, #131316 50%, #0D0D0F 100%)';
+      : DEFAULT_BACKGROUND_VALUE;
 
   // Compute Active Zoom Transform
   const zoom = computeZoomTransformAtTime(currentTime, zoomSegments, 0.45, appearance);

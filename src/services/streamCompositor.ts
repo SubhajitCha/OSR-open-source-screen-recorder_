@@ -1,6 +1,6 @@
 import { CompositionLayout, PipConfig, RecorderBackgroundConfig } from '../types';
 import { calculatePipMetrics } from './pipCoordinates';
-import { renderBackgroundToCanvas } from './backgroundPresets';
+import { renderBackgroundToCanvas, DEFAULT_RECORDER_BACKGROUND } from './backgroundPresets';
 
 export interface CompositorController {
   canvas: HTMLCanvasElement;
@@ -153,12 +153,7 @@ export function createStreamCompositor(
   let isRunning = true;
   let pipConfig = { ...initialPipConfig };
   let currentLayout: CompositionLayout = initialLayout;
-  let currentBackground: RecorderBackgroundConfig = initialBackground || {
-    type: 'gradient',
-    value: 'linear-gradient(145deg, #18181B 0%, #131316 50%, #0D0D0F 100%)',
-    padding: 24,
-    borderRadius: 12,
-  };
+  let currentBackground: RecorderBackgroundConfig = initialBackground || DEFAULT_RECORDER_BACKGROUND;
 
   let animFrameId: number | null = null;
   let lastFrameTime = 0;

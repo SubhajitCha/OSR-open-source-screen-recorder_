@@ -10,12 +10,12 @@ import {
   ZoomSegment,
 } from '../types';
 import { generateAutoZoomSegments } from './zoomEngine';
-import { BACKGROUND_PRESETS } from './backgroundPresets';
+import { BACKGROUND_PRESETS, DEFAULT_BACKGROUND_VALUE } from './backgroundPresets';
 
 export { BACKGROUND_PRESETS };
 
 export const DEFAULT_APPEARANCE: AppearanceSettings = {
-  background: BACKGROUND_PRESETS[0].value,
+  background: DEFAULT_BACKGROUND_VALUE,
   padding: 32,
   borderRadius: 16,
   shadow: 25,

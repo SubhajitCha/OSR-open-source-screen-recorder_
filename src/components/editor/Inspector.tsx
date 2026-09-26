@@ -18,7 +18,7 @@ import {
   ZoomEasingType,
   ZoomSegment,
 } from '../../types';
-import { BACKGROUND_PRESETS } from '../../services/backgroundPresets';
+import { BACKGROUND_PRESETS, DEFAULT_BACKGROUND_VALUE } from '../../services/backgroundPresets';
 import { extractZoomSegments } from '../../services/editorEngine';
 
 const EASING_OPTIONS: { id: ZoomEasingType; label: string; desc: string }[] = [
@@ -242,7 +242,7 @@ export const Inspector: React.FC<InspectorProps> = ({
                           background:
                             item.type === 'end-to-end' || item.type === 'corner-cam'
                               ? '#1e293b'
-                              : (typeof appearance.background === 'string' ? appearance.background : 'linear-gradient(145deg, #18181B 0%, #131316 50%, #0D0D0F 100%)'),
+                              : (typeof appearance.background === 'string' ? appearance.background : DEFAULT_BACKGROUND_VALUE),
                         }}
                       >
                         {/* 1. End to End (Screen edge-to-edge, camera sitting flush at corner) */}

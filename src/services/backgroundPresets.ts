@@ -14,6 +14,14 @@ export interface BackgroundPreset {
 
 export const NOISE_SVG_DATA_URL = `data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.35'/%3E%3C/svg%3E`;
 
+export const DEFAULT_BACKGROUND_VALUE = 'radial-gradient(ellipse at 70% 30%, #06b6d4 0%, #3b82f6 25%, #8b5cf6 50%, #ec4899 75%, #050508 100%)';
+export const DEFAULT_RECORDER_BACKGROUND = {
+  type: 'gradient' as const,
+  value: DEFAULT_BACKGROUND_VALUE,
+  padding: 24,
+  borderRadius: 12,
+};
+
 export const BACKGROUND_PRESETS: BackgroundPreset[] = [
   // ─── APPLE KEYNOTE & MACOS WALLPAPER COLLECTION ──────────────────────
   {
@@ -669,9 +677,11 @@ export function renderBackgroundToCanvas(
           grad.addColorStop(idx / (colorMatches.length - 1), col);
         });
       } else {
-        grad.addColorStop(0, '#18181B');
-        grad.addColorStop(0.5, '#131316');
-        grad.addColorStop(1, '#0D0D0F');
+        grad.addColorStop(0, '#06b6d4');
+        grad.addColorStop(0.25, '#3b82f6');
+        grad.addColorStop(0.5, '#8b5cf6');
+        grad.addColorStop(0.75, '#ec4899');
+        grad.addColorStop(1, '#050508');
       }
     }
 

@@ -23,6 +23,7 @@ import {
   PrompterConfig,
 } from './types';
 import { RecorderEngine } from './services/recorderEngine';
+import { DEFAULT_RECORDER_BACKGROUND } from './services/backgroundPresets';
 import { getAllRecordings, saveRecordingToDB, generateThumbnailFromBlob, saveActiveEditingSession, getActiveEditingSession, clearActiveEditingSession } from './services/db';
 import { getBestSupportedVideoMimeType } from './services/browserCapabilities';
 import { logbook } from './services/logbook';
@@ -196,12 +197,7 @@ export default function App() {
   // Composition States for Clean 3-Zone Studio UX
   const [compositionLayout, setCompositionLayout] = useState<CompositionLayout>('overlay');
   const [aspectRatio, setAspectRatio] = useState<RecorderAspectRatio>('16:9');
-  const [background, setBackground] = useState<RecorderBackgroundConfig>({
-    type: 'gradient',
-    value: 'linear-gradient(145deg, #18181B 0%, #131316 50%, #0D0D0F 100%)',
-    padding: 24,
-    borderRadius: 12,
-  });
+  const [background, setBackground] = useState<RecorderBackgroundConfig>(DEFAULT_RECORDER_BACKGROUND);
   const [smartConfig, setSmartConfig] = useState<SmartRecordingConfig>({
     smoothCursor: true,
     detectClicks: true,

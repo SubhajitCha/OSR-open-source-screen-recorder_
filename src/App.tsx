@@ -145,14 +145,13 @@ export default function App() {
   }, []);
 
   // Master teardown function: guarantees total revocation of camera, screen, and mic hardware handles
+  // Uses refs exclusively so the identity never changes when streams are set — prevents
+  // React useEffect cleanup from tearing down freshly-acquired streams on re-render.
   const stopAllActiveMediaAccess = useCallback(() => {
     const streamsToStop = [
       activeWebcamStreamRef.current,
       activeScreenStreamRef.current,
       activeMicStreamRef.current,
-      activeWebcamStream,
-      activeScreenStream,
-      activeMicStream,
     ];
 
     streamsToStop.forEach((stream) => {
@@ -180,7 +179,7 @@ export default function App() {
         recorderEngineRef.current.cleanupStreams();
       } catch (_) {}
     }
-  }, [activeWebcamStream, activeScreenStream, activeMicStream]);
+  }, []);
 
   // Finished recording output data & Project model
   const [lastRecordingData, setLastRecordingData] = useState<{

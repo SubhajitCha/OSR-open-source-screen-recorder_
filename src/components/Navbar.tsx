@@ -14,6 +14,8 @@ import {
 } from 'hugeicons-react';
 import { ActiveView, RecordingMode } from '../types';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
+import { LanguageSelector } from './LanguageSelector';
 
 interface NavbarProps {
   activeView: ActiveView;
@@ -54,6 +56,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onGoHome,
 }) => {
   const { resolvedTheme, toggleTheme } = useTheme();
+  const { t } = useLanguage();
 
   const recordingModes: {
     id: RecordingMode;
@@ -62,7 +65,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   }[] = [
     {
       id: 'screen_cam',
-      tooltip: 'Screen & Camera',
+      tooltip: t.hero.modes.screenCam.title,
       icon: (
         <div className="flex items-center gap-0.5 sm:gap-1">
           <ComputerIcon className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
@@ -72,17 +75,17 @@ export const Navbar: React.FC<NavbarProps> = ({
     },
     {
       id: 'screen',
-      tooltip: 'Screen only',
+      tooltip: t.hero.modes.screen.title,
       icon: <ComputerIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />,
     },
     {
       id: 'cam_only',
-      tooltip: 'Camera only',
+      tooltip: t.hero.modes.camOnly.title,
       icon: <Camera01Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />,
     },
     {
       id: 'audio_only',
-      tooltip: 'Audio only',
+      tooltip: t.hero.modes.audioOnly.title,
       icon: <Mic01Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />,
     },
   ];
@@ -295,7 +298,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             title="View Saved Recordings"
           >
             <Film01Icon className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Library</span>
+            <span className="hidden sm:inline">{t.nav.library}</span>
             {recordingsCount > 0 && (
               <span
                 className={`px-1.5 py-0.2 text-[10px] font-mono font-bold rounded-full ${
@@ -360,6 +363,9 @@ export const Navbar: React.FC<NavbarProps> = ({
             </span>
           </button>
 
+          {/* Language Selector Dropdown */}
+          <LanguageSelector variant="compact" />
+
           {/* Small Download Button in Top Header during Video Editing */}
           {activeView === 'studio' && recordingState === 'editing' && onOpenEditorExport && (
             <button
@@ -367,10 +373,10 @@ export const Navbar: React.FC<NavbarProps> = ({
               type="button"
               onClick={onOpenEditorExport}
               className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full bg-[#D90000] hover:bg-[#b80000] active:scale-95 text-white font-bold text-xs shadow-md shadow-[#D90000]/25 transition-all cursor-pointer whitespace-nowrap"
-              title="Download / Export video"
+              title={t.review.downloadMp4}
             >
               <Download01Icon className="w-3.5 h-3.5 stroke-[2.5]" />
-              <span>Download</span>
+              <span>{t.common.download}</span>
             </button>
           )}
 
@@ -389,10 +395,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                   onClick={onStartRecording}
                   disabled={recordingState === 'countdown'}
                   className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1.5 rounded-full bg-[#D90000] hover:bg-[#b80000] active:scale-95 text-white font-bold text-xs sm:text-sm shadow-md shadow-[#D90000]/30 transition-all cursor-pointer whitespace-nowrap"
-                  title="Start Recording"
+                  title={t.recorder.startRecordBtn}
                 >
                   <span className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-white animate-pulse" />
-                  <span>Record</span>
+                  <span>{t.common.record}</span>
                 </button>
               ) : (
                 /* Stop Button ONLY */
@@ -406,10 +412,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                       ? 'bg-[#b80000] opacity-80 cursor-wait'
                       : 'bg-[#D90000] hover:bg-[#b80000] active:scale-95 cursor-pointer'
                   } text-white font-bold text-xs sm:text-sm shadow-lg shadow-[#D90000]/40 transition-all whitespace-nowrap`}
-                  title={isStoppingRecording ? 'Finalizing recording...' : 'Stop Recording'}
+                  title={isStoppingRecording ? t.common.processing : t.recorder.stopRecordBtn}
                 >
                   <StopIcon className="w-3.5 h-3.5 fill-current" />
-                  <span>{isStoppingRecording ? 'Saving...' : 'Stop'}</span>
+                  <span>{isStoppingRecording ? t.common.processing : t.common.stop}</span>
                 </button>
               )}
             </div>

@@ -6,6 +6,7 @@ import {
   RotateRight01Icon,
 } from 'hugeicons-react';
 import { PipConfig } from '../../../types';
+import { useLanguage } from '../../../context/LanguageContext';
 
 interface CameraPopoverProps {
   isOpen: boolean;
@@ -26,6 +27,7 @@ export const CameraPopover: React.FC<CameraPopoverProps> = ({
   onToggleCamera,
   placement = 'left',
 }) => {
+  const { t } = useLanguage();
   const [videoDevices, setVideoDevices] = useState<MediaDeviceInfo[]>([]);
   const [selectedDeviceId, setSelectedDeviceId] = useState<string>('');
 
@@ -66,7 +68,7 @@ export const CameraPopover: React.FC<CameraPopoverProps> = ({
             <Camera01Icon className="w-4 h-4" />
           </div>
           <span className="font-bold text-xs tracking-wider uppercase text-slate-700 dark:text-zinc-200">
-            Webcam Settings
+            {t.recorder?.camOn || 'Webcam Settings'}
           </span>
         </div>
         <button
@@ -88,7 +90,7 @@ export const CameraPopover: React.FC<CameraPopoverProps> = ({
               }`}
             />
             <span className="text-xs font-semibold text-slate-700 dark:text-zinc-200">
-              {isCameraActive ? 'Camera Live' : 'Camera Off'}
+              {isCameraActive ? (t.recorder?.camOn || 'Camera Live') : (t.recorder?.camOff || 'Camera Off')}
             </span>
           </div>
           <button
@@ -100,7 +102,7 @@ export const CameraPopover: React.FC<CameraPopoverProps> = ({
                 : 'bg-orange-600 hover:bg-orange-500 text-white shadow-xs'
             }`}
           >
-            {isCameraActive ? 'Turn Off' : 'Turn On'}
+            {isCameraActive ? (t.recorder?.hideCam || 'Turn Off') : (t.recorder?.addCam || 'Turn On')}
           </button>
         </div>
 

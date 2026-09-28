@@ -20,6 +20,7 @@ import {
 } from '../../types';
 import { BACKGROUND_PRESETS, DEFAULT_BACKGROUND_VALUE } from '../../services/backgroundPresets';
 import { extractZoomSegments } from '../../services/editorEngine';
+import { useLanguage } from '../../context/LanguageContext';
 
 const EASING_OPTIONS: { id: ZoomEasingType; label: string; desc: string }[] = [
   { id: 'easeInOut', label: 'Smooth', desc: 'Quintic curve' },
@@ -56,6 +57,7 @@ export const Inspector: React.FC<InspectorProps> = ({
   isCollapsed = false,
   onToggleCollapse,
 }) => {
+  const { t } = useLanguage();
   const [openSections, setOpenSections] = useState<{ [key: string]: boolean }>({
     layout: false,
     background: false,
@@ -176,11 +178,11 @@ export const Inspector: React.FC<InspectorProps> = ({
       <div className="px-4 py-3 border-b border-slate-200 dark:border-zinc-800 flex items-center justify-between transition-colors bg-slate-50/50 dark:bg-zinc-900/30 shrink-0">
         <h3 className="font-bold text-xs text-slate-900 dark:text-white tracking-wider uppercase flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-[#D90000]" />
-          <span>STUDIO TOOLS</span>
+          <span>{t.editor?.studioTools || 'STUDIO TOOLS'}</span>
         </h3>
         <div className="flex items-center gap-1.5">
           <span className="text-[10px] font-mono text-slate-500 dark:text-zinc-400 bg-white dark:bg-zinc-900 px-2 py-0.5 rounded border border-slate-200 dark:border-zinc-700 font-semibold shadow-2xs">
-            INSPECTOR
+            {t.editor?.inspector || 'INSPECTOR'}
           </span>
           {onToggleCollapse && (
             <button
@@ -208,7 +210,7 @@ export const Inspector: React.FC<InspectorProps> = ({
                 <Layers01Icon className="w-3.5 h-3.5" />
               </div>
               <span className="font-extrabold text-[11px] text-slate-900 dark:text-white tracking-wider uppercase">
-                STAGE LAYOUT
+                {t.editor?.stageLayout || 'STAGE LAYOUT'}
               </span>
             </div>
             {openSections.layout ? (
@@ -503,7 +505,7 @@ export const Inspector: React.FC<InspectorProps> = ({
                 <ColorsIcon className="w-3.5 h-3.5" />
               </div>
               <span className="font-extrabold text-[11px] text-slate-900 dark:text-white tracking-wider uppercase">
-                CANVAS BACKGROUND
+                {t.editor?.canvasBackground || 'CANVAS BACKGROUND'}
               </span>
             </div>
             {openSections.background ? (
@@ -587,7 +589,7 @@ export const Inspector: React.FC<InspectorProps> = ({
                 <ScissorIcon className="w-3.5 h-3.5" />
               </div>
               <span className="font-extrabold text-[11px] text-slate-900 dark:text-white tracking-wider uppercase">
-                VIDEO TRIM
+                {t.editor?.videoTrim || 'VIDEO TRIM'}
               </span>
             </div>
             {openSections.trim ? (
@@ -658,7 +660,7 @@ export const Inspector: React.FC<InspectorProps> = ({
                 <Search01Icon className="w-3.5 h-3.5" />
               </div>
               <span className="font-extrabold text-[11px] text-slate-900 dark:text-white tracking-wider uppercase">
-                ZOOM EFFECTS
+                {t.editor?.zoomEffects || 'ZOOM EFFECTS'}
               </span>
               {zoomSegments.length > 0 && (
                 <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#D90000]/10 text-[#D90000] font-bold">

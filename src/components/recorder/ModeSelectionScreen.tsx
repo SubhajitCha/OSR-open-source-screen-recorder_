@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ActiveView, CompositionLayout, RecordingMode } from '../../types';
 import { SeoContentSection } from '../home/SeoContentSection';
+import { useLanguage } from '../../context/LanguageContext';
 
 interface ModeSelectionScreenProps {
   onSelectSetup: (mode: RecordingMode, layout: CompositionLayout) => void;
@@ -19,28 +20,29 @@ export const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
   currentMode = 'screen_cam',
   onSelectView,
 }) => {
+  const { t } = useLanguage();
   const [imgError, setImgError] = useState(false);
 
   const modeOptions: VisualModeOption[] = [
     {
       id: 'screen_cam',
       layout: 'overlay',
-      title: 'Screen & Camera',
+      title: t.hero.modes.screenCam.title,
     },
     {
       id: 'screen',
       layout: 'screen',
-      title: 'Screen only',
+      title: t.hero.modes.screen.title,
     },
     {
       id: 'audio_only',
       layout: 'screen',
-      title: 'Audio',
+      title: t.hero.modes.audioOnly.title,
     },
     {
       id: 'cam_only',
       layout: 'cam-only',
-      title: 'Camera only',
+      title: t.hero.modes.camOnly.title,
     },
   ];
 
@@ -103,10 +105,10 @@ export const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
           {/* Minimal Header */}
           <div className="space-y-1.5 max-w-xl">
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-              Choose what to record
+              {t.hero.title}
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400">
-              Select an option below to get started.
+              {t.hero.subtitle}
             </p>
           </div>
 

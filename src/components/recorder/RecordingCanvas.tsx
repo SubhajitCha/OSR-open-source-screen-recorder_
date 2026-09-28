@@ -23,6 +23,7 @@ import { AudioWaveformVisualizer } from './AudioWaveformVisualizer';
 import { AdjustableLayerBox, LayerRect } from './AdjustableLayerBox';
 import { calculatePipMetrics } from '../../services/pipCoordinates';
 import { BACKGROUND_PRESETS, NOISE_SVG_DATA_URL } from '../../services/backgroundPresets';
+import { useLanguage } from '../../context/LanguageContext';
 
 interface RecordingCanvasProps {
   layout: CompositionLayout;
@@ -63,6 +64,7 @@ export const RecordingCanvas: React.FC<RecordingCanvasProps> = ({
   onEnableMic,
   onStageHeightChange,
 }) => {
+  const { t } = useLanguage();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
 
@@ -558,15 +560,15 @@ export const RecordingCanvas: React.FC<RecordingCanvasProps> = ({
                         <div className="w-9 h-9 rounded-full bg-emerald-500 text-white flex items-center justify-center mb-1.5 shadow-md shadow-emerald-500/25">
                           <Tick01Icon className="w-4 h-4 stroke-[2.5]" />
                         </div>
-                        <span className="text-xs font-bold text-white drop-shadow-xs">Ready to record</span>
-                        <span className="text-[10px] text-zinc-300 font-medium mt-0.5">Screen connected</span>
+                        <span className="text-xs font-bold text-white drop-shadow-xs">{t.canvas?.readyToRecord || 'Ready to record'}</span>
+                        <span className="text-[10px] text-zinc-300 font-medium mt-0.5">{t.canvas?.screenConnected || 'Screen connected'}</span>
                       </div>
                     </>
                   ) : (
                     <div className="p-4 flex flex-col items-center justify-center text-center w-full h-full bg-zinc-950 rounded-2xl">
                       <ComputerIcon className="w-8 h-8 text-zinc-300 mb-2" />
-                      <span className="text-xs font-semibold text-zinc-200">Screen</span>
-                      <span className="text-[10px] text-zinc-400 mt-0.5">Select screen to share</span>
+                      <span className="text-xs font-semibold text-zinc-200">{t.canvas?.screenLabel || 'Screen'}</span>
+                      <span className="text-[10px] text-zinc-400 mt-0.5">{t.canvas?.selectScreenToShare || 'Select screen to share'}</span>
                     </div>
                   )}
                 </div>
@@ -619,11 +621,11 @@ export const RecordingCanvas: React.FC<RecordingCanvasProps> = ({
 
                           {/* Subtle Reassuring Copy */}
                           <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight drop-shadow-xs">
-                            Ready to record
+                            {t.canvas.readyToRecord}
                           </h3>
 
                           <p className="text-xs sm:text-sm font-medium text-zinc-300 mt-1 max-w-xs sm:max-w-sm leading-snug drop-shadow-xs">
-                            Your screen is connected and all set.
+                            {t.canvas.readyToRecordDesc}
                           </p>
                         </div>
                       </>
@@ -635,10 +637,10 @@ export const RecordingCanvas: React.FC<RecordingCanvasProps> = ({
                         </div>
                         <div className="space-y-1">
                           <span className="text-sm font-semibold text-zinc-200 tracking-tight block">
-                            Screen Setup
+                            {t.canvas.screenSetup}
                           </span>
                           <span className="text-xs text-zinc-400 max-w-xs block leading-relaxed">
-                            Share your window, browser tab, or entire display.
+                            {t.canvas.screenSetupDesc}
                           </span>
                         </div>
                         {onShareScreen && (
@@ -648,7 +650,7 @@ export const RecordingCanvas: React.FC<RecordingCanvasProps> = ({
                             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 active:scale-95 text-white font-medium text-xs transition-all border border-white/15 shadow-md cursor-pointer mt-1"
                           >
                             <ComputerIcon className="w-4 h-4 text-zinc-300" />
-                            <span>Share Screen to Preview</span>
+                            <span>{t.canvas.shareScreenBtn}</span>
                           </button>
                         )}
                       </div>

@@ -1,16 +1,20 @@
 import React, { useState } from 'react';
 import { ActiveView } from '../../types';
+import { useLanguage } from '../../context/LanguageContext';
 
 interface SeoContentSectionProps {
   onNavigate?: (view: ActiveView) => void;
 }
 
 export const SeoContentSection: React.FC<SeoContentSectionProps> = ({ onNavigate }) => {
+  const { t } = useLanguage();
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
 
   const toggleFaq = (index: number) => {
     setActiveFaq((prev) => (prev === index ? null : index));
   };
+
+  const seo = t.seoSection;
 
   return (
     <section
@@ -23,15 +27,15 @@ export const SeoContentSection: React.FC<SeoContentSectionProps> = ({ onNavigate
         <header className="space-y-4 text-center sm:text-left">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-red-100/70 text-[#D90000] dark:bg-red-950/40 dark:text-red-400 border border-red-200/60 dark:border-red-900/40">
             <span className="w-2 h-2 rounded-full bg-[#D90000] animate-pulse" />
-            <span>Complete Guide &amp; Technical Overview</span>
+            <span>{seo.badge}</span>
           </div>
 
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
-            The Ultimate Free Online Screen Recorder for Video Creators, Educators &amp; Developers
+            {seo.mainHeading}
           </h1>
 
           <p className="text-base sm:text-lg text-slate-600 dark:text-zinc-400 leading-relaxed">
-            In today’s fast-paced digital creation ecosystem, having an agile, browser-based <strong>online screen recorder</strong> is essential for software developers, product managers, educators, designers, and content creators. Traditional desktop recording utilities often burden users with heavy system overhead, mandatory software installations, invasive background telemetry, and restrictive subscription paywalls. Our modern <strong>free online screen recorder</strong> solves this problem entirely by operating natively within standard web browsers using cutting-edge MediaStream, WebCodecs, and HTML5 Canvas technologies. Without installing a single executable file, you can record crystal-clear 1080p and 4K displays, capture system audio alongside microphone narration, overlay a picture-in-picture webcam feed, annotate on screen in real time, and export directly in universal MP4 or lightweight WebM formats.
+            {seo.introParagraph}
           </p>
         </header>
 
@@ -39,60 +43,41 @@ export const SeoContentSection: React.FC<SeoContentSectionProps> = ({ onNavigate
         <article className="space-y-4">
           <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2.5">
             <span className="w-1.5 h-6 bg-[#D90000] rounded-full" />
-            Why Choose an In-Browser Online Screen Recorder Over Desktop Bloatware
+            {seo.section1Title}
           </h2>
 
           <p className="text-sm sm:text-base text-slate-600 dark:text-zinc-300 leading-relaxed">
-            Traditional desktop screen capture applications demand substantial local disk storage, continuous background updater daemons, and administrative installation privileges. When you need to quickly record a bug reproduction, demonstrate a new feature to stakeholders, or produce an educational lecture, launching our <strong>free screen video recorder</strong> in your browser takes mere seconds.
+            {seo.section1P1}
           </p>
 
           <p className="text-sm sm:text-base text-slate-600 dark:text-zinc-300 leading-relaxed">
-            Because our application executes client-side through standard Web APIs—including <code>navigator.mediaDevices.getDisplayMedia</code> and <code>MediaRecorder</code>—it delivers native hardware-accelerated capture speeds with zero software installations. It runs seamlessly on Windows, macOS, Linux, and Chromebook devices, eliminating the frustration of cross-platform version discrepancies.
+            {seo.section1P2}
           </p>
         </article>
 
         {/* Section 2: Step-by-Step Workflow */}
         <article className="space-y-4 bg-white dark:bg-zinc-900/60 p-6 sm:p-8 rounded-2xl border border-slate-200/80 dark:border-zinc-800 shadow-sm">
           <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
-            Step-by-Step Guide: How to Use Free Screen Video Recorder
+            {seo.section2Title}
           </h2>
 
           <p className="text-sm sm:text-base text-slate-600 dark:text-zinc-300 leading-relaxed">
-            Recording your screen online with studio-grade fidelity takes just four straightforward steps:
+            {seo.section2Intro}
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-            <div className="p-4 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-200/60 dark:border-zinc-700/60 space-y-1.5">
-              <span className="text-xs font-bold text-[#D90000] dark:text-red-400 uppercase tracking-wider">Step 1</span>
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Choose Your Capture Mode</h3>
-              <p className="text-xs text-slate-600 dark:text-zinc-400">
-                Select from four dedicated capture presets: <strong>Screen &amp; Camera</strong> (simultaneous desktop and PIP webcam), <strong>Screen Only</strong>, <strong>Camera Only</strong>, or <strong>Audio Only</strong>.
-              </p>
-            </div>
-
-            <div className="p-4 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-200/60 dark:border-zinc-700/60 space-y-1.5">
-              <span className="text-xs font-bold text-[#D90000] dark:text-red-400 uppercase tracking-wider">Step 2</span>
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Grant Screen &amp; Audio Permissions</h3>
-              <p className="text-xs text-slate-600 dark:text-zinc-400">
-                Pick your desired monitor, individual application window, or browser tab. Enable the &quot;Share system audio&quot; toggle to record internal computer sound alongside your microphone narration.
-              </p>
-            </div>
-
-            <div className="p-4 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-200/60 dark:border-zinc-700/60 space-y-1.5">
-              <span className="text-xs font-bold text-[#D90000] dark:text-red-400 uppercase tracking-wider">Step 3</span>
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Record with Real-Time Tools</h3>
-              <p className="text-xs text-slate-600 dark:text-zinc-400">
-                Hit the red Record button. Enjoy unlimited recording duration without annoying watermarks, adjust your webcam bubble shape and position, and pause or resume on the fly.
-              </p>
-            </div>
-
-            <div className="p-4 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-200/60 dark:border-zinc-700/60 space-y-1.5">
-              <span className="text-xs font-bold text-[#D90000] dark:text-red-400 uppercase tracking-wider">Step 4</span>
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Trim &amp; Export Instantly</h3>
-              <p className="text-xs text-slate-600 dark:text-zinc-400">
-                Preview your finished video in the integrated studio timeline, trim unnecessary beginnings or pauses, and download directly as a universal MP4 (H.264/AAC) or fast WebM file.
-              </p>
-            </div>
+            {seo.steps.map((item, idx) => (
+              <div
+                key={idx}
+                className="p-4 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-200/60 dark:border-zinc-700/60 space-y-1.5"
+              >
+                <span className="text-xs font-bold text-[#D90000] dark:text-red-400 uppercase tracking-wider">
+                  {item.step}
+                </span>
+                <h3 className="text-sm font-semibold text-slate-900 dark:text-white">{item.title}</h3>
+                <p className="text-xs text-slate-600 dark:text-zinc-400">{item.desc}</p>
+              </div>
+            ))}
           </div>
         </article>
 
@@ -100,40 +85,40 @@ export const SeoContentSection: React.FC<SeoContentSectionProps> = ({ onNavigate
         <article className="space-y-4">
           <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2.5">
             <span className="w-1.5 h-6 bg-blue-600 rounded-full" />
-            Advanced Features: Picture-in-Picture, Dual Audio Mixing &amp; MP4 Muxing
+            {seo.section3Title}
           </h2>
 
           <p className="text-sm sm:text-base text-slate-600 dark:text-zinc-300 leading-relaxed">
-            OSR Studio is built for professional presentation fidelity. Presenters can position their live webcam feed in any corner of the screen, toggle between circle, square, and rounded rectangle frames, and customize canvas margins and backgrounds for polished tutorial presentations.
+            {seo.section3P1}
           </p>
 
           <p className="text-sm sm:text-base text-slate-600 dark:text-zinc-300 leading-relaxed">
-            Our multi-channel audio mixing pipeline leverages the browser’s Web Audio API to combine system audio (music, video playback, game sound, or meeting attendees) with your external USB or headset microphone, ensuring balanced levels with built-in visual volume meters and noise suppression.
+            {seo.section3P2}
           </p>
         </article>
 
         {/* Section 4: Privacy & Client-Side Advantages */}
         <article className="space-y-4 bg-slate-100/70 dark:bg-zinc-900/40 p-6 sm:p-8 rounded-2xl border border-slate-200/60 dark:border-zinc-800">
           <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
-            Uncompromising Privacy: 100% Client-Side In-Browser Processing
+            {seo.section4Title}
           </h2>
 
           <p className="text-sm sm:text-base text-slate-600 dark:text-zinc-300 leading-relaxed">
-            Most commercial online recorders secretly stream your screen captures to cloud servers where your confidential data, business source code, and private conversations are stored. OSR Studio is architected with strict client-side isolation:
+            {seo.section4Intro}
           </p>
 
           <ul className="space-y-2.5 text-sm sm:text-base text-slate-700 dark:text-zinc-300 list-disc list-inside">
             <li>
-              <strong>Zero Cloud Uploads:</strong> Every byte of video and audio is processed and stored strictly within your browser’s local sandbox and IndexedDB storage.
+              <strong>{seo.privacyBullet1Title}:</strong> {seo.privacyBullet1Desc}
             </li>
             <li>
-              <strong>No Account Required:</strong> No login walls, email harvesting, or credit card requirements. Start recording immediately with a single click.
+              <strong>{seo.privacyBullet2Title}:</strong> {seo.privacyBullet2Desc}
             </li>
             <li>
-              <strong>No Watermarks &amp; Unlimited Duration:</strong> We never imprint promotional logos over your footage or artificially cut off your recording after five minutes.
+              <strong>{seo.privacyBullet3Title}:</strong> {seo.privacyBullet3Desc}
             </li>
             <li>
-              <strong>Progressive Web App (PWA):</strong> Install OSR Studio as a standalone desktop app from your browser address bar for instant offline access even without an active internet connection.
+              <strong>{seo.privacyBullet4Title}:</strong> {seo.privacyBullet4Desc}
             </li>
           </ul>
         </article>
@@ -142,64 +127,11 @@ export const SeoContentSection: React.FC<SeoContentSectionProps> = ({ onNavigate
         <article className="space-y-4">
           <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2.5">
             <span className="w-1.5 h-6 bg-emerald-500 rounded-full" />
-            Frequently Asked Questions About Our Free Online Screen Recorder
+            {seo.faqTitle}
           </h2>
 
           <div className="space-y-3 pt-2">
-            {[
-              {
-                q: 'What is the best free online screen recorder?',
-                a: 'OSR Studio is one of the best free online screen recorders available. It runs 100% inside your web browser without requiring any software downloads, account registration, or subscriptions. It delivers watermark-free HD and 4K recording, webcam picture-in-picture overlay, system audio and microphone mixing, and instant offline exports in both WebM and MP4 formats.',
-              },
-              {
-                q: 'How to use free screen video recorder',
-                a: 'Using our free screen video recorder takes just three simple steps: 1) Select your recording mode (Screen & Camera, Screen Only, Audio Only, or Camera Only) from the home screen. 2) Grant browser permission to choose the screen, window, or Chrome tab you wish to capture, along with audio sources. 3) Click Record. When finished, pause or stop the recording to trim and download your video instantly.',
-              },
-              {
-                q: 'How to download free screen recorder',
-                a: "You do not need to download or install any desktop application to use our free screen recorder—it works directly inside modern web browsers like Chrome, Edge, and Firefox. However, you can install it as a Progressive Web App (PWA) directly from your browser's address bar for instant offline desktop access with zero installation bloat.",
-              },
-              {
-                q: 'What is a screen recorder?',
-                a: 'A screen recorder is software or a web application that captures digital visual output from a computer, laptop, or mobile screen and encodes it into a shareable video file (such as MP4 or WebM). Screen recorders are widely used for software tutorials, product demonstrations, bug reports, video meetings, online courses, and gaming walkthroughs.',
-              },
-              {
-                q: 'Can I screen record on Chrome?',
-                a: 'Yes, you can easily screen record on Google Chrome. Modern versions of Chrome natively support the Screen Capture API (navigator.mediaDevices.getDisplayMedia). With our web-based tool, you can record an entire desktop monitor, a specific application window, or an individual Chrome tab with tab audio directly inside Chrome on Windows, Mac, Linux, and Chromebooks.',
-              },
-              {
-                q: 'Can I screen record for 1 hour?',
-                a: "Yes! Unlike commercial screen recording software that imposes artificial 5-minute or 10-minute paywalls, our free online screen recorder has no hardcoded duration limits. You can record for 1 hour or longer, limited only by your computer's available RAM and local storage.",
-              },
-              {
-                q: 'Can I record my screen online?',
-                a: 'Yes, you can record your screen online directly through modern web browsers. Our tool leverages native browser APIs (MediaRecorder, WebCodecs, and HTML5 Canvas) so you can capture full-resolution video and audio without installing third-party browser extensions or desktop clients.',
-              },
-              {
-                q: 'How long can I record my screen?',
-                a: 'There is no arbitrary time restriction on our screen recorder. You can record for a few seconds or multiple hours. Because processing is done client-side on your device, the maximum recording duration depends primarily on your system memory (RAM) and free disk space.',
-              },
-              {
-                q: 'How do I activate my screen record?',
-                a: 'To activate screen recording: 1) Open our online screen recorder in your web browser. 2) Click on your preferred recording setup (e.g., "Screen & Camera" or "Screen only"). 3) In the browser prompt, select the screen or window you want to share and ensure "Share system audio" is checked if you need internal sound. 4) Hit the red "Start Recording" button or use the keyboard shortcut to activate capture.',
-              },
-              {
-                q: "Why can't I screen record?",
-                a: 'If you cannot screen record, the most common causes include: 1) Missing browser permissions (ensure your browser has permission in OS Settings > Privacy & Security > Screen Recording on macOS or Display Settings on Windows). 2) Denied browser dialog prompt when asked to share your screen. 3) Using an outdated or unsupported browser (ensure you are using the latest version of Chrome, Edge, Brave, or Firefox). 4) Restrictive enterprise or school administrator security policies.',
-              },
-              {
-                q: 'How to screen record on a browser?',
-                a: 'To record your screen in a browser, navigate to our free online recorder, choose your recording mode, and click Start. When the browser displays the screen-sharing prompt, pick the screen, window, or browser tab you wish to capture, enable audio sharing if needed, and click Share. The recorder captures frames in real time and lets you edit or download when completed.',
-              },
-              {
-                q: 'Is screen recording safe?',
-                a: 'Yes, screen recording with our tool is completely safe and private. Because our application operates 100% client-side in your local browser sandbox, your recorded video and audio streams are never sent or uploaded to any remote server or cloud database. Your footage stays strictly on your machine.',
-              },
-              {
-                q: 'Can websites track screen recording?',
-                a: 'Standard websites cannot directly detect if you are recording your screen using a system-level or independent browser tab recorder, as browsers do not expose a general API to notify regular web pages when your screen is being captured. However, certain specialized proctoring platforms or DRM-protected video streaming services use protected media paths that will display a black screen if capture is attempted.',
-              },
-            ].map((faq, idx) => (
+            {seo.faqs.map((faq, idx) => (
               <div
                 key={idx}
                 className="border border-slate-200 dark:border-zinc-800 rounded-xl overflow-hidden bg-white dark:bg-zinc-900/50"

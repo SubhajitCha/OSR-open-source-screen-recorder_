@@ -31,6 +31,7 @@ import { LayoutPopover } from './popovers/LayoutPopover';
 import { BackgroundPopover } from './popovers/BackgroundPopover';
 import { SmartRecordingPopover } from './popovers/SmartRecordingPopover';
 import { MicPulseButton } from './MicPulseButton';
+import { useLanguage } from '../../context/LanguageContext';
 
 interface RecorderToolbarProps {
   layout: CompositionLayout;
@@ -106,6 +107,7 @@ export const RecorderToolbar: React.FC<RecorderToolbarProps> = ({
   orientation = 'vertical',
   height,
 }) => {
+  const { t } = useLanguage();
   const [activePopover, setActivePopover] = useState<ActivePopover>(null);
   const toolbarRef = useRef<HTMLDivElement | null>(null);
 
@@ -144,7 +146,7 @@ export const RecorderToolbar: React.FC<RecorderToolbarProps> = ({
             <button
               type="button"
               onClick={() => onToggleCamera(!isCameraActive)}
-              title={isCameraActive ? 'Hide camera' : 'Add camera'}
+              title={isCameraActive ? (t.recorder?.hideCamera || 'Hide camera') : (t.recorder?.addCamera || 'Add camera')}
               className="cursor-pointer"
             >
               <div
@@ -188,7 +190,7 @@ export const RecorderToolbar: React.FC<RecorderToolbarProps> = ({
                   isCameraActive ? 'bg-[#8DB355]' : 'bg-slate-400 dark:bg-zinc-500'
                 }`}
               />
-              <span>{isCameraActive ? 'Hide Cam' : 'Add Cam'}</span>
+              <span>{isCameraActive ? (t.recorder?.hideCam || 'Hide Cam') : (t.recorder?.addCam || 'Add Cam')}</span>
             </div>
           </div>
 
@@ -257,7 +259,7 @@ export const RecorderToolbar: React.FC<RecorderToolbarProps> = ({
                     isMicActive ? 'bg-[#8DB355]' : 'bg-[#D90000]'
                   }`}
                 />
-                <span>{isMicActive ? 'Mute Mic' : 'Unmute Mic'}</span>
+                <span>{isMicActive ? (t.recorder?.muteMic || 'Mute Mic') : (t.recorder?.unmuteMic || 'Unmute Mic')}</span>
               </div>
             </div>
           )}
@@ -306,7 +308,7 @@ export const RecorderToolbar: React.FC<RecorderToolbarProps> = ({
                   isScreenActive ? 'bg-[#8DB355]' : 'bg-slate-400 dark:bg-zinc-500'
                 }`}
               />
-              <span>{isScreenActive ? 'Stop Sharing' : 'Share Screen'}</span>
+              <span>{isScreenActive ? (t.recorder?.stopSharing || 'Stop Sharing') : (t.recorder?.shareScreen || 'Share Screen')}</span>
             </div>
           </div>
 
@@ -344,7 +346,7 @@ export const RecorderToolbar: React.FC<RecorderToolbarProps> = ({
             {/* Sleek Tooltip Label on Hover */}
             <div className="pointer-events-none absolute left-full ml-3 top-1/2 -translate-y-1/2 z-40 opacity-0 -translate-x-2.5 scale-95 group-hover:opacity-100 group-hover:translate-x-0 group-hover:scale-100 transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] whitespace-nowrap">
               <div className="px-2.5 py-1 rounded-lg bg-slate-900/95 dark:bg-white/95 text-white dark:text-slate-950 text-xs font-semibold shadow-xl shadow-black/20 backdrop-blur-md border border-white/10 dark:border-black/10 flex items-center select-none">
-                <span>Layouts</span>
+                <span>{t.recorder?.layouts || 'Layouts'}</span>
               </div>
             </div>
 
@@ -398,7 +400,7 @@ export const RecorderToolbar: React.FC<RecorderToolbarProps> = ({
                       : '#8DB355',
                 }}
               />
-              <span>Background</span>
+              <span>{t.recorder?.background || 'Background'}</span>
             </div>
           </div>
 
@@ -431,7 +433,7 @@ export const RecorderToolbar: React.FC<RecorderToolbarProps> = ({
           <div className="pointer-events-none absolute left-full ml-3 top-1/2 -translate-y-1/2 z-40 opacity-0 -translate-x-2.5 scale-95 group-hover:opacity-100 group-hover:translate-x-0 group-hover:scale-100 transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] whitespace-nowrap">
             <div className="px-2.5 py-1 rounded-lg bg-slate-900/95 dark:bg-white/95 text-white dark:text-slate-950 text-xs font-semibold shadow-xl shadow-black/20 backdrop-blur-md border border-white/10 dark:border-black/10 flex items-center gap-1.5 select-none">
               <Settings01Icon className="w-3 h-3 stroke-[2]" />
-              <span>Settings</span>
+              <span>{t.recorder?.settings || 'Settings'}</span>
             </div>
           </div>
 
@@ -507,7 +509,7 @@ export const RecorderToolbar: React.FC<RecorderToolbarProps> = ({
             }`}
             onClick={() => onToggleCamera(!isCameraActive)}
           >
-            {isCameraActive ? 'Hide Cam' : 'Add Cam'}
+            {isCameraActive ? (t.recorder?.hideCam || 'Hide Cam') : (t.recorder?.addCam || 'Add Cam')}
           </span>
 
           <CameraPopover

@@ -7,6 +7,7 @@ import {
   Cancel01Icon,
 } from 'hugeicons-react';
 import { AudioSettings, VideoSettings } from '../../../types';
+import { useLanguage } from '../../../context/LanguageContext';
 
 interface ScreenPopoverProps {
   isOpen: boolean;
@@ -29,6 +30,7 @@ export const ScreenPopover: React.FC<ScreenPopoverProps> = ({
   onToggleScreen,
   placement = 'left',
 }) => {
+  const { t } = useLanguage();
   if (!isOpen) return null;
 
   const positionClass =
@@ -78,7 +80,7 @@ export const ScreenPopover: React.FC<ScreenPopoverProps> = ({
                   : 'bg-zinc-900 dark:bg-white hover:bg-zinc-800 dark:hover:bg-zinc-100 text-white dark:text-zinc-950 shadow-xs'
               }`}
             >
-              {isScreenActive ? 'Stop' : 'Share Screen'}
+              {isScreenActive ? (t.common?.stop || 'Stop') : (t.recorder?.shareScreen || 'Share Screen')}
             </button>
           </div>
         )}

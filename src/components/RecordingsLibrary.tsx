@@ -25,6 +25,7 @@ import {
   formatBytes,
 } from '../services/db';
 import { downloadBlob, downloadAsMp4 } from '../services/videoTrimmer';
+import { useLanguage } from '../context/LanguageContext';
 
 interface RecordingsLibraryProps {
   onSelectRecordingForEdit?: (recording: SavedRecording) => void;
@@ -37,6 +38,7 @@ export const RecordingsLibrary: React.FC<RecordingsLibraryProps> = ({
   onRecordingDeleted,
   onSelectRecordingForEdit,
 }) => {
+  const { t } = useLanguage();
   const [recordings, setRecordings] = useState<SavedRecording[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedTag, setSelectedTag] = useState<string>('all');
@@ -174,13 +176,13 @@ export const RecordingsLibrary: React.FC<RecordingsLibraryProps> = ({
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Recordings Library</h1>
+              <h1 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">{t.library.title}</h1>
               <span className="text-[11px] font-bold text-[#D90000] dark:text-[#FF6666] bg-[#D90000]/10 dark:bg-[#D90000]/20 border border-[#D90000]/20 px-2.5 py-0.5 rounded-full">
-                {recordings.length} {recordings.length === 1 ? 'recording' : 'recordings'}
+                {recordings.length} {t.library.recordingsTag}
               </span>
             </div>
             <p className="text-xs text-slate-500 dark:text-zinc-400">
-              Offline recordings stored securely in browser IndexedDB
+              {t.library.subtitle}
             </p>
           </div>
         </div>
@@ -192,7 +194,7 @@ export const RecordingsLibrary: React.FC<RecordingsLibraryProps> = ({
               <HardDriveIcon className="w-4 h-4 text-slate-400 dark:text-zinc-500" />
               <div>
                 <span className="font-bold block text-slate-900 dark:text-zinc-100">{storageInfo.formattedUsage}</span>
-                <span className="text-[10px] text-slate-400 dark:text-zinc-500">Local Storage</span>
+                <span className="text-[10px] text-slate-400 dark:text-zinc-500">{t.library.storageUsage}</span>
               </div>
             </div>
 
@@ -207,7 +209,7 @@ export const RecordingsLibrary: React.FC<RecordingsLibraryProps> = ({
               <button
                 onClick={() => setShowClearAllModal(true)}
                 className="p-1.5 text-slate-400 dark:text-zinc-500 hover:text-[#D90000] hover:bg-red-50 dark:hover:bg-red-950/30 rounded-full transition-colors cursor-pointer"
-                title="Delete All Recordings"
+                title={t.library.clearAllModalTitle}
               >
                 <Delete02Icon className="w-4 h-4" />
               </button>
@@ -227,7 +229,7 @@ export const RecordingsLibrary: React.FC<RecordingsLibraryProps> = ({
                 : 'bg-white dark:bg-[#121215] text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-zinc-800 shadow-xs'
             }`}
           >
-            All ({recordings.length})
+            {t.library.noTags} ({recordings.length})
           </button>
           {allTags.map((tag) => (
             <button
@@ -249,7 +251,7 @@ export const RecordingsLibrary: React.FC<RecordingsLibraryProps> = ({
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20 text-slate-400 dark:text-zinc-500">
           <div className="w-8 h-8 border-2 border-[#D90000] border-t-transparent rounded-full animate-spin mb-3" />
-          <p className="text-xs font-medium">Loading offline recordings...</p>
+          <p className="text-xs font-medium">{t.library.loadingRecordings}</p>
         </div>
       ) : filteredRecordings.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 p-8 rounded-3xl bg-white dark:bg-[#121215] border border-dashed border-slate-200 dark:border-zinc-800 text-center space-y-4 shadow-xs transition-colors">
@@ -257,16 +259,16 @@ export const RecordingsLibrary: React.FC<RecordingsLibraryProps> = ({
             <Video01Icon className="w-7 h-7" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-slate-900 dark:text-white mb-1">No recordings saved yet</h3>
+            <h3 className="text-base font-bold text-slate-900 dark:text-white mb-1">{t.library.emptyTitle}</h3>
             <p className="text-xs text-slate-500 dark:text-zinc-400 max-w-sm mx-auto">
-              Start your first screen recording with OSR. Everything is recorded offline with zero server lag.
+              {t.library.emptyDesc}
             </p>
           </div>
           <button
             onClick={onOpenStudio}
             className="px-6 py-3 text-xs font-bold text-white bg-[#D90000] hover:bg-[#b80000] rounded-full shadow-lg shadow-[#D90000]/25 transition-all cursor-pointer active:scale-95"
           >
-            Start First Recording
+            {t.library.startFirstRecording}
           </button>
         </div>
       ) : (

@@ -15,6 +15,7 @@ import {
 } from 'hugeicons-react';
 import { probeBrowserCapabilities } from '../services/browserCapabilities';
 import { BrowserCapabilityReport } from '../types';
+import { useLanguage } from '../context/LanguageContext';
 
 interface ServiceItem {
   id: string;
@@ -31,6 +32,7 @@ interface ServiceItem {
 }
 
 export const ServicesStatusPage: React.FC = () => {
+  const { t } = useLanguage();
   const [report, setReport] = useState<BrowserCapabilityReport | null>(null);
   const [storageUsage, setStorageUsage] = useState<{ used: string; quota: string }>({
     used: '0 MB',

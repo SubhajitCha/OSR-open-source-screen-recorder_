@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ColorsIcon, Cancel01Icon, SparklesIcon } from 'hugeicons-react';
 import { RecorderBackgroundConfig } from '../../../types';
 import { BACKGROUND_PRESETS, BackgroundPreset } from '../../../services/backgroundPresets';
+import { useLanguage } from '../../../context/LanguageContext';
 
 interface BackgroundPopoverProps {
   isOpen: boolean;
@@ -18,6 +19,7 @@ export const BackgroundPopover: React.FC<BackgroundPopoverProps> = ({
   onUpdateBackground,
   placement = 'left',
 }) => {
+  const { t } = useLanguage();
   const [activeCategory, setActiveCategory] = useState<'apple' | 'grain' | 'gradient' | 'minimal'>('apple');
 
   if (!isOpen) return null;
@@ -48,7 +50,7 @@ export const BackgroundPopover: React.FC<BackgroundPopoverProps> = ({
             <ColorsIcon className="w-4 h-4" />
           </div>
           <span className="font-bold text-xs tracking-wider uppercase text-slate-700 dark:text-zinc-200">
-            Studio Backdrops & Wallpapers
+            {t.editor?.canvasBackground || 'Canvas Background'}
           </span>
         </div>
         <button

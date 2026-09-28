@@ -11,6 +11,7 @@ import {
   BookOpen01Icon,
 } from 'hugeicons-react';
 import { ActiveView } from '../../types';
+import { useLanguage } from '../../context/LanguageContext';
 
 interface AboutUsPageProps {
   onOpenStudio: () => void;
@@ -21,6 +22,7 @@ export const AboutUsPage: React.FC<AboutUsPageProps> = ({
   onOpenStudio,
   onNavigate,
 }) => {
+  const { t } = useLanguage();
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
@@ -34,7 +36,7 @@ export const AboutUsPage: React.FC<AboutUsPageProps> = ({
           className="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white transition-colors group w-fit"
         >
           <ArrowLeft01Icon className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-          <span>Back to Studio</span>
+          <span>{t.common?.back || 'Back to Studio'}</span>
         </a>
 
         <div className="flex items-center gap-2">

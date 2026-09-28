@@ -2,6 +2,7 @@ import React from 'react';
 import { Layers01Icon, Cancel01Icon, CheckmarkCircle01Icon } from 'hugeicons-react';
 import { CompositionLayout, RecorderBackgroundConfig, RecordingMode } from '../../../types';
 import { DEFAULT_BACKGROUND_VALUE } from '../../../services/backgroundPresets';
+import { useLanguage } from '../../../context/LanguageContext';
 
 interface LayoutPopoverProps {
   isOpen: boolean;
@@ -22,6 +23,7 @@ export const LayoutPopover: React.FC<LayoutPopoverProps> = ({
   placement = 'left',
   mode = 'screen_cam',
 }) => {
+  const { t } = useLanguage();
   if (!isOpen || mode === 'audio_only') return null;
 
   const isSingleSource = mode === 'screen' || mode === 'cam_only';
@@ -99,7 +101,7 @@ export const LayoutPopover: React.FC<LayoutPopoverProps> = ({
           </div>
           <div>
             <span className="font-bold text-xs tracking-wider uppercase text-slate-800 dark:text-zinc-200 block">
-              Stage Layout
+              {t.editor?.stageLayout || 'Stage Layout'}
             </span>
             <span className="text-[10px] text-slate-400 dark:text-zinc-400 block -mt-0.5">
               Select a premade layout configuration

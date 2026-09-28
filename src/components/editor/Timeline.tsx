@@ -8,6 +8,7 @@ import {
 } from 'hugeicons-react';
 import { Project, ZoomSegment } from '../../types';
 import { extractCutSegments, extractZoomSegments } from '../../services/editorEngine';
+import { useLanguage } from '../../context/LanguageContext';
 
 interface TimelineProps {
   project: Project;
@@ -60,6 +61,7 @@ export const Timeline: React.FC<TimelineProps> = ({
   height = 200,
   onStartResizeDrag,
 }) => {
+  const { t } = useLanguage();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const zoomTrackRef = useRef<HTMLDivElement | null>(null);
   const [dragState, setDragState] = useState<DragState | null>(null);
@@ -276,7 +278,7 @@ export const Timeline: React.FC<TimelineProps> = ({
             className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white dark:bg-zinc-900 hover:bg-slate-100 dark:hover:bg-zinc-800 border border-slate-300 dark:border-zinc-700 text-slate-800 dark:text-zinc-200 font-bold text-[11px] shadow-2xs transition-colors cursor-pointer"
             title={isCollapsed ? 'Expand Timeline' : 'Minimize Timeline'}
           >
-            <span className="tracking-wide uppercase">TIMELINE</span>
+            <span className="tracking-wide uppercase">{t.editor?.timeline || 'TIMELINE'}</span>
             {isCollapsed ? (
               <ArrowUp01Icon className="w-3.5 h-3.5 text-[#D90000]" />
             ) : (
@@ -441,7 +443,7 @@ export const Timeline: React.FC<TimelineProps> = ({
                 <div className="relative z-10 flex items-center gap-2 pointer-events-none truncate bg-white/70 dark:bg-black/50 px-2.5 py-1 rounded-md border border-black/5 dark:border-white/10 shadow-2xs">
                   <div className="w-2 h-2 rounded-full bg-[#8DB355] shadow-xs" />
                   <span className="text-[11px] font-bold text-slate-900 dark:text-zinc-100 truncate">
-                    Active Video ({formatShortTime(trimEnd - trimStart)})
+                    {t.editor?.activeVideo || 'Active Video'} ({formatShortTime(trimEnd - trimStart)})
                   </span>
                 </div>
               </div>
@@ -553,7 +555,7 @@ export const Timeline: React.FC<TimelineProps> = ({
             {/* Lane Header Label */}
             <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-[10px] font-bold text-slate-500 dark:text-zinc-400 pointer-events-none select-none z-10">
               <Search01Icon className="w-3 h-3 text-[#D90000]" />
-              <span className="tracking-widest uppercase font-mono">ZOOM</span>
+              <span className="tracking-widest uppercase font-mono">{t.editor?.zoom || 'ZOOM'}</span>
             </div>
 
             {/* Interactive Zoom Track Container */}

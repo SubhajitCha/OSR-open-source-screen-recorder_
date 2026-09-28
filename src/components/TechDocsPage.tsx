@@ -18,12 +18,14 @@ import {
 import { ARCHITECTURE_DOCS, OPEN_SOURCE_STACK } from '../data/techDocs';
 import { probeBrowserCapabilities } from '../services/browserCapabilities';
 import { BrowserCapabilityReport } from '../types';
+import { useLanguage } from '../context/LanguageContext';
 
 interface TechDocsPageProps {
   onOpenStudio: () => void;
 }
 
 export const TechDocsPage: React.FC<TechDocsPageProps> = ({ onOpenStudio }) => {
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState<'architecture' | 'stack' | 'diagnostics' | 'privacy' | 'deployment'>('architecture');
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [probeReport, setProbeReport] = useState<BrowserCapabilityReport | null>(null);
@@ -69,7 +71,7 @@ export const TechDocsPage: React.FC<TechDocsPageProps> = ({ onOpenStudio }) => {
             className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 dark:bg-white hover:bg-blue-700 dark:hover:bg-zinc-200 text-white dark:text-black font-bold text-xs rounded-full shadow-md shadow-blue-500/25 dark:shadow-white/10 transition-all cursor-pointer active:scale-95"
           >
             <Video01Icon className="w-4 h-4" />
-            <span>Open Studio</span>
+            <span>{t.nav?.studio || 'Open Studio'}</span>
           </button>
         </div>
       </div>

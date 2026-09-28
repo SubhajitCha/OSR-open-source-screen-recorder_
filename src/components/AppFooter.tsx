@@ -1,5 +1,7 @@
 import React from 'react';
 import { ActiveView } from '../types';
+import { useLanguage } from '../context/LanguageContext';
+import { LanguageSelector } from './LanguageSelector';
 
 interface AppFooterProps {
   onNavigate?: (view: ActiveView) => void;
@@ -8,6 +10,8 @@ interface AppFooterProps {
 }
 
 export const AppFooter: React.FC<AppFooterProps> = ({ onNavigate, activeView, isRecording = false }) => {
+  const { t } = useLanguage();
+
   const handleNav = (targetView: ActiveView) => {
     if (onNavigate) {
       onNavigate(targetView);
@@ -16,7 +20,7 @@ export const AppFooter: React.FC<AppFooterProps> = ({ onNavigate, activeView, is
   };
 
   // Dedicated hard page-refresh navigation for About Us, Privacy Policy, Terms & Conditions, Contact Us
-  const handleHardPageNav = (e: React.MouseEvent<HTMLAnchorElement>, targetView: 'about' | 'privacy' | 'terms' | 'contact') => {
+  const handleHardPageNav = (e: React.MouseEvent<HTMLAnchorElement>, _targetView: 'about' | 'privacy' | 'terms' | 'contact') => {
     if (isRecording) {
       const confirmLeave = window.confirm(
         'A recording is currently in progress. Navigating to another page will stop and reset the current recording. Do you want to continue?'
@@ -26,8 +30,9 @@ export const AppFooter: React.FC<AppFooterProps> = ({ onNavigate, activeView, is
         return;
       }
     }
-    // Allow the browser's standard anchor click to navigate with full page reload to the view URL
   };
+
+  const f = t.footer;
 
   return (
     <footer
@@ -54,18 +59,18 @@ export const AppFooter: React.FC<AppFooterProps> = ({ onNavigate, activeView, is
               </span>
             </button>
             <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed max-w-sm">
-              Free, privacy-first online screen recorder operating 100% inside your browser. Capture screen, webcam, and system audio with zero watermarks and no duration limits.
+              {f.brandTagline}
             </p>
             <div className="flex items-center gap-2 pt-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>100% Client-Side &amp; Private Sandbox</span>
+              <span>{f.clientSideNotice}</span>
             </div>
           </div>
 
           {/* Column 1: Recording Presets */}
           <div className="space-y-2.5">
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
-              Recording Modes
+              {f.recordingModesHeading}
             </h3>
             <ul className="space-y-1.5 text-xs text-slate-600 dark:text-zinc-400">
               <li>
@@ -74,7 +79,7 @@ export const AppFooter: React.FC<AppFooterProps> = ({ onNavigate, activeView, is
                   onClick={() => handleNav('studio')}
                   className="hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer text-left"
                 >
-                  Screen &amp; Webcam PIP
+                  {f.modes.screenCam}
                 </button>
               </li>
               <li>
@@ -83,7 +88,7 @@ export const AppFooter: React.FC<AppFooterProps> = ({ onNavigate, activeView, is
                   onClick={() => handleNav('studio')}
                   className="hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer text-left"
                 >
-                  Full Desktop &amp; Window Capture
+                  {f.modes.desktopWindow}
                 </button>
               </li>
               <li>
@@ -92,7 +97,7 @@ export const AppFooter: React.FC<AppFooterProps> = ({ onNavigate, activeView, is
                   onClick={() => handleNav('studio')}
                   className="hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer text-left"
                 >
-                  Individual Chrome Tab Sharing
+                  {f.modes.tabShare}
                 </button>
               </li>
               <li>
@@ -101,7 +106,7 @@ export const AppFooter: React.FC<AppFooterProps> = ({ onNavigate, activeView, is
                   onClick={() => handleNav('studio')}
                   className="hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer text-left"
                 >
-                  Dedicated Camera Only Mode
+                  {f.modes.camOnly}
                 </button>
               </li>
               <li>
@@ -110,7 +115,7 @@ export const AppFooter: React.FC<AppFooterProps> = ({ onNavigate, activeView, is
                   onClick={() => handleNav('studio')}
                   className="hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer text-left"
                 >
-                  High-Fidelity Audio Narration
+                  {f.modes.audioOnly}
                 </button>
               </li>
             </ul>
@@ -119,13 +124,13 @@ export const AppFooter: React.FC<AppFooterProps> = ({ onNavigate, activeView, is
           {/* Column 2: Studio Tools */}
           <div className="space-y-2.5">
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
-              Studio Tools
+              {f.studioToolsHeading}
             </h3>
             <ul className="space-y-1.5 text-xs text-slate-600 dark:text-zinc-400">
-              <li>System Audio Mixing</li>
-              <li>WebCodecs MP4 Export</li>
-              <li>Non-Destructive Trimmer</li>
-              <li>Custom Canvas Radii</li>
+              <li>{f.tools.audioMixing}</li>
+              <li>{f.tools.mp4Export}</li>
+              <li>{f.tools.trimmer}</li>
+              <li>{f.tools.canvasRadii}</li>
               <li>
                 <button
                   type="button"
@@ -134,7 +139,7 @@ export const AppFooter: React.FC<AppFooterProps> = ({ onNavigate, activeView, is
                     activeView === 'docs' ? 'font-bold text-slate-900 dark:text-white' : ''
                   }`}
                 >
-                  Technical Architecture
+                  {f.tools.architecture}
                 </button>
               </li>
               <li>
@@ -145,7 +150,7 @@ export const AppFooter: React.FC<AppFooterProps> = ({ onNavigate, activeView, is
                     activeView === 'services' ? 'font-bold text-slate-900 dark:text-white' : ''
                   }`}
                 >
-                  System Diagnostics
+                  {f.tools.diagnostics}
                 </button>
               </li>
             </ul>
@@ -154,7 +159,7 @@ export const AppFooter: React.FC<AppFooterProps> = ({ onNavigate, activeView, is
           {/* Column 3: Company & Legal */}
           <div className="space-y-2.5">
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
-              Company &amp; Legal
+              {f.companyLegalHeading}
             </h3>
             <ul className="space-y-1.5 text-xs text-slate-600 dark:text-zinc-400">
               <li>
@@ -166,7 +171,7 @@ export const AppFooter: React.FC<AppFooterProps> = ({ onNavigate, activeView, is
                     activeView === 'about' ? 'font-bold text-[#D90000] dark:text-[#FFEA93]' : ''
                   }`}
                 >
-                  About Us
+                  {f.links.about}
                 </a>
               </li>
               <li>
@@ -178,7 +183,7 @@ export const AppFooter: React.FC<AppFooterProps> = ({ onNavigate, activeView, is
                     activeView === 'privacy' ? 'font-bold text-[#D90000] dark:text-[#FFEA93]' : ''
                   }`}
                 >
-                  Privacy Policy
+                  {f.links.privacy}
                 </a>
               </li>
               <li>
@@ -190,7 +195,7 @@ export const AppFooter: React.FC<AppFooterProps> = ({ onNavigate, activeView, is
                     activeView === 'terms' ? 'font-bold text-[#D90000] dark:text-[#FFEA93]' : ''
                   }`}
                 >
-                  Terms &amp; Conditions
+                  {f.links.terms}
                 </a>
               </li>
               <li>
@@ -202,7 +207,7 @@ export const AppFooter: React.FC<AppFooterProps> = ({ onNavigate, activeView, is
                     activeView === 'contact' ? 'font-bold text-[#D90000] dark:text-[#FFEA93]' : ''
                   }`}
                 >
-                  Contact Us
+                  {f.links.contact}
                 </a>
               </li>
               <li>
@@ -214,7 +219,7 @@ export const AppFooter: React.FC<AppFooterProps> = ({ onNavigate, activeView, is
                     activeView === 'library' ? 'font-bold text-[#D90000] dark:text-[#FFEA93]' : ''
                   }`}
                 >
-                  Recordings Library
+                  {f.links.library}
                 </button>
               </li>
               <li className="pt-1 text-[11px] text-slate-400 dark:text-zinc-600 font-semibold uppercase tracking-wider">
@@ -231,7 +236,7 @@ export const AppFooter: React.FC<AppFooterProps> = ({ onNavigate, activeView, is
                       : 'text-slate-500 dark:text-zinc-400'
                   }`}
                 >
-                  404 &bull; Page Not Found
+                  {f.links.error404}
                 </button>
               </li>
               <li>
@@ -245,37 +250,33 @@ export const AppFooter: React.FC<AppFooterProps> = ({ onNavigate, activeView, is
                       : 'text-slate-500 dark:text-zinc-400'
                   }`}
                 >
-                  500 &bull; System Error
+                  {f.links.error500}
                 </button>
               </li>
             </ul>
           </div>
         </div>
 
+        {/* Global Multi-Language Selector Section for Crawlers & Global Users */}
+        <div className="pt-6 border-t border-slate-200/60 dark:border-zinc-800/60 space-y-3">
+          <div className="flex items-center justify-between">
+            <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 flex items-center gap-1.5">
+              <svg className="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+              </svg>
+              <span>{f.chooseLanguage}</span>
+            </h4>
+          </div>
+          <LanguageSelector variant="inline-links" />
+        </div>
+
         {/* Authentic Application Keywords Index for SEO */}
-        <div className="pt-6 border-t border-slate-200/60 dark:border-zinc-800/60 space-y-3 text-center sm:text-left">
+        <div className="pt-4 border-t border-slate-200/60 dark:border-zinc-800/60 space-y-3 text-center sm:text-left">
           <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400">
-            Related Search Terms &amp; Topics
+            {f.searchTermsHeading}
           </h4>
           <div className="flex flex-wrap justify-center sm:justify-start gap-1.5 text-[11px] text-slate-600 dark:text-zinc-300">
-            {[
-              'online screen recorder',
-              'free online screen recorder',
-              'screen recorder chrome',
-              'best free online screen recorder',
-              'free screen video recorder',
-              'record screen online',
-              'screen recorder no watermark',
-              'how to use free screen video recorder',
-              'record screen with audio',
-              'browser screen recorder',
-              'screen and camera recorder',
-              'free screen recorder download',
-              'unlimited screen recorder',
-              'mp4 screen recorder',
-              'webcam picture in picture recorder',
-              'safe screen recorder',
-            ].map((kw, i) => (
+            {f.searchTerms.map((kw, i) => (
               <span
                 key={i}
                 className="px-2.5 py-1 rounded-md bg-white dark:bg-zinc-800/90 border border-slate-200/80 dark:border-zinc-700/60 font-medium text-slate-700 dark:text-zinc-300 shadow-2xs hover:border-[#D90000]/40 transition-colors"
@@ -289,7 +290,7 @@ export const AppFooter: React.FC<AppFooterProps> = ({ onNavigate, activeView, is
         {/* Copyright & Security Disclaimer */}
         <div className="pt-4 border-t border-slate-200/50 dark:border-zinc-800/50 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-zinc-400 text-center sm:text-left">
           <p>
-            &copy; {new Date().getFullYear()} OSR Studio. All video and audio streams are processed entirely client-side.
+            &copy; {new Date().getFullYear()} {f.copyright}
           </p>
           <div className="flex flex-wrap items-center justify-center sm:justify-end gap-x-4 gap-y-1.5 text-xs">
             <a
@@ -299,7 +300,7 @@ export const AppFooter: React.FC<AppFooterProps> = ({ onNavigate, activeView, is
                 activeView === 'about' ? 'font-bold text-[#D90000] dark:text-[#FFEA93]' : ''
               }`}
             >
-              About Us
+              {f.links.about}
             </a>
             <span>&bull;</span>
             <a
@@ -309,7 +310,7 @@ export const AppFooter: React.FC<AppFooterProps> = ({ onNavigate, activeView, is
                 activeView === 'privacy' ? 'font-bold text-[#D90000] dark:text-[#FFEA93]' : ''
               }`}
             >
-              Privacy Policy
+              {f.links.privacy}
             </a>
             <span>&bull;</span>
             <a
@@ -319,7 +320,7 @@ export const AppFooter: React.FC<AppFooterProps> = ({ onNavigate, activeView, is
                 activeView === 'terms' ? 'font-bold text-[#D90000] dark:text-[#FFEA93]' : ''
               }`}
             >
-              Terms &amp; Conditions
+              {f.links.terms}
             </a>
             <span>&bull;</span>
             <a
@@ -329,7 +330,7 @@ export const AppFooter: React.FC<AppFooterProps> = ({ onNavigate, activeView, is
                 activeView === 'contact' ? 'font-bold text-[#D90000] dark:text-[#FFEA93]' : ''
               }`}
             >
-              Contact Us
+              {f.links.contact}
             </a>
           </div>
         </div>

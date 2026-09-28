@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Mic01Icon, VolumeHighIcon, Tick01Icon, Cancel01Icon } from 'hugeicons-react';
 import { AudioSettings } from '../../../types';
+import { useLanguage } from '../../../context/LanguageContext';
 
 interface MicPopoverProps {
   isOpen: boolean;
@@ -21,6 +22,7 @@ export const MicPopover: React.FC<MicPopoverProps> = ({
   onToggleMic,
   placement = 'left',
 }) => {
+  const { t } = useLanguage();
   const [audioDevices, setAudioDevices] = useState<MediaDeviceInfo[]>([]);
   const [selectedDeviceId, setSelectedDeviceId] = useState<string>('');
 
@@ -61,7 +63,7 @@ export const MicPopover: React.FC<MicPopoverProps> = ({
             <Mic01Icon className="w-4 h-4" />
           </div>
           <span className="font-bold text-xs tracking-wider uppercase text-slate-700 dark:text-zinc-200">
-            Microphone Setup
+            {t.recorder?.micOn || 'Microphone Setup'}
           </span>
         </div>
         <button
@@ -86,8 +88,8 @@ export const MicPopover: React.FC<MicPopoverProps> = ({
             />
             <span className="text-xs font-semibold text-slate-700 dark:text-zinc-200">
               {(isMicActive ?? audioSettings.includeMic)
-                ? 'Microphone Active'
-                : 'Microphone Muted'}
+                ? (t.recorder?.micOn || 'Microphone Active')
+                : (t.recorder?.micOff || 'Microphone Muted')}
             </span>
           </div>
           <button
@@ -106,7 +108,7 @@ export const MicPopover: React.FC<MicPopoverProps> = ({
                 : 'bg-orange-600 hover:bg-orange-500 text-white shadow-xs'
             }`}
           >
-            {(isMicActive ?? audioSettings.includeMic) ? 'Mute' : 'Unmute'}
+            {(isMicActive ?? audioSettings.includeMic) ? (t.recorder?.muteMic || 'Mute') : (t.recorder?.unmuteMic || 'Unmute')}
           </button>
         </div>
 

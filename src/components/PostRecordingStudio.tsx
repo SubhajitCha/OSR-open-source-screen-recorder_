@@ -24,6 +24,7 @@ import {
   downloadAsMp4,
   trimVideoClientSide,
 } from '../services/videoTrimmer';
+import { useLanguage } from '../context/LanguageContext';
 
 interface PostRecordingStudioProps {
   videoBlob: Blob;
@@ -42,6 +43,7 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
   onRecordAnother,
   onSavedToLibrary,
 }) => {
+  const { t } = useLanguage();
   const [currentBlob, setCurrentBlob] = useState<Blob>(initialBlob);
   const [currentDuration, setCurrentDuration] = useState<number>(initialDuration);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
@@ -378,7 +380,7 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
               title="Start a new recording"
             >
               <RotateLeft01Icon className="w-3.5 h-3.5 text-slate-500 dark:text-zinc-400" />
-              <span>Record Again</span>
+              <span>{t.review?.recordAgain || 'Record Again'}</span>
             </button>
 
             <button
@@ -391,7 +393,7 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
               title="Trim recording start and end"
             >
               <ScissorIcon className="w-3.5 h-3.5 text-blue-600 dark:text-emerald-400" />
-              <span>{isTrimmingMode ? 'Close Trimmer' : 'Trim'}</span>
+              <span>{isTrimmingMode ? (t.common?.close || 'Close') : (t.review?.trimVideo || 'Trim Video')}</span>
             </button>
 
             <button
@@ -408,7 +410,7 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
               ) : (
                 <FloppyDiskIcon className="w-3.5 h-3.5 text-slate-500 dark:text-zinc-400" />
               )}
-              <span>{isSaved ? 'Saved to Library' : 'Save to Library'}</span>
+              <span>{isSaved ? (t.review?.savedSuccess || 'Saved to Library') : (t.review?.saveToLibrary || 'Save to Library')}</span>
             </button>
 
             <button
@@ -418,7 +420,7 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
               title="Instant download of original WebM recording"
             >
               <Download01Icon className="w-3.5 h-3.5 stroke-[2]" />
-              <span>Download WebM</span>
+              <span>{t.review?.downloadWebm || 'Download WebM'}</span>
             </button>
 
             <button
@@ -430,7 +432,7 @@ export const PostRecordingStudio: React.FC<PostRecordingStudioProps> = ({
             >
               <Download01Icon className="w-4 h-4 stroke-[2.5]" />
               <span>
-                {isConvertingDownload ? `Converting MP4 (${downloadProgress}%)...` : 'Download MP4'}
+                {isConvertingDownload ? `${t.common?.processing || 'Converting MP4'} (${downloadProgress}%)...` : (t.review?.downloadMp4 || 'Download MP4')}
               </span>
             </button>
           </div>

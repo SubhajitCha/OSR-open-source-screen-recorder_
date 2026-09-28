@@ -9,6 +9,7 @@ import {
   File01Icon,
 } from 'hugeicons-react';
 import { ActiveView } from '../../types';
+import { useLanguage } from '../../context/LanguageContext';
 
 interface PrivacyPolicyPageProps {
   onOpenStudio: () => void;
@@ -19,6 +20,7 @@ export const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({
   onOpenStudio,
   onNavigate,
 }) => {
+  const { t } = useLanguage();
   const [storageEstimate, setStorageEstimate] = useState<string>('0 MB');
 
   useEffect(() => {

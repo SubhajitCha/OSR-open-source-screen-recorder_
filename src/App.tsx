@@ -368,7 +368,7 @@ export default function App() {
   useEffect(() => {
     const restoreSession = async () => {
       try {
-        const savedState = sessionStorage.getItem('fsr_active_state') || sessionStorage.getItem('osr_active_state');
+        const savedState = sessionStorage.getItem('fsr_active_state');
         if (savedState === 'editing' || savedState === 'review') {
           const session = await getActiveEditingSession();
           if (session && session.blob) {
@@ -1137,7 +1137,6 @@ export default function App() {
     clearActiveEditingSession();
     try {
       sessionStorage.removeItem('fsr_active_state');
-      sessionStorage.removeItem('osr_active_state');
     } catch (_) {}
     setLastRecordingData(null);
     setActiveWebcamStream(null);
@@ -1324,7 +1323,6 @@ export default function App() {
               clearActiveEditingSession();
               try {
                 sessionStorage.removeItem('fsr_active_state');
-                sessionStorage.removeItem('osr_active_state');
               } catch (_) {}
               setLastRecordingData(null);
               setActiveWebcamStream(null);
@@ -1343,7 +1341,6 @@ export default function App() {
               clearActiveEditingSession();
               try {
                 sessionStorage.removeItem('fsr_active_state');
-                sessionStorage.removeItem('osr_active_state');
               } catch (_) {}
               refreshLibraryCount();
               setActiveWebcamStream(null);

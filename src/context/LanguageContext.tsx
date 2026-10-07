@@ -30,7 +30,7 @@ function detectInitialLanguage(): LanguageCode {
     }
 
     // 2. Check local storage
-    const storedLang = localStorage.getItem('osr_language') as LanguageCode;
+    const storedLang = (localStorage.getItem('fsr_language') || localStorage.getItem('osr_language')) as LanguageCode;
     if (storedLang && SUPPORTED_LANGUAGES.some((l) => l.code === storedLang)) {
       return storedLang;
     }
@@ -118,7 +118,8 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const setLanguage = useCallback((newLang: LanguageCode, updateUrl: boolean = true) => {
     setCurrentLangState(newLang);
     try {
-      localStorage.setItem('osr_language', newLang);
+      localStorage.setItem('fsr_language', newLang);
+      localStorage.removeItem('osr_language');
 
       if (updateUrl && typeof window !== 'undefined') {
         const url = new URL(window.location.href);

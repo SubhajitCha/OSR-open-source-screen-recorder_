@@ -65,7 +65,7 @@ export const LogbookPage: React.FC<LogbookPageProps> = ({ onBackToStudio }) => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `osr_logbook_session_${new Date().toISOString().slice(0, 19).replace(/[:T]/g, '_')}.json`;
+    a.download = `fsr_logbook_session_${new Date().toISOString().slice(0, 19).replace(/[:T]/g, '_')}.json`;
     a.click();
     URL.revokeObjectURL(url);
   };

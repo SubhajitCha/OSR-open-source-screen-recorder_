@@ -22,7 +22,7 @@ export interface LogEntry {
   };
 }
 
-const SESSION_STORAGE_KEY = 'osr_runtime_logbook_v1';
+const SESSION_STORAGE_KEY = 'fsr_runtime_logbook_v1';
 const MAX_LOGS = 500;
 
 class LogbookManager {

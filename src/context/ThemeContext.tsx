@@ -14,7 +14,7 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [theme, setThemeState] = useState<Theme>(() => {
     try {
-      const saved = localStorage.getItem('osr_app_theme');
+      const saved = localStorage.getItem('fsr_app_theme') || localStorage.getItem('osr_app_theme');
       if (saved === 'dark' || saved === 'light' || saved === 'system') {
         return saved;
       }
@@ -67,7 +67,8 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme);
     try {
-      localStorage.setItem('osr_app_theme', newTheme);
+      localStorage.setItem('fsr_app_theme', newTheme);
+      localStorage.removeItem('osr_app_theme');
     } catch {
       // ignore
     }

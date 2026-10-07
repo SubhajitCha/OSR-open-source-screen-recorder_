@@ -2,12 +2,12 @@ import { TranslationDictionary } from '../types';
 
 export const de: TranslationDictionary = {
   meta: {
-    title: 'OSR — Kostenloser Online Bildschirmrekorder | Ohne Wasserzeichen & Privat',
+    title: 'FSR Studio — Kostenloser Online Bildschirmrekorder | Ohne Wasserzeichen & Privat',
     description:
       'Kostenloser Online Bildschirmrekorder mit Webcam-PIP, System-Audio-Mixing, direktem MP4-Export und Video-Zuschnitt. 100% im Browser, ohne Wasserzeichen oder Zeitlimits.',
     keywords:
       'bildschirmrekorder online, bildschirm aufnehmen kostenlos, screen recorder chrome, bildschirmaufnahme ohne wasserzeichen, bildschirm und webcam aufnehmen, bildschirm video aufnehmen kostenlos',
-    ogTitle: 'OSR — Kostenloser Online Bildschirmrekorder',
+    ogTitle: 'FSR Studio — Kostenloser Online Bildschirmrekorder',
     ogDescription:
       'Nimm deinen Bildschirm, Ton und deine Webcam direkt im Browser auf – ohne Software-Installation.',
   },
@@ -128,7 +128,7 @@ export const de: TranslationDictionary = {
     subtitle: 'Sicher im Browser IndexedDB gespeicherte Aufnahmen',
     storageUsage: 'Lokaler Speicher',
     emptyTitle: 'Noch keine Aufnahmen vorhanden',
-    emptyDesc: 'Starten Sie Ihre erste Bildschirmaufnahme mit OSR.',
+    emptyDesc: 'Starten Sie Ihre erste Bildschirmaufnahme mit FSR Studio.',
     startFirstRecording: 'Erste Aufnahme Starten',
     recordingsTag: 'Aufnahmen',
     editInStudio: 'Im Studio bearbeiten',
@@ -204,10 +204,10 @@ export const de: TranslationDictionary = {
     mainHeading:
       'Der ultimative kostenlose Online-Bildschirmrekorder für Kreative, Lehrende & Entwickler',
     introParagraph:
-      'In der heutigen digitalen Welt ist ein schneller, browserbasierter Bildschirmrekorder unerlässlich. OSR Studio läuft zu 100% nativ im Webbrowser mit WebCodecs und HTML5 Canvas, ohne dass du Installationsdateien herunterladen musst.',
+      'In der heutigen digitalen Welt ist ein schneller, browserbasierter Bildschirmrekorder unerlässlich. FSR Studio läuft zu 100% nativ im Webbrowser mit WebCodecs und HTML5 Canvas, ohne dass du Installationsdateien herunterladen musst.',
     section1Title: 'Vorteile einer browserbasierten Bildschirmaufnahme',
     section1P1:
-      'Klassische Desktop-Programme verbrauchen viel Speicherplatz und verlangen Administratorrechte. OSR öffnet sich in Sekundenschnelle in jedem modernen Browser.',
+      'Klassische Desktop-Programme verbrauchen viel Speicherplatz und verlangen Administratorrechte. FSR Studio öffnet sich in Sekundenschnelle in jedem modernen Browser.',
     section1P2:
       'Kompatibel mit Windows, macOS, Linux und Chromebooks mit voller Hardwarebeschleunigung.',
     section2Title: 'Schritt-für-Schritt: Kostenlos Bildschirm aufnehmen',
@@ -241,7 +241,7 @@ export const de: TranslationDictionary = {
       'Kombiniere Computerton und Mikrofon für optimale Sprachverständlichkeit mit aktiver Rauschfilterung.',
     section4Title: '100% Datenschutz: Lokale Verarbeitung auf deinem Gerät',
     section4Intro:
-      'OSR Studio lädt deine Aufnahmen niemals auf fremde Cloud-Server hoch:',
+      'FSR Studio lädt deine Aufnahmen niemals auf fremde Cloud-Server hoch:',
     privacyBullet1Title: 'Keine Cloud-Uploads',
     privacyBullet1Desc: 'Jedes Datenpaket verbleibt isoliert in deinem Browser-Speicher.',
     privacyBullet2Title: 'Kein Konto erforderlich',
@@ -249,12 +249,12 @@ export const de: TranslationDictionary = {
     privacyBullet3Title: 'Keine Wasserzeichen & unbegrenzte Dauer',
     privacyBullet3Desc: 'Deine Videos gehören dir – ohne störende Logos.',
     privacyBullet4Title: 'Progressive Web App (PWA)',
-    privacyBullet4Desc: 'Installiere OSR als App auf deinem Desktop – funktioniert auch offline.',
+    privacyBullet4Desc: 'Installiere FSR Studio als App auf deinem Desktop – funktioniert auch offline.',
     faqTitle: 'Häufig gestellte Fragen (FAQ)',
     faqs: [
       {
         q: 'Was ist der beste kostenlose Online-Bildschirmrekorder?',
-        a: 'OSR Studio bietet vollwertige HD/4K-Aufnahme, Bild-in-Bild-Webcam, Sound-Mixing und direkten MP4-Download direkt im Browser.',
+        a: 'FSR Studio bietet vollwertige HD/4K-Aufnahme, Bild-in-Bild-Webcam, Sound-Mixing und direkten MP4-Download direkt im Browser.',
       },
       {
         q: 'Kann ich länger als 1 Stunde aufnehmen?',
@@ -305,7 +305,7 @@ export const de: TranslationDictionary = {
       'bildschirmaufnahme ohne wasserzeichen',
       'bildschirm video aufnehmen kostenlos',
     ],
-    copyright: 'OSR Studio. Alle Audio- und Videostreams werden lokal verarbeitet.',
+    copyright: 'FSR Studio. Alle Audio- und Videostreams werden lokal verarbeitet.',
     chooseLanguage: 'Sprache wählen / Choose Language',
   },
 };

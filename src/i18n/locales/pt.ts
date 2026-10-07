@@ -2,12 +2,12 @@ import { TranslationDictionary } from '../types';
 
 export const pt: TranslationDictionary = {
   meta: {
-    title: 'OSR — Gravador de Tela Online Grátis | Sem Marca d’Água & Privado',
+    title: 'FSR Studio — Gravador de Tela Online Grátis | Sem Marca d’Água & Privado',
     description:
       'Gravador de tela online grátis com webcam PIP, mixagem de áudio do sistema, exportação instantânea para MP4 e corte de vídeo. 100% no navegador, sem marcas d’água ou limites de tempo.',
     keywords:
       'gravador de tela online, gravar tela pc gratis, gravar tela chrome, gravar tela sem marca d agua, gravar tela e camera juntos, gravar tela com audio, gravador de tela web mp4',
-    ogTitle: 'OSR — Gravador de Tela Online Grátis',
+    ogTitle: 'FSR Studio — Gravador de Tela Online Grátis',
     ogDescription:
       'Grave tela, microfone e áudio interno diretamente no seu navegador sem instalar nenhum software.',
   },
@@ -136,10 +136,10 @@ export const pt: TranslationDictionary = {
     mainHeading:
       'O Melhor Gravador de Tela Online Grátis para Criadores, Professores e Desenvolvedores',
     introParagraph:
-      'No ritmo acelerado da criação digital, ter um gravador de tela online ágil e baseado em navegador é essencial. O OSR Studio funciona 100% no navegador por meio de WebCodecs e HTML5 Canvas, sem necessidade de baixar ou instalar nada.',
+      'No ritmo acelerado da criação digital, ter um gravador de tela online ágil e baseado em navegador é essencial. O FSR Studio funciona 100% no navegador por meio de WebCodecs e HTML5 Canvas, sem necessidade de baixar ou instalar nada.',
     section1Title: 'Por que escolher um gravador no navegador em vez de programas pesados',
     section1P1:
-      'Softwares tradicionais de desktop ocupam muito espaço e exigem permissões de administrador. O OSR abre em segundos no Chrome, Edge, Firefox ou Safari.',
+      'Softwares tradicionais de desktop ocupam muito espaço e exigem permissões de administrador. O FSR Studio abre em segundos no Chrome, Edge, Firefox ou Safari.',
     section1P2:
       'Funciona com aceleração de hardware nativa no Windows, macOS, Linux e Chromebooks.',
     section2Title: 'Passo a Passo: Como gravar a tela gratuitamente',
@@ -173,7 +173,7 @@ export const pt: TranslationDictionary = {
       'Combine o áudio interno do computador com o microfone externo com redução de ruídos.',
     section4Title: 'Privacidade absoluta: Processamento 100% local',
     section4Intro:
-      'Diferente de serviços que enviam seus vídeos para servidores na nuvem, o OSR isola tudo no seu computador:',
+      'Diferente de serviços que enviam seus vídeos para servidores na nuvem, o FSR Studio isola tudo no seu computador:',
     privacyBullet1Title: 'Zero uploads na nuvem',
     privacyBullet1Desc: 'Cada segundo de áudio e vídeo é processado na memória local do navegador.',
     privacyBullet2Title: 'Sem necessidade de conta',
@@ -186,7 +186,7 @@ export const pt: TranslationDictionary = {
     faqs: [
       {
         q: 'Qual o melhor gravador de tela online grátis?',
-        a: 'O OSR Studio é uma das melhores opções: 100% no navegador, sem marcas d’água, com gravação 4K e exportação MP4.',
+        a: 'O FSR Studio é uma das melhores opções: 100% no navegador, sem marcas d’água, com gravação 4K e exportação MP4.',
       },
       {
         q: 'É possível gravar por mais de 1 hora?',
@@ -237,7 +237,7 @@ export const pt: TranslationDictionary = {
       'gravar tela sem marca d agua',
       'gravar tela e webcam',
     ],
-    copyright: 'OSR Studio. Todos os fluxos de vídeo e áudio são processados localmente.',
+    copyright: 'FSR Studio. Todos os fluxos de vídeo e áudio são processados localmente.',
     chooseLanguage: 'Escolher Idioma / Choose Language',
   },
 };

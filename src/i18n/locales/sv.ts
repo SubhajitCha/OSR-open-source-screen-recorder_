@@ -2,12 +2,12 @@ import { TranslationDictionary } from '../types';
 
 export const sv: TranslationDictionary = {
   meta: {
-    title: 'OSR — Gratis Skärminspelare Online | Utan Vattenstämpel & Privat',
+    title: 'FSR Studio — Gratis Skärminspelare Online | Utan Vattenstämpel & Privat',
     description:
       'Gratis skärminspelare online med webbkamera PIP, mixning av systemljud och mikrofon, snabb MP4-export och videoklippning. 100% i webbläsaren, utan vattenstämpel eller tidsgränser.',
     keywords:
       'skärminspelare online, spela in skärmen gratis, skärminspelning chrome, skärminspelare utan vattenstämpel, spela in skärm och kamera, spela in skärm med ljud',
-    ogTitle: 'OSR — Gratis Skärminspelare Online',
+    ogTitle: 'FSR Studio — Gratis Skärminspelare Online',
     ogDescription:
       'Spela in din datorskärm, mikrofon och webbkamera direkt i webbläsaren utan installation.',
   },
@@ -135,10 +135,10 @@ export const sv: TranslationDictionary = {
     badge: 'Komplett Guide & Teknisk Översikt',
     mainHeading: 'Den Ultimata Gratis Skärminspelaren Online för Kreatörer och Utvecklare',
     introParagraph:
-      'OSR Studio körs 100% i webbläsaren via WebCodecs och HTML5 Canvas, helt utan programvaruinstallationer.',
+      'FSR Studio körs 100% i webbläsaren via WebCodecs och HTML5 Canvas, helt utan programvaruinstallationer.',
     section1Title: 'Varför välja en webbläsarbaserad skärminspelare?',
     section1P1:
-      'Traditionella skrivbordsprogram tar stor plats och kräver administratörsbehörighet. OSR startar på sekunder i din webbläsare.',
+      'Traditionella skrivbordsprogram tar stor plats och kräver administratörsbehörighet. FSR Studio startar på sekunder i din webbläsare.',
     section1P2:
       'Fungerar smidigt på Windows, macOS, Linux och Chromebook med hårdvaruacceleration.',
     section2Title: 'Steg-för-steg: Så spelar du in skärmen gratis',
@@ -185,7 +185,7 @@ export const sv: TranslationDictionary = {
     faqs: [
       {
         q: 'Vilken är den bästa gratis skärminspelaren online?',
-        a: 'OSR Studio erbjuder 4K-inspelning, webbkamera PIP och MP4-nedladdning utan vattenstämpel.',
+        a: 'FSR Studio erbjuder 4K-inspelning, webbkamera PIP och MP4-nedladdning utan vattenstämpel.',
       },
       {
         q: 'Kan jag spela in längre än 1 timme?',
@@ -236,7 +236,7 @@ export const sv: TranslationDictionary = {
       'skärminspelare utan vattenstämpel',
       'spela in skärm med ljud',
     ],
-    copyright: 'OSR Studio. Alla ljud- och videoströmmar behandlas lokalt.',
+    copyright: 'FSR Studio. Alla ljud- och videoströmmar behandlas lokalt.',
     chooseLanguage: 'Välj Språk / Choose Language',
   },
 };

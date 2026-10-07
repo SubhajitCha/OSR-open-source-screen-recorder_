@@ -181,7 +181,7 @@ export const NotFoundPage: React.FC<NotFoundPageProps> = ({
             Need help finding a recording?
           </span>
           <p>
-            OSR Studio operates with 100% client-side privacy. If you switched browser profiles, opened an incognito session, or cleared site storage, previous recordings may not appear. Visit the{' '}
+            FSR Studio operates with 100% client-side privacy. If you switched browser profiles, opened an incognito session, or cleared site storage, previous recordings may not appear. Visit the{' '}
             <a
               href="?view=contact"
               className="text-indigo-600 dark:text-indigo-400 underline hover:no-underline font-medium"

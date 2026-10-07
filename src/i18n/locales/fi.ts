@@ -2,12 +2,12 @@ import { TranslationDictionary } from '../types';
 
 export const fi: TranslationDictionary = {
   meta: {
-    title: 'OSR — Ilmainen Näytönkaappaus Verkossa | Ei Vesileimaa & Yksityinen',
+    title: 'FSR Studio — Ilmainen Näytönkaappaus Verkossa | Ei Vesileimaa & Yksityinen',
     description:
       'Ilmainen näytönkaappausohjelma selaimessa web-kameralla (PIP), järjestelmä- ja mikrofonin äänityksellä, MP4-viennillä ja leikkauksella. 100% selaimessa ilman vesileimaa tai aikarajoja.',
     keywords:
       'näytönkaappaus verkossa, nauhoita näyttö ilmaiseksi, ruudunkaappaus chrome, näytön tallennus ilman vesileimaa, tallenna näyttö ja kamera, näytön tallennus äänellä',
-    ogTitle: 'OSR — Ilmainen Näytönkaappaus Verkossa',
+    ogTitle: 'FSR Studio — Ilmainen Näytönkaappaus Verkossa',
     ogDescription:
       'Tallenna näyttö, järjestelmän äänet ja web-kamera suoraan selaimessasi ilman asennusta.',
   },
@@ -135,10 +135,10 @@ export const fi: TranslationDictionary = {
     badge: 'Täydellinen Opas & Tekninen Yleiskatsaus',
     mainHeading: 'Paras Ilmainen Näytönkaappausohjelma Verkossa Sisällöntuottajille ja Kehittäjille',
     introParagraph:
-      'OSR Studio toimii suoraan selaimessasi WebCodecs- ja HTML5 Canvas -tekniikoiden avulla ilman ohjelmistojen lataamista.',
+      'FSR Studio toimii suoraan selaimessasi WebCodecs- ja HTML5 Canvas -tekniikoiden avulla ilman ohjelmistojen lataamista.',
     section1Title: 'Miksi valita selaimessa toimiva näytönkaappaus?',
     section1P1:
-      'Perinteiset ohjelmat vievät tilaa ja vaativat asennuksen. OSR käynnistyy sekunneissa selaimessasi.',
+      'Perinteiset ohjelmat vievät tilaa ja vaativat asennuksen. FSR Studio käynnistyy sekunneissa selaimessasi.',
     section1P2:
       'Toimii sujuvasti Windows-, macOS-, Linux- ja Chromebook-laitteilla.',
     section2Title: 'Vaiheittainen ohje: Miten nauhoittaa näyttö ilmaiseksi',
@@ -185,7 +185,7 @@ export const fi: TranslationDictionary = {
     faqs: [
       {
         q: 'Mikä on paras ilmainen näytöntallennin verkossa?',
-        a: 'OSR Studio tarjoaa 4K-nauhoituksen, web-kameran PIP-tilan ja MP4-viennin ilman vesileimaa.',
+        a: 'FSR Studio tarjoaa 4K-nauhoituksen, web-kameran PIP-tilan ja MP4-viennin ilman vesileimaa.',
       },
       {
         q: 'Voinko nauhoittaa yli 1 tunnin?',
@@ -236,7 +236,7 @@ export const fi: TranslationDictionary = {
       'näytön tallennus ilman vesileimaa',
       'näytön tallennus äänellä',
     ],
-    copyright: 'OSR Studio. Kaikki ääni- ja videovirrat käsitellään paikallisesti.',
+    copyright: 'FSR Studio. Kaikki ääni- ja videovirrat käsitellään paikallisesti.',
     chooseLanguage: 'Valitse Kieli / Choose Language',
   },
 };

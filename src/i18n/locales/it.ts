@@ -2,12 +2,12 @@ import { TranslationDictionary } from '../types';
 
 export const it: TranslationDictionary = {
   meta: {
-    title: 'OSR — Registratore Schermo Online Gratis | Senza Filigrana e Sicuro',
+    title: 'FSR Studio — Registratore Schermo Online Gratis | Senza Filigrana e Sicuro',
     description:
       'Registratore schermo online gratuito con webcam PIP, missaggio audio di sistema, esportazione rapida in MP4 e ritaglio video. 100% nel browser, senza filigrana né limiti di tempo.',
     keywords:
       'registratore schermo online, registrare schermo gratis, registrare schermo pc, cattura schermo video chrome, registrare schermo senza filigrana, registrare schermo e webcam contemporaneamente',
-    ogTitle: 'OSR — Registratore Schermo Online Gratis',
+    ogTitle: 'FSR Studio — Registratore Schermo Online Gratis',
     ogDescription:
       'Registra schermo, audio interno e webcam direttamente nel tuo browser web senza scaricare programmi.',
   },
@@ -128,7 +128,7 @@ export const it: TranslationDictionary = {
     subtitle: 'Registrazioni salvate in modo sicuro nel browser IndexedDB',
     storageUsage: 'Archiviazione Locale',
     emptyTitle: 'Nessuna registrazione salvata',
-    emptyDesc: 'Inizia la tua prima registrazione di schermo con OSR.',
+    emptyDesc: 'Inizia la tua prima registrazione di schermo con FSR Studio.',
     startFirstRecording: 'Prima Registrazione',
     recordingsTag: 'registrazioni',
     editInStudio: 'Modifica in Studio',
@@ -204,10 +204,10 @@ export const it: TranslationDictionary = {
     mainHeading:
       'Il Miglior Registratore Schermo Online Gratis per Creator, Insegnanti e Sviluppatori',
     introParagraph:
-      'Nel mondo digitale moderno, avere a disposizione un registratore schermo online veloce e utilizzabile direttamente nel browser è fondamentale. OSR Studio funziona completamente nel tuo browser tramite WebCodecs e HTML5 Canvas, senza installare alcun programma.',
+      'Nel mondo digitale moderno, avere a disposizione un registratore schermo online veloce e utilizzabile direttamente nel browser è fondamentale. FSR Studio funziona completamente nel tuo browser tramite WebCodecs e HTML5 Canvas, senza installare alcun programma.',
     section1Title: 'Perché scegliere un registratore online anziché un software pesante',
     section1P1:
-      'I classici software desktop consumano memoria e richiedono frequenti aggiornamenti. OSR si apre in pochi secondi su Chrome, Safari, Firefox o Edge.',
+      'I classici software desktop consumano memoria e richiedono frequenti aggiornamenti. FSR Studio si apre in pochi secondi su Chrome, Safari, Firefox o Edge.',
     section1P2:
       'Compatibile con Windows, macOS, Linux e Chromebook con accelerazione hardware nativa.',
     section2Title: 'Guida Passo Passo: Come registrare lo schermo gratis',
@@ -241,7 +241,7 @@ export const it: TranslationDictionary = {
       'Combina l’audio interno del computer e la tua voce con soppressione del rumore.',
     section4Title: 'Privacy assoluta: Elaborazione al 100% sul tuo dispositivo',
     section4Intro:
-      'A differenza dei servizi cloud che caricano i tuoi video su server remoti, OSR Studio garantisce massima riservatezza:',
+      'A differenza dei servizi cloud che caricano i tuoi video su server remoti, FSR Studio garantisce massima riservatezza:',
     privacyBullet1Title: 'Nessun caricamento cloud',
     privacyBullet1Desc: 'Tutti i dati rimangono isolati nella memoria del tuo browser.',
     privacyBullet2Title: 'Nessun account necessario',
@@ -254,7 +254,7 @@ export const it: TranslationDictionary = {
     faqs: [
       {
         q: 'Qual è il miglior registratore schermo online gratis?',
-        a: 'OSR Studio offre registrazione 4K, webcam picture-in-picture, audio di sistema ed export MP4 senza installazione.',
+        a: 'FSR Studio offre registrazione 4K, webcam picture-in-picture, audio di sistema ed export MP4 senza installazione.',
       },
       {
         q: 'Si può registrare per più di un’ora?',
@@ -305,7 +305,7 @@ export const it: TranslationDictionary = {
       'registrare schermo senza filigrana',
       'registrare schermo pc gratis',
     ],
-    copyright: 'OSR Studio. Tutti i flussi video e audio sono elaborati in locale.',
+    copyright: 'FSR Studio. Tutti i flussi video e audio sono elaborati in locale.',
     chooseLanguage: 'Seleziona Lingua / Choose Language',
   },
 };

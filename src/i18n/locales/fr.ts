@@ -2,12 +2,12 @@ import { TranslationDictionary } from '../types';
 
 export const fr: TranslationDictionary = {
   meta: {
-    title: "OSR — Enregistreur d'Écran Gratuit en Ligne | Sans Filigrane & Privé",
+    title: "FSR Studio — Enregistreur d'Écran Gratuit en Ligne | Sans Filigrane & Privé",
     description:
       "Enregistreur d'écran en ligne gratuit avec webcam incrustée (PIP), mixage audio système & micro, export MP4 instantané et découpage vidéo. 100% dans le navigateur, sans filigrane ni limite.",
     keywords:
       "enregistreur d'ecran en ligne, capturer ecran gratuit, enregistrer ecran chrome, enregistrer ecran sans filigrane, enregistrer ecran et webcam, capture video ecran pc, enregistrer ecran avec son",
-    ogTitle: "OSR — Enregistreur d'Écran Gratuit en Ligne",
+    ogTitle: "FSR Studio — Enregistreur d'Écran Gratuit en Ligne",
     ogDescription:
       "Capturez votre écran, son système et webcam directement dans votre navigateur web sans installer de logiciel.",
   },
@@ -128,7 +128,7 @@ export const fr: TranslationDictionary = {
     subtitle: 'Enregistrements hors ligne enregistrés en sécurité dans le navigateur IndexedDB',
     storageUsage: 'Stockage Local',
     emptyTitle: 'Aucun enregistrement sauvegardé',
-    emptyDesc: 'Commencez votre premier enregistrement avec OSR.',
+    emptyDesc: 'Commencez votre premier enregistrement avec FSR Studio.',
     startFirstRecording: 'Premier Enregistrement',
     recordingsTag: 'enregistrements',
     editInStudio: 'Éditer dans le Studio',
@@ -203,10 +203,10 @@ export const fr: TranslationDictionary = {
     badge: 'Guide Complet & Présentation Technique',
     mainHeading: "L'Enregistreur d'Écran en Ligne Gratuit Ultime pour Créateurs et Développeurs",
     introParagraph:
-      "Dans l'environnement numérique moderne, un outil d'enregistrement d'écran rapide et fonctionnant directement dans le navigateur est indispensable. OSR Studio s'exécute entièrement dans votre navigateur grâce à MediaStream, WebCodecs et HTML5 Canvas, sans installer de logiciel lourd.",
+      "Dans l'environnement numérique moderne, un outil d'enregistrement d'écran rapide et fonctionnant directement dans le navigateur est indispensable. FSR Studio s'exécute entièrement dans votre navigateur grâce à MediaStream, WebCodecs et HTML5 Canvas, sans installer de logiciel lourd.",
     section1Title: "Pourquoi choisir un enregistreur web plutôt qu'un logiciel lourd",
     section1P1:
-      "Les logiciels de bureau traditionnels consomment des ressources considérables et nécessitent des mises à jour constantes. OSR se lance en quelques secondes dans Chrome, Firefox ou Edge.",
+      "Les logiciels de bureau traditionnels consomment des ressources considérables et nécessitent des mises à jour constantes. FSR Studio se lance en quelques secondes dans Chrome, Firefox ou Edge.",
     section1P2:
       'Il fonctionne de manière fluide sur Windows, macOS, Linux et Chromebook grâce à l’accélération matérielle native.',
     section2Title: "Guide étape par étape : Comment enregistrer son écran gratuitement",
@@ -240,7 +240,7 @@ export const fr: TranslationDictionary = {
       'Le moteur audio combine le son interne de votre PC avec votre microphone externe avec réduction de bruit active.',
     section4Title: 'Confidentialité sans compromis : 100% côté client',
     section4Intro:
-      "Contrairement à d'autres outils qui envoient vos vidéos sur des serveurs distants, OSR garantit une confidentialité totale :",
+      "Contrairement à d'autres outils qui envoient vos vidéos sur des serveurs distants, FSR Studio garantit une confidentialité totale :",
     privacyBullet1Title: 'Zéro upload dans le cloud',
     privacyBullet1Desc: "Toutes vos données restent confinées dans la mémoire locale de votre navigateur.",
     privacyBullet2Title: 'Aucun compte requis',
@@ -248,12 +248,12 @@ export const fr: TranslationDictionary = {
     privacyBullet3Title: 'Sans filigrane & durée illimitée',
     privacyBullet3Desc: 'Vos vidéos restent nettes et sans logo commercial imposé.',
     privacyBullet4Title: 'Application Web Progressive (PWA)',
-    privacyBullet4Desc: 'Installez OSR comme application de bureau accessible même hors ligne.',
+    privacyBullet4Desc: 'Installez FSR Studio comme application de bureau accessible même hors ligne.',
     faqTitle: "Foire Aux Questions (FAQ)",
     faqs: [
       {
         q: "Quel est le meilleur enregistreur d'écran en ligne gratuit ?",
-        a: "OSR Studio est l'une des meilleures solutions gratuites : 100% dans le navigateur, sans filigrane, avec export MP4 et incrustation webcam.",
+        a: "FSR Studio est l'une des meilleures solutions gratuites : 100% dans le navigateur, sans filigrane, avec export MP4 et incrustation webcam.",
       },
       {
         q: "Peut-on enregistrer l'écran pendant plus d'une heure ?",
@@ -305,7 +305,7 @@ export const fr: TranslationDictionary = {
       'capture ecran video pc',
       'enregistrer ecran et webcam',
     ],
-    copyright: 'OSR Studio. Tous les flux sont traités exclusivement côté client.',
+    copyright: 'FSR Studio. Tous les flux sont traités exclusivement côté client.',
     chooseLanguage: 'Choisir la langue / Select Language',
   },
 };

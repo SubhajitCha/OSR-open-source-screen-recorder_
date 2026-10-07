@@ -2,12 +2,12 @@ import { TranslationDictionary } from '../types';
 
 export const ja: TranslationDictionary = {
   meta: {
-    title: 'OSR — 無料オンライン画面録画ツール | 透かしなし・高プライバシー・インストール不要',
+    title: 'FSR Studio — 無料オンライン画面録画ツール | 透かしなし・高プライバシー・インストール不要',
     description:
       'WebカメラPIP、PC内部音声とマイクの同時録音、即時MP4書き出し、動画トリミングに対応した高機能な無料オンライン画面録画ツール。ブラウザ上で100%動作、透かしなし、時間無制限、クラウド送信ゼロ。',
     keywords:
       '画面録画 オンライン, 無料 画面録画, スクリーンレコーダー Chrome, 透かしなし 画面録画, 画面 キャプチャ ブラウザ, 画面とカメラ 同時録画, PC 画面録画 無料, MP4 画面録画',
-    ogTitle: 'OSR — 無料オンライン画面録画ツール | 透かしなし',
+    ogTitle: 'FSR Studio — 無料オンライン画面録画ツール | 透かしなし',
     ogDescription:
       'ソフトウェアのインストール不要！ブラウザだけで画面、マイク、PC内部音声を高画質録画。',
   },
@@ -203,10 +203,10 @@ export const ja: TranslationDictionary = {
     badge: '完全ガイド＆技術概要',
     mainHeading: 'クリエイター・教育者・エンジニアのための最高峰無料オンライン画面録画ツール',
     introParagraph:
-      '現代のデジタルワークにおいて、ブラウザ上で素早く起動できる画面録画ツールは欠かせません。従来のソフトのような重いインストールや不要な常駐ソフトは不要。OSR StudioはWebCodecsとHTML5 Canvasを駆使し、ブラウザ完結で高精細な1080p・4K録画とMP4書き出しを実現します。',
+      '現代のデジタルワークにおいて、ブラウザ上で素早く起動できる画面録画ツールは欠かせません。従来のソフトのような重いインストールや不要な常駐ソフトは不要。FSR StudioはWebCodecsとHTML5 Canvasを駆使し、ブラウザ完結で高精細な1080p・4K録画とMP4書き出しを実現します。',
     section1Title: 'なぜデスクトップソフトではなくブラウザ録画ツールなのか',
     section1P1:
-      '一般的な録画ソフトはPC容量を圧迫し、管理者権限も必要です。OSRならブラウザを開いて数秒でバグ再現やデモ動画の収録を始められます。',
+      '一般的な録画ソフトはPC容量を圧迫し、管理者権限も必要です。FSR Studioならブラウザを開いて数秒でバグ再現やデモ動画の収録を始められます。',
     section1P2:
       'Windows、Mac、Linux、Chromebookのすべてでハードウェアアクセラレーションを活用し軽快に動作します。',
     section2Title: '使い方：簡単4ステップで無料画面録画',
@@ -253,7 +253,7 @@ export const ja: TranslationDictionary = {
     faqs: [
       {
         q: '無料で一番おすすめのオンライン画面録画ツールは？',
-        a: 'OSR Studioは完全無料・透かしなし・4K対応・MP4即時書き出しを備えたおすすめのツールです。',
+        a: 'FSR Studioは完全無料・透かしなし・4K対応・MP4即時書き出しを備えたおすすめのツールです。',
       },
       {
         q: '1時間以上の長時間録画は可能ですか？',
@@ -305,7 +305,7 @@ export const ja: TranslationDictionary = {
       'PC 画面録画 無料',
       '画面とカメラ 同時録画',
     ],
-    copyright: 'OSR Studio. すべての映像および音声ストリームはローカルで処理されます。',
+    copyright: 'FSR Studio. すべての映像および音声ストリームはローカルで処理されます。',
     chooseLanguage: '言語を選択 / Choose Language',
   },
 };

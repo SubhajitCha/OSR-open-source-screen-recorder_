@@ -2,12 +2,12 @@ import { TranslationDictionary } from '../types';
 
 export const ko: TranslationDictionary = {
   meta: {
-    title: 'OSR — 무료 온라인 화면 녹화기 | 워터마크 없음 & 완벽한 개인정보 보호',
+    title: 'FSR Studio — 무료 온라인 화면 녹화기 | 워터마크 없음 & 완벽한 개인정보 보호',
     description:
       '웹캠 PIP, 시스템 오디오 믹싱, 즉각적인 MP4 내보내기 및 비디오 트리밍을 지원하는 강력한 무료 온라인 화면 녹화 도구. 브라우저에서 100% 작동, 워터마크 없음, 무제한 녹화 시간, 클라우드 업로드 제로.',
     keywords:
       '온라인 화면 녹화, 무료 화면 녹화, 크롬 화면 녹화, 워터마크 없는 화면 녹화 프로그램, 컴퓨터 화면 녹화, 웹캠 동시 녹화, 브라우저 화면 캡처, MP4 녹화',
-    ogTitle: 'OSR — 무료 온라인 화면 녹화기 | 워터마크 없음',
+    ogTitle: 'FSR Studio — 무료 온라인 화면 녹화기 | 워터마크 없음',
     ogDescription:
       '프로그램 설치 없이 브라우저에서 화면, 시스템 소리, 웹캠을 고화질로 바로 녹화하세요.',
   },
@@ -128,7 +128,7 @@ export const ko: TranslationDictionary = {
     subtitle: '브라우저 IndexedDB에 안전하게 오프라인 저장된 비디오',
     storageUsage: '로컬 저장소',
     emptyTitle: '저장된 녹화가 없습니다',
-    emptyDesc: 'OSR로 첫 화면 녹화를 시작해보세요.',
+    emptyDesc: 'FSR Studio로 첫 화면 녹화를 시작해보세요.',
     startFirstRecording: '첫 녹화 시작하기',
     recordingsTag: '개 비디오',
     editInStudio: '스튜디오에서 편집',
@@ -203,10 +203,10 @@ export const ko: TranslationDictionary = {
     badge: '완벽 가이드 & 기술 개요',
     mainHeading: '크리에이터, 교육자, 개발자를 위한 최고의 무료 온라인 화면 녹화기',
     introParagraph:
-      '바쁜 디지털 작업 환경에서 별도 프로그램 설치 없이 브라우저에서 바로 실행되는 녹화 도구는 필수입니다. OSR Studio는 WebCodecs와 HTML5 Canvas 기술을 기반으로 100% 브라우저 내에서 안전하게 구동됩니다.',
+      '바쁜 디지털 작업 환경에서 별도 프로그램 설치 없이 브라우저에서 바로 실행되는 녹화 도구는 필수입니다. FSR Studio는 WebCodecs와 HTML5 Canvas 기술을 기반으로 100% 브라우저 내에서 안전하게 구동됩니다.',
     section1Title: '왜 설치형 프로그램 대신 웹 브라우저 녹화기를 선택해야 할까요?',
     section1P1:
-      '기존 PC 녹화 프로그램은 용량이 크고 설치 및 관리자 권한이 필요합니다. OSR은 브라우저를 열고 클릭 몇 번으로 즉시 녹화를 시작할 수 있습니다.',
+      '기존 PC 녹화 프로그램은 용량이 크고 설치 및 관리자 권한이 필요합니다. FSR Studio은 브라우저를 열고 클릭 몇 번으로 즉시 녹화를 시작할 수 있습니다.',
     section1P2:
       'Windows, Mac, Linux, 크롬북 어디서나 하드웨어 가속으로 매끄럽게 동작합니다.',
     section2Title: '무료 화면 녹화 4단계 가이드',
@@ -253,7 +253,7 @@ export const ko: TranslationDictionary = {
     faqs: [
       {
         q: '가장 좋은 무료 온라인 화면 녹화 프로그램은 무엇인가요?',
-        a: 'OSR Studio는 완전 무료, 워터마크 없음, 4K 지원, MP4 즉시 저장을 제공하는 최고의 브라우저 녹화 도구입니다.',
+        a: 'FSR Studio는 완전 무료, 워터마크 없음, 4K 지원, MP4 즉시 저장을 제공하는 최고의 브라우저 녹화 도구입니다.',
       },
       {
         q: '1시간 이상 연속 녹화가 가능한가요?',
@@ -305,7 +305,7 @@ export const ko: TranslationDictionary = {
       '컴퓨터 화면 캡처',
       '웹캠 화면 동시 녹화',
     ],
-    copyright: 'OSR Studio. 모든 영상 및 음성 스트림은 로컬에서 처리됩니다.',
+    copyright: 'FSR Studio. 모든 영상 및 음성 스트림은 로컬에서 처리됩니다.',
     chooseLanguage: '언어 선택 / Choose Language',
   },
 };

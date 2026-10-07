@@ -248,7 +248,7 @@ export const RecordingCanvas: React.FC<RecordingCanvasProps> = ({
 
         // Check Chrome Capture Handle API
         const handle = (track as any).getCaptureHandle?.();
-        const selfDetected = handle?.handle === 'osr-recorder';
+        const selfDetected = handle?.handle === 'fsr-recorder';
         setIsSelfCapture(selfDetected);
       }
     } else {

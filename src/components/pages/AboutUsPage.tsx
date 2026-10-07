@@ -56,14 +56,14 @@ export const AboutUsPage: React.FC<AboutUsPageProps> = ({
           <SparklesIcon className="w-6 h-6" />
         </div>
         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
-          About OSR Studio
+          About FSR Studio
         </h1>
         <p className="text-base sm:text-lg text-slate-600 dark:text-zinc-400 leading-relaxed max-w-3xl">
-          OSR Studio was created with a clear objective: to build the fastest, most private, and most capable screen recording studio right inside the modern web browser—with zero installation, zero cloud uploads, and zero paywalls.
+          FSR Studio was created with a clear objective: to build the fastest, most private, and most capable screen recording studio right inside the modern web browser—with zero installation, zero cloud uploads, and zero paywalls.
         </p>
       </header>
 
-      {/* Why We Built OSR Studio Card */}
+      {/* Why We Built FSR Studio Card */}
       <div className="bg-white dark:bg-zinc-900/80 rounded-3xl border border-slate-200 dark:border-zinc-800 p-6 sm:p-8 shadow-xs space-y-6">
         <div className="space-y-2">
           <span className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 font-mono">
@@ -79,7 +79,7 @@ export const AboutUsPage: React.FC<AboutUsPageProps> = ({
         </p>
 
         <p className="text-sm sm:text-base leading-relaxed text-slate-700 dark:text-zinc-300">
-          We believed web standards had matured to a point where a desktop-class recorder could live entirely inside the browser. Powered by HTML5 Canvas, Web Audio DSP mixing, MediaStream capture, and WebCodecs, <strong>OSR Studio</strong> runs locally in any modern browser without sacrificing performance or privacy.
+          We believed web standards had matured to a point where a desktop-class recorder could live entirely inside the browser. Powered by HTML5 Canvas, Web Audio DSP mixing, MediaStream capture, and WebCodecs, <strong>FSR Studio</strong> runs locally in any modern browser without sacrificing performance or privacy.
         </p>
       </div>
 
@@ -149,7 +149,7 @@ export const AboutUsPage: React.FC<AboutUsPageProps> = ({
         </div>
       </div>
 
-      {/* Who Uses OSR Studio */}
+      {/* Who Uses FSR Studio */}
       <div className="space-y-6">
         <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
           Built for Creators, Engineers &amp; Educators
@@ -189,7 +189,7 @@ export const AboutUsPage: React.FC<AboutUsPageProps> = ({
           Powered by Pure Native Web Technologies
         </h2>
         <p className="text-sm text-zinc-400 leading-relaxed max-w-2xl">
-          OSR Studio is crafted with TypeScript, React 18, Tailwind CSS, HTML5 Canvas, Web Audio API, and IndexedDB. We actively contribute our architecture findings back to the open web developer ecosystem.
+          FSR Studio is crafted with TypeScript, React 18, Tailwind CSS, HTML5 Canvas, Web Audio API, and IndexedDB. We actively contribute our architecture findings back to the open web developer ecosystem.
         </p>
         <div className="pt-2 flex flex-wrap gap-2 text-xs font-mono">
           <span className="px-2.5 py-1 rounded-lg bg-zinc-900 text-zinc-300 border border-zinc-800">MediaStream API</span>

@@ -2,12 +2,12 @@ import { TranslationDictionary } from '../types';
 
 export const es: TranslationDictionary = {
   meta: {
-    title: 'OSR — Grabador de Pantalla Online Gratis | Sin Marca de Agua y Privado',
+    title: 'FSR Studio — Grabador de Pantalla Online Gratis | Sin Marca de Agua y Privado',
     description:
       'Grabador de pantalla online gratis con cámara web PIP, mezcla de audio del sistema, exportación instantánea en MP4 y recorte de video. 100% en el navegador, sin marcas de agua ni límite de tiempo.',
     keywords:
       'grabador de pantalla online, grabar pantalla gratis, grabador de pantalla chrome, grabar pantalla sin marca de agua, grabar pantalla y camara a la vez, capturador de pantalla online, grabar pantalla con audio, grabar pantalla pc online',
-    ogTitle: 'OSR — Grabador de Pantalla Online Gratis | Sin Marcas de Agua',
+    ogTitle: 'FSR Studio — Grabador de Pantalla Online Gratis | Sin Marcas de Agua',
     ogDescription:
       'Herramienta gratuita para grabar pantalla, audio interno y cámara web directamente desde tu navegador sin instalar programas.',
   },
@@ -128,7 +128,7 @@ export const es: TranslationDictionary = {
     subtitle: 'Grabaciones guardadas de forma segura en el navegador IndexedDB',
     storageUsage: 'Almacenamiento Local',
     emptyTitle: 'No hay grabaciones guardadas',
-    emptyDesc: 'Comienza tu primera grabación con OSR.',
+    emptyDesc: 'Comienza tu primera grabación con FSR Studio.',
     startFirstRecording: 'Iniciar Grabación',
     recordingsTag: 'grabaciones',
     editInStudio: 'Editar en Estudio',
@@ -204,10 +204,10 @@ export const es: TranslationDictionary = {
     mainHeading:
       'El Mejor Grabador de Pantalla Online Gratis para Creadores, Docentes y Desarrolladores',
     introParagraph:
-      'En el dinámico entorno digital actual, contar con un grabador de pantalla en línea rápido y basado en navegador es fundamental. OSR Studio opera completamente en tu navegador web mediante MediaStream, WebCodecs y Canvas de HTML5. Sin instalar ningún ejecutable, puedes grabar en 1080p y 4K, capturar el audio del sistema y del micrófono, superponer tu cámara web y exportar directamente en MP4 universal sin marcas de agua ni límites de duración.',
+      'En el dinámico entorno digital actual, contar con un grabador de pantalla en línea rápido y basado en navegador es fundamental. FSR Studio opera completamente en tu navegador web mediante MediaStream, WebCodecs y Canvas de HTML5. Sin instalar ningún ejecutable, puedes grabar en 1080p y 4K, capturar el audio del sistema y del micrófono, superponer tu cámara web y exportar directamente en MP4 universal sin marcas de agua ni límites de duración.',
     section1Title: 'Por qué elegir un grabador de pantalla en navegador web',
     section1P1:
-      'Las aplicaciones tradicionales de escritorio consumen gran cantidad de recursos, requieren privilegios de administrador y ralentizan tu ordenador. OSR se inicia en pocos segundos directamente desde tu navegador.',
+      'Las aplicaciones tradicionales de escritorio consumen gran cantidad de recursos, requieren privilegios de administrador y ralentizan tu ordenador. FSR Studio se inicia en pocos segundos directamente desde tu navegador.',
     section1P2:
       'Funciona de manera fluida en Windows, macOS, Linux y Chromebook con aceleración de hardware nativa.',
     section2Title: 'Paso a Paso: Cómo usar el grabador de pantalla gratis',
@@ -241,7 +241,7 @@ export const es: TranslationDictionary = {
       'Mezcla sonido interno del sistema con tu micrófono externo con balance perfecto y cancelación de ruido.',
     section4Title: 'Privacidad absoluta: Procesamiento 100% en el cliente',
     section4Intro:
-      'A diferencia de otros servicios en la nube que suben tus grabaciones a servidores remotos, OSR Studio garantiza máxima privacidad:',
+      'A diferencia de otros servicios en la nube que suben tus grabaciones a servidores remotos, FSR Studio garantiza máxima privacidad:',
     privacyBullet1Title: 'Cero subidas a la nube',
     privacyBullet1Desc: 'Cada segundo de video se procesa únicamente en la memoria local de tu navegador.',
     privacyBullet2Title: 'Sin necesidad de cuenta',
@@ -254,7 +254,7 @@ export const es: TranslationDictionary = {
     faqs: [
       {
         q: '¿Cuál es el mejor grabador de pantalla online gratis?',
-        a: 'OSR Studio es una de las mejores opciones gratuitas. Funciona al 100% en tu navegador, sin software adicional, sin marcas de agua y con exportación directa en MP4.',
+        a: 'FSR Studio es una de las mejores opciones gratuitas. Funciona al 100% en tu navegador, sin software adicional, sin marcas de agua y con exportación directa en MP4.',
       },
       {
         q: '¿Se puede grabar la pantalla durante más de 1 hora?',
@@ -308,7 +308,7 @@ export const es: TranslationDictionary = {
       'capturar pantalla con audio',
       'grabar pantalla online mp4',
     ],
-    copyright: 'OSR Studio. Todos los flujos de audio y video se procesan localmente.',
+    copyright: 'FSR Studio. Todos los flujos de audio y video se procesan localmente.',
     chooseLanguage: 'Elegir Idioma / Choose Language',
   },
 };

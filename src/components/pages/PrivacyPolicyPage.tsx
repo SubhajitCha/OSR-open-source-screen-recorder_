@@ -67,7 +67,7 @@ export const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({
           Privacy Policy
         </h1>
         <p className="text-base sm:text-lg text-slate-600 dark:text-zinc-400 leading-relaxed max-w-3xl">
-          At <strong>OSR Studio</strong> (Open Source Screen Recorder), privacy is not an afterthought or a compliance checkbox—it is the foundational architectural pillar of our platform. We believe that what happens on your screen, in your microphone, and in your webcam belongs entirely to you.
+          At <strong>FSR Studio</strong> (Free Screen Record Studio), privacy is not an afterthought or a compliance checkbox—it is the foundational architectural pillar of our platform. We believe that what happens on your screen, in your microphone, and in your webcam belongs entirely to you.
         </p>
       </header>
 
@@ -122,7 +122,7 @@ export const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({
             The 100% In-Browser Execution Guarantee
           </h2>
           <p>
-            Unlike conventional screen recording services that transmit your video chunks to remote cloud clusters for encoding and storage, OSR Studio operates <strong>exclusively inside your client browser environment</strong>.
+            Unlike conventional screen recording services that transmit your video chunks to remote cloud clusters for encoding and storage, FSR Studio operates <strong>exclusively inside your client browser environment</strong>.
           </p>
           <p>
             All video encoding, audio DSP mixing, canvas compositing, frame inspection, and video trimming are performed locally on your computer’s CPU and GPU via W3C WebCodecs and MediaStream APIs. No video files, audio streams, or screenshots ever touch an external server or cloud bucket.
@@ -167,7 +167,7 @@ export const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({
             <li>You can download or export your recordings at any time.</li>
             <li>You can delete individual recordings or clear your entire library with a single click.</li>
             <li>Clearing your browser cache or site data automatically purges all locally stored recordings.</li>
-            <li>OSR Studio developers and operators have zero technical ability to access, inspect, or restore your locally stored files.</li>
+            <li>FSR Studio developers and operators have zero technical ability to access, inspect, or restore your locally stored files.</li>
           </ul>
         </section>
 
@@ -178,7 +178,7 @@ export const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({
             Zero Cookies, Tracking Pixels &amp; Third-Party Ad Networks
           </h2>
           <p>
-            OSR Studio does not deploy tracking cookies, advertising pixels, user fingerprinting scripts, or cross-site tracking beacons. We do not sell, rent, monetize, or trade any user metadata or device profiles with data brokers or advertising networks.
+            FSR Studio does not deploy tracking cookies, advertising pixels, user fingerprinting scripts, or cross-site tracking beacons. We do not sell, rent, monetize, or trade any user metadata or device profiles with data brokers or advertising networks.
           </p>
           <p>
             Any application preferences you configure (such as dark/light theme preference, webcam bubble shape, and default recording resolution) are saved strictly in your browser&apos;s <code>localStorage</code>.

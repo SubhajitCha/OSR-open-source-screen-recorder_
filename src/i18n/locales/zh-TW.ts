@@ -2,12 +2,12 @@ import { TranslationDictionary } from '../types';
 
 export const zhTW: TranslationDictionary = {
   meta: {
-    title: 'OSR — 免費線上螢幕錄影工具 | 無浮水印、高隱私、免安裝',
+    title: 'FSR Studio — 免費線上螢幕錄影工具 | 無浮水印、高隱私、免安裝',
     description:
       '功能強大的免費線上螢幕錄影工具，支援視訊鏡頭子母畫面、系統音訊與麥克風混音、即時 MP4 匯出與線上剪輯。100% 純瀏覽器運作，無浮水印、無時長限制、零雲端上傳。',
     keywords:
       '線上螢幕錄影, 免費螢幕錄影, Chrome錄影, 瀏覽器螢幕錄影, 無浮水印錄影, 螢幕視訊鏡頭同時錄製, 免安裝螢幕錄影, MP4錄影工具',
-    ogTitle: 'OSR — 免費線上螢幕錄影神器 | 隱私安全、無浮水印',
+    ogTitle: 'FSR Studio — 免費線上螢幕錄影神器 | 隱私安全、無浮水印',
     ogDescription:
       '純瀏覽器端運作的免安裝螢幕錄製神器，支援系統音訊、子母畫面視訊鏡頭與即時 MP4 下載。',
   },
@@ -203,10 +203,10 @@ export const zhTW: TranslationDictionary = {
     badge: '完整指南與技術解析',
     mainHeading: '專為創作者、教育工作者與開發者打造的免費線上螢幕錄影工具',
     introParagraph:
-      '在當今快節奏的數位創作時代，擁有一個敏捷、基於瀏覽器的線上螢幕錄影工具至關重要。傳統桌面錄影軟體往往需要下載肥大的安裝包、強制更新甚至昂貴的訂閱費用。OSR 螢幕錄影工具直接在現代瀏覽器中運作，運用 MediaStream、WebCodecs 及 HTML5 Canvas 技術，無需安裝任何軟體即可錄製 1080p 與 4K 畫面，同步擷取系統音訊與麥克風，支援子母畫面視訊鏡頭與即時 MP4 匯出。',
+      '在當今快節奏的數位創作時代，擁有一個敏捷、基於瀏覽器的線上螢幕錄影工具至關重要。傳統桌面錄影軟體往往需要下載肥大的安裝包、強制更新甚至昂貴的訂閱費用。FSR Studio 螢幕錄影工具直接在現代瀏覽器中運作，運用 MediaStream、WebCodecs 及 HTML5 Canvas 技術，無需安裝任何軟體即可錄製 1080p 與 4K 畫面，同步擷取系統音訊與麥克風，支援子母畫面視訊鏡頭與即時 MP4 匯出。',
     section1Title: '為何選擇免安裝的瀏覽器線上螢幕錄影工具',
     section1P1:
-      '傳統桌面螢幕擷取程式佔用大量硬碟空間與背景程序。當您需要快速重現軟體錯誤、向團隊展示新功能或錄製線上課程時，在瀏覽器中開啟 OSR 數秒即可開錄。',
+      '傳統桌面螢幕擷取程式佔用大量硬碟空間與背景程序。當您需要快速重現軟體錯誤、向團隊展示新功能或錄製線上課程時，在瀏覽器中開啟 FSR Studio 數秒即可開錄。',
     section1P2:
       '我們的應用程式透過標準 Web API 在本機硬體加速運作，完美相容 Windows、macOS、Linux 與 Chromebook，免除跨平台相容性的煩惱。',
     section2Title: '操作步驟：如何使用免費螢幕錄影工具',
@@ -235,12 +235,12 @@ export const zhTW: TranslationDictionary = {
     ],
     section3Title: '進階功能：子母畫面、雙聲道混音與 MP4 即時編碼',
     section3P1:
-      'OSR 專為高質感簡報打造。您可以自由將視訊鏡頭放置在角落，隨時切換圓形或方角，並自訂畫布邊框背景。',
+      'FSR Studio 專為高質感簡報打造。您可以自由將視訊鏡頭放置在角落，隨時切換圓形或方角，並自訂畫布邊框背景。',
     section3P2:
       '多聲道音訊混音引擎結合系統內錄音與外接麥克風，具備即時音量可視化與智慧降噪功能。',
     section4Title: '嚴格隱私防護：100% 客戶端本機處理',
     section4Intro:
-      '市面上多數線上錄影服務會將影片上傳至雲端伺服器。OSR 採用嚴格的本機端沙箱隔離：',
+      '市面上多數線上錄影服務會將影片上傳至雲端伺服器。FSR Studio 採用嚴格的本機端沙箱隔離：',
     privacyBullet1Title: '零雲端上傳',
     privacyBullet1Desc: '所有影音檔案皆在您的瀏覽器記憶體與本機 IndexedDB 中處理，絕不外流。',
     privacyBullet2Title: '免註冊帳號',
@@ -253,7 +253,7 @@ export const zhTW: TranslationDictionary = {
     faqs: [
       {
         q: '最推薦的免費線上螢幕錄影工具是什麼？',
-        a: 'OSR 是極佳的免費線上螢幕錄影工具，100% 於瀏覽器內執行，免下載軟體、無浮水印，支援 4K 錄製、子母畫面視訊鏡頭、雙聲道混音與快速 MP4 下載。',
+        a: 'FSR Studio 是極佳的免費線上螢幕錄影工具，100% 於瀏覽器內執行，免下載軟體、無浮水印，支援 4K 錄製、子母畫面視訊鏡頭、雙聲道混音與快速 MP4 下載。',
       },
       {
         q: '錄影有時間限制嗎？可以錄超過 1 小時嗎？',
@@ -307,7 +307,7 @@ export const zhTW: TranslationDictionary = {
       '電腦錄音錄影',
       'MP4螢幕錄影',
     ],
-    copyright: 'OSR Studio. 所有的音訊與視訊皆在使用者本機端即時處理。',
+    copyright: 'FSR Studio. 所有的音訊與視訊皆在使用者本機端即時處理。',
     chooseLanguage: '選擇語言 / Select Language',
   },
 };

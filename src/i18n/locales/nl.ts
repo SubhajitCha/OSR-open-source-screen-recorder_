@@ -2,12 +2,12 @@ import { TranslationDictionary } from '../types';
 
 export const nl: TranslationDictionary = {
   meta: {
-    title: 'OSR — Gratis Online Schermrecorder | Zonder Watermerk & Privé',
+    title: 'FSR Studio — Gratis Online Schermrecorder | Zonder Watermerk & Privé',
     description:
       'Gratis online schermrecorder met webcam PIP, systeemgeluid & microfoon mixen, directe MP4-export en videotrimmer. 100% in de browser, geen watermerk of tijdslimiet.',
     keywords:
       'schermrecorder online, gratis scherm opnemen, scherm opnemen chrome, schermrecorder zonder watermerk, scherm en camera opnemen, scherm opnemen pc gratis',
-    ogTitle: 'OSR — Gratis Online Schermrecorder',
+    ogTitle: 'FSR Studio — Gratis Online Schermrecorder',
     ogDescription:
       'Neem je scherm, geluid en webcam direct op in je browser zonder software te downloaden.',
   },
@@ -135,10 +135,10 @@ export const nl: TranslationDictionary = {
     badge: 'Volledige Gids & Technische Overzicht',
     mainHeading: 'De Ultieme Gratis Online Schermrecorder voor Creators en Ontwikkelaars',
     introParagraph:
-      'Met OSR Studio neem je eenvoudig en snel je scherm op direct in je browser via WebCodecs en HTML5 Canvas. Geen installatie van zware programma’s nodig.',
+      'Met FSR Studio neem je eenvoudig en snel je scherm op direct in je browser via WebCodecs en HTML5 Canvas. Geen installatie van zware programma’s nodig.',
     section1Title: 'Waarom kiezen voor een browser-schermrecorder?',
     section1P1:
-      'Traditionele software vereist installaties en neemt veel schijfruimte in beslag. OSR start binnen enkele seconden op elk besturingssysteem.',
+      'Traditionele software vereist installaties en neemt veel schijfruimte in beslag. FSR Studio start binnen enkele seconden op elk besturingssysteem.',
     section1P2:
       'Volledig compatibel met Windows, macOS, Linux en Chromebook.',
     section2Title: 'Stappenplan: Gratis scherm opnemen',
@@ -172,7 +172,7 @@ export const nl: TranslationDictionary = {
       'Mix computeraudio met microfoongeluid met automatische ruisonderdrukking.',
     section4Title: '100% Privacy: Volledig lokaal verwerkt',
     section4Intro:
-      'OSR bewaart en verwerkt alle opnames uitsluitend in je lokale browser:',
+      'FSR Studio bewaart en verwerkt alle opnames uitsluitend in je lokale browser:',
     privacyBullet1Title: 'Geen uploads naar de cloud',
     privacyBullet1Desc: 'Alle beelden blijven op je eigen apparaat.',
     privacyBullet2Title: 'Geen account vereist',
@@ -185,7 +185,7 @@ export const nl: TranslationDictionary = {
     faqs: [
       {
         q: 'Wat is de beste gratis online schermrecorder?',
-        a: 'OSR Studio biedt 4K-opnames, webcam PIP en MP4-download zonder installatie of watermerk.',
+        a: 'FSR Studio biedt 4K-opnames, webcam PIP en MP4-download zonder installatie of watermerk.',
       },
       {
         q: 'Kan ik langer dan 1 uur opnemen?',
@@ -236,7 +236,7 @@ export const nl: TranslationDictionary = {
       'schermrecorder zonder watermerk',
       'scherm en webcam opnemen',
     ],
-    copyright: 'OSR Studio. Alle streams worden lokaal verwerkt.',
+    copyright: 'FSR Studio. Alle streams worden lokaal verwerkt.',
     chooseLanguage: 'Kies Taal / Choose Language',
   },
 };

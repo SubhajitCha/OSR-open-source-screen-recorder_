@@ -34,7 +34,7 @@ export const ServerErrorPage: React.FC<ServerErrorPageProps> = ({
 
   const handleCopyDiagnostics = () => {
     const diagnosticReport = [
-      `OSR Studio Diagnostics Report (500 Error)`,
+      `FSR Studio Diagnostics Report (500 Error)`,
       `Timestamp: ${new Date().toISOString()}`,
       `User Agent: ${navigator.userAgent}`,
       `Screen: ${window.screen.width}x${window.screen.height}`,

@@ -2,12 +2,12 @@ import { TranslationDictionary } from '../types';
 
 export const tr: TranslationDictionary = {
   meta: {
-    title: 'OSR — Ücretsiz Çevrimiçi Ekran Kaydedici | Filigransız & Gizli',
+    title: 'FSR Studio — Ücretsiz Çevrimiçi Ekran Kaydedici | Filigransız & Gizli',
     description:
       'Web kamerası PIP, sistem sesi ve mikrofon miksajı, anında MP4 dışa aktarma ve video kırpma özellikli ücretsiz çevrimiçi ekran kaydedici. %100 tarayıcı tabanlı, filigransız, sınırsız ve buluta yükleme yapmaz.',
     keywords:
       'ekran kaydedici online, ücretsiz ekran kaydetme, ekran kaydı alma chrome, filigransız ekran kaydedici, ekran ve kamera kaydetme, sesli ekran kaydı alma pc',
-    ogTitle: 'OSR — Ücretsiz Çevrimiçi Ekran Kaydedici',
+    ogTitle: 'FSR Studio — Ücretsiz Çevrimiçi Ekran Kaydedici',
     ogDescription:
       'Herhangi bir program indirmeden ekranınızı, sistem sesini ve web kamerasını doğrudan tarayıcınızda kaydedin.',
   },
@@ -135,10 +135,10 @@ export const tr: TranslationDictionary = {
     badge: 'Kapsamlı Rehber & Teknik Genel Bakış',
     mainHeading: 'İçerik Üreticileri ve Geliştiriciler İçin En İyi Ücretsiz Çevrimiçi Ekran Kaydedici',
     introParagraph:
-      'OSR Studio, WebCodecs ve HTML5 Canvas teknolojileri sayesinde program kurmanıza gerek kalmadan tamamen tarayıcınızda çalışır.',
+      'FSR Studio, WebCodecs ve HTML5 Canvas teknolojileri sayesinde program kurmanıza gerek kalmadan tamamen tarayıcınızda çalışır.',
     section1Title: 'Neden tarayıcı tabanlı ekran kaydedici seçmelisiniz?',
     section1P1:
-      'Geleneksel masaüstü yazılımları çok yer kaplar ve yönetici izni ister. OSR saniyeler içinde Chrome, Edge, Firefox veya Safari’de açılır.',
+      'Geleneksel masaüstü yazılımları çok yer kaplar ve yönetici izni ister. FSR Studio saniyeler içinde Chrome, Edge, Firefox veya Safari’de açılır.',
     section1P2:
       'Windows, macOS, Linux ve Chromebook cihazlarında donanım hızlandırmasıyla akıcı çalışır.',
     section2Title: 'Adım Adım Kılavuz: Ücretsiz ekran kaydı nasıl alınır?',
@@ -185,7 +185,7 @@ export const tr: TranslationDictionary = {
     faqs: [
       {
         q: 'En iyi ücretsiz online ekran kaydedici hangisidir?',
-        a: 'OSR Studio, 4K kayıt, web kamerası PIP ve filigransız MP4 indirme seçenekleriyle en iyi çözümlerden biridir.',
+        a: 'FSR Studio, 4K kayıt, web kamerası PIP ve filigransız MP4 indirme seçenekleriyle en iyi çözümlerden biridir.',
       },
       {
         q: '1 saatten uzun süre kayıt yapabilir miyim?',
@@ -236,7 +236,7 @@ export const tr: TranslationDictionary = {
       'filigransız ekran kaydedici',
       'sesli ekran kaydı alma pc',
     ],
-    copyright: 'OSR Studio. Tüm ses ve video akışları yerel olarak işlenmektedir.',
+    copyright: 'FSR Studio. Tüm ses ve video akışları yerel olarak işlenmektedir.',
     chooseLanguage: 'Dil Seçin / Choose Language',
   },
 };

@@ -2,12 +2,12 @@ import { TranslationDictionary } from '../types';
 
 export const no: TranslationDictionary = {
   meta: {
-    title: 'OSR — Gratis Skjermopptaker på Nett | Uten Vannmerke & Privat',
+    title: 'FSR Studio — Gratis Skjermopptaker på Nett | Uten Vannmerke & Privat',
     description:
       'Gratis online skjermopptaker med webkamera PIP, systemlyd & mikrofonopptak, rask MP4-eksport og videoklipping. 100% i nettleseren uten vannmerke eller tidsbegrensning.',
     keywords:
       'skjermopptaker online, ta opp skjerm gratis, skjermopptak chrome, skjermopptaker uten vannmerke, ta opp skjerm og webkamera, ta opp skjerm med lyd',
-    ogTitle: 'OSR — Gratis Skjermopptaker på Nett',
+    ogTitle: 'FSR Studio — Gratis Skjermopptaker på Nett',
     ogDescription:
       'Ta opp skjerm, lyd og webkamera direkte i nettleseren din uten programvareinstallasjon.',
   },
@@ -135,10 +135,10 @@ export const no: TranslationDictionary = {
     badge: 'Komplett Guide & Teknisk Oversikt',
     mainHeading: 'Den Ultimative Gratis Skjermopptakeren på Nett for Skapere og Utviklere',
     introParagraph:
-      'OSR Studio kjører 100% i nettleseren din ved hjelp av WebCodecs og HTML5 Canvas, helt uten nedlasting av programvare.',
+      'FSR Studio kjører 100% i nettleseren din ved hjelp av WebCodecs og HTML5 Canvas, helt uten nedlasting av programvare.',
     section1Title: 'Hvorfor velge en nettleserbasert skjermopptaker?',
     section1P1:
-      'Tradisjonelle programmer krever installasjon og administratortilgang. OSR starter på sekunder i nettleseren din.',
+      'Tradisjonelle programmer krever installasjon og administratortilgang. FSR Studio starter på sekunder i nettleseren din.',
     section1P2:
       'Fungerer sømløst på Windows, macOS, Linux og Chromebook.',
     section2Title: 'Trinn-for-trinn: Slik tar du opp skjermen gratis',
@@ -185,7 +185,7 @@ export const no: TranslationDictionary = {
     faqs: [
       {
         q: 'Hva er den beste gratis skjermopptakeren på nett?',
-        a: 'OSR Studio tilbyr 4K-opptak, webkamera PIP og MP4-nedlasting uten vannmerker.',
+        a: 'FSR Studio tilbyr 4K-opptak, webkamera PIP og MP4-nedlasting uten vannmerker.',
       },
       {
         q: 'Kan jeg ta opp i mer enn 1 time?',
@@ -236,7 +236,7 @@ export const no: TranslationDictionary = {
       'skjermopptaker uten vannmerke',
       'ta opp skjerm med lyd',
     ],
-    copyright: 'OSR Studio. Alle opptak behandles lokalt på datamaskinen din.',
+    copyright: 'FSR Studio. Alle opptak behandles lokalt på datamaskinen din.',
     chooseLanguage: 'Velg Språk / Choose Language',
   },
 };

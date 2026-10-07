@@ -2,12 +2,12 @@ import { TranslationDictionary } from '../types';
 
 export const zhCN: TranslationDictionary = {
   meta: {
-    title: 'OSR — 免费在线屏幕录制工具 | 无水印、高隐私、免安装',
+    title: 'FSR Studio — 免费在线屏幕录制工具 | 无水印、高隐私、免安装',
     description:
       '功能强大的免费在线屏幕录像机，支持摄像头画中画、系统声音与麦克风混音、MP4即时导出与在线剪辑。100%纯浏览器运行，无水印，无录制时长限制，零云端上传。',
     keywords:
       '在线屏幕录制, 免费屏幕录像, Chrome录屏, 浏览器录屏, 无水印录屏, 电脑录屏软件, 屏幕摄像头同时录制, 网页录屏, 免安装录屏, MP4录屏工具',
-    ogTitle: 'OSR — 免费在线屏幕录像工具 | 隐私安全、无水印',
+    ogTitle: 'FSR Studio — 免费在线屏幕录像工具 | 隐私安全、无水印',
     ogDescription:
       '纯浏览器客户端运行的免安装屏幕录制神器，支持系统音频、画中画摄像头与即时MP4下载。',
   },
@@ -203,10 +203,10 @@ export const zhCN: TranslationDictionary = {
     badge: '完整指南与技术解析',
     mainHeading: '专为创作者、教育工作者与开发者打造的免费在线屏幕录像机',
     introParagraph:
-      '在当今快节奏的数字化创作时代，拥有一个敏捷、基于浏览器的在线录屏工具至关重要。传统桌面录屏软件通常体积庞大、强制安装、存在后台追踪甚至昂贵的订阅收费。OSR 录屏工具完全在标准网页浏览器中运行，依托 MediaStream、WebCodecs 与 HTML5 Canvas 技术，无需下载任何客户端，即可录制 1080p 及 4K 画面，同步捕获系统音频与麦克风，支持画中画摄像头与即时 MP4 导出。',
+      '在当今快节奏的数字化创作时代，拥有一个敏捷、基于浏览器的在线录屏工具至关重要。传统桌面录屏软件通常体积庞大、强制安装、存在后台追踪甚至昂贵的订阅收费。FSR Studio 录屏工具完全在标准网页浏览器中运行，依托 MediaStream、WebCodecs 与 HTML5 Canvas 技术，无需下载任何客户端，即可录制 1080p 及 4K 画面，同步捕获系统音频与麦克风，支持画中画摄像头与即时 MP4 导出。',
     section1Title: '为什么选择免安装的浏览器在线录屏工具',
     section1P1:
-      '传统桌面录屏程序占用大量磁盘空间与系统后台常驻进程。当您需要快速重现 Bug、向同事演示产品原型或录制教学课程时，在浏览器中打开 OSR 即可在几秒钟内开始录制。',
+      '传统桌面录屏程序占用大量磁盘空间与系统后台常驻进程。当您需要快速重现 Bug、向同事演示产品原型或录制教学课程时，在浏览器中打开 FSR Studio 即可在几秒钟内开始录制。',
     section1P2:
       '因为我们的工具直接利用现代浏览器的原生 Web API 执行客户端硬件加速录制，完美支持 Windows、macOS、Linux 和 Chromebook，彻底解决跨平台兼容烦恼。',
     section2Title: '操作指南：如何使用免费在线录屏工具',
@@ -235,12 +235,12 @@ export const zhCN: TranslationDictionary = {
     ],
     section3Title: '高级功能：画中画、双声道音频混音与即时 MP4 打包',
     section3P1:
-      'OSR 专为高质量演示设计。您可以自由拖拽人脸摄像头至画面任意角落，切换圆形或方角形状，并自定义背景边框。',
+      'FSR Studio 专为高质量演示设计。您可以自由拖拽人脸摄像头至画面任意角落，切换圆形或方角形状，并自定义背景边框。',
     section3P2:
       '内置基于 Web Audio API 的多通道混音引擎，将电脑内部播放的声音与外接麦克风人声平衡融合，并提供实时音频波形图和降噪处理。',
     section4Title: '极致隐私保护：100% 纯浏览器客户端处理',
     section4Intro:
-      '大多数商业在线录屏软件会将您的视频上传至远程云端服务器。OSR 采用严苛的客户端沙箱隔离架构：',
+      '大多数商业在线录屏软件会将您的视频上传至远程云端服务器。FSR Studio 采用严苛的客户端沙箱隔离架构：',
     privacyBullet1Title: '零云端上传',
     privacyBullet1Desc: '录制的每一帧音视频均在您本机的浏览器内存与 IndexedDB 中处理，绝不上传到任何服务器。',
     privacyBullet2Title: '无需注册账号',
@@ -248,12 +248,12 @@ export const zhCN: TranslationDictionary = {
     privacyBullet3Title: '无水印且无时长限制',
     privacyBullet3Desc: '绝不强制添加破坏画面的品牌水印，录制时长完全由您的设备内存决定。',
     privacyBullet4Title: '渐进式网页应用 (PWA)',
-    privacyBullet4Desc: '可将 OSR 安装至桌面独立窗口，甚至在离线断网状态下照常工作。',
+    privacyBullet4Desc: '可将 FSR Studio 安装至桌面独立窗口，甚至在离线断网状态下照常工作。',
     faqTitle: '关于免费在线屏幕录制的常见问题 (FAQ)',
     faqs: [
       {
         q: '哪个是在线免费录屏工具的最佳选择？',
-        a: 'OSR 是极佳的在线免费录屏工具。它100%在浏览器内运行，无需下载软件、无水印、支持高清4K录制、摄像头画中画、系统声音混音以及秒级导出 MP4 格式。',
+        a: 'FSR Studio 是极佳的在线免费录屏工具。它100%在浏览器内运行，无需下载软件、无水印、支持高清4K录制、摄像头画中画、系统声音混音以及秒级导出 MP4 格式。',
       },
       {
         q: '如何使用免费屏幕视频录像工具？',
@@ -317,7 +317,7 @@ export const zhCN: TranslationDictionary = {
       '电脑系统声音内录',
       '免费在线录像神器',
     ],
-    copyright: 'OSR Studio. 所有的音视频流均在本地客户端实时处理。',
+    copyright: 'FSR Studio. 所有的音视频流均在本地客户端实时处理。',
     chooseLanguage: '选择语言 / Select Language',
   },
 };

@@ -2,12 +2,12 @@ import { TranslationDictionary } from '../types';
 
 export const da: TranslationDictionary = {
   meta: {
-    title: 'OSR — Gratis Online Skærmoptager | Uden Vandmærke & Privat',
+    title: 'FSR Studio — Gratis Online Skærmoptager | Uden Vandmærke & Privat',
     description:
       'Gratis online skærmoptager med webcam PIP, systemlyd & mikrofon mixning, hurtig MP4-eksport og videoredigering. 100% i browseren, intet vandmærke eller tidsbegrænsning.',
     keywords:
       'skærmoptager online, optag skærm gratis, screen recorder chrome, skærmoptager uden vandmærke, optag skærm og kamera, optag skærm pc med lyd',
-    ogTitle: 'OSR — Gratis Online Skærmoptager',
+    ogTitle: 'FSR Studio — Gratis Online Skærmoptager',
     ogDescription:
       'Optag din skærm, lyd og webcam direkte i browseren uden softwareinstallation.',
   },
@@ -135,10 +135,10 @@ export const da: TranslationDictionary = {
     badge: 'Komplet Guide & Teknisk Overblik',
     mainHeading: 'Den Ultimative Gratis Online Skærmoptager for Skabere og Udviklere',
     introParagraph:
-      'OSR Studio fungerer direkte i din webbrowser via WebCodecs og HTML5 Canvas uden installation af tunge programmer.',
+      'FSR Studio fungerer direkte i din webbrowser via WebCodecs og HTML5 Canvas uden installation af tunge programmer.',
     section1Title: 'Hvorfor vælge en browserbaseret skærmoptager?',
     section1P1:
-      'Traditionelle skrivebordsprogrammer optager meget plads og kræver administratoradgang. OSR starter på få sekunder i din browser.',
+      'Traditionelle skrivebordsprogrammer optager meget plads og kræver administratoradgang. FSR Studio starter på få sekunder i din browser.',
     section1P2:
       'Virker flydende på Windows, macOS, Linux og Chromebook med hardwareacceleration.',
     section2Title: 'Trin for trin guide: Sådan optager du skærmen gratis',
@@ -185,7 +185,7 @@ export const da: TranslationDictionary = {
     faqs: [
       {
         q: 'Hvad er den bedste gratis online skærmoptager?',
-        a: 'OSR Studio er en af de bedste: 100% i browseren, uden vandmærke, med 4K og MP4-download.',
+        a: 'FSR Studio er en af de bedste: 100% i browseren, uden vandmærke, med 4K og MP4-download.',
       },
       {
         q: 'Kan jeg optage i mere end 1 time?',
@@ -236,7 +236,7 @@ export const da: TranslationDictionary = {
       'skærmoptager uden vandmærke',
       'optag skærm pc gratis',
     ],
-    copyright: 'OSR Studio. Alle streams behandles lokalt på din enhed.',
+    copyright: 'FSR Studio. Alle streams behandles lokalt på din enhed.',
     chooseLanguage: 'Vælg Sprog / Choose Language',
   },
 };

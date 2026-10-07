@@ -259,7 +259,7 @@ export default function App() {
     if (typeof navigator !== 'undefined' && navigator.mediaDevices && 'setCaptureHandleConfig' in navigator.mediaDevices) {
       try {
         (navigator.mediaDevices as any).setCaptureHandleConfig({
-          handle: 'osr-recorder',
+          handle: 'fsr-recorder',
           exposeOrigin: true,
           permittedOrigins: ['*'],
         });
@@ -368,7 +368,7 @@ export default function App() {
   useEffect(() => {
     const restoreSession = async () => {
       try {
-        const savedState = sessionStorage.getItem('osr_active_state');
+        const savedState = sessionStorage.getItem('fsr_active_state') || sessionStorage.getItem('osr_active_state');
         if (savedState === 'editing' || savedState === 'review') {
           const session = await getActiveEditingSession();
           if (session && session.blob) {
@@ -972,7 +972,7 @@ export default function App() {
       setRecordingState('review');
       saveActiveEditingSession(result);
       try {
-        sessionStorage.setItem('osr_active_state', 'review');
+        sessionStorage.setItem('fsr_active_state', 'review');
       } catch (_) {}
     } catch (err) {
       console.error('Error stopping recording:', err);
@@ -1125,7 +1125,7 @@ export default function App() {
     setRecordingState('review');
     saveActiveEditingSession(data);
     try {
-      sessionStorage.setItem('osr_active_state', 'review');
+      sessionStorage.setItem('fsr_active_state', 'review');
     } catch (_) {}
   };
 
@@ -1136,6 +1136,7 @@ export default function App() {
     }
     clearActiveEditingSession();
     try {
+      sessionStorage.removeItem('fsr_active_state');
       sessionStorage.removeItem('osr_active_state');
     } catch (_) {}
     setLastRecordingData(null);
@@ -1295,7 +1296,7 @@ export default function App() {
             onEdit={() => {
               setRecordingState('editing');
               try {
-                sessionStorage.setItem('osr_active_state', 'editing');
+                sessionStorage.setItem('fsr_active_state', 'editing');
               } catch (_) {}
             }}
             onRetake={handleRetake}
@@ -1322,6 +1323,7 @@ export default function App() {
               }
               clearActiveEditingSession();
               try {
+                sessionStorage.removeItem('fsr_active_state');
                 sessionStorage.removeItem('osr_active_state');
               } catch (_) {}
               setLastRecordingData(null);
@@ -1340,6 +1342,7 @@ export default function App() {
               }
               clearActiveEditingSession();
               try {
+                sessionStorage.removeItem('fsr_active_state');
                 sessionStorage.removeItem('osr_active_state');
               } catch (_) {}
               refreshLibraryCount();

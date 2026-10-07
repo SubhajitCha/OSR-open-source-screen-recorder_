@@ -2,12 +2,12 @@ import { TranslationDictionary } from '../types';
 
 export const ms: TranslationDictionary = {
   meta: {
-    title: 'OSR — Perakam Skrin Dalam Talian Percuma | Tanpa Tanda Air & Peribadi',
+    title: 'FSR Studio — Perakam Skrin Dalam Talian Percuma | Tanpa Tanda Air & Peribadi',
     description:
       'Perakam skrin dalam talian percuma dengan webcam PIP, pengadunan audio sistem & mikrofon, eksport MP4 pantas dan pemotong video. 100% dalam pelayar tanpa tanda air atau had masa.',
     keywords:
       'perakam skrin online, rakam skrin pc percuma, rakam skrin chrome, perakam skrin tanpa watermark, rakam skrin dan kamera serentak, rakam skrin dengan audio',
-    ogTitle: 'OSR — Perakam Skrin Dalam Talian Percuma',
+    ogTitle: 'FSR Studio — Perakam Skrin Dalam Talian Percuma',
     ogDescription:
       'Rakam skrin, suara mikrofon dan audio dalaman komputer terus dari pelayar web tanpa memasang sebarang perisian.',
   },
@@ -135,10 +135,10 @@ export const ms: TranslationDictionary = {
     badge: 'Panduan Lengkap & Gambaran Teknikal',
     mainHeading: 'Perakam Skrin Dalam Talian Percuma Terbaik untuk Pencipta & Pembangun',
     introParagraph:
-      'OSR Studio beroperasi sepenuhnya dalam pelayar web anda melalui WebCodecs dan HTML5 Canvas tanpa sebarang pemasangan perisian.',
+      'FSR Studio beroperasi sepenuhnya dalam pelayar web anda melalui WebCodecs dan HTML5 Canvas tanpa sebarang pemasangan perisian.',
     section1Title: 'Mengapa memilih perakam berasaskan pelayar web?',
     section1P1:
-      'Perisian desktop tradisional memerlukan ruang penyimpanan yang besar dan kebenaran pentadbir. OSR dilancarkan dalam beberapa saat dalam Chrome, Firefox atau Edge.',
+      'Perisian desktop tradisional memerlukan ruang penyimpanan yang besar dan kebenaran pentadbir. FSR Studio dilancarkan dalam beberapa saat dalam Chrome, Firefox atau Edge.',
     section1P2:
       'Berfungsi dengan lancar pada Windows, macOS, Linux dan Chromebook dengan pecutan perkakasan.',
     section2Title: 'Panduan Langkah demi Langkah: Cara merakam skrin secara percuma',
@@ -185,7 +185,7 @@ export const ms: TranslationDictionary = {
     faqs: [
       {
         q: 'Apakah perakam skrin dalam talian percuma yang terbaik?',
-        a: 'OSR Studio menawarkan rakaman 4K, webcam PIP dan muat turun MP4 segera tanpa sebarang tanda air.',
+        a: 'FSR Studio menawarkan rakaman 4K, webcam PIP dan muat turun MP4 segera tanpa sebarang tanda air.',
       },
       {
         q: 'Bolehkah saya merakam lebih dari 1 jam?',
@@ -236,7 +236,7 @@ export const ms: TranslationDictionary = {
       'perakam skrin tanpa watermark',
       'rakam skrin dan kamera',
     ],
-    copyright: 'OSR Studio. Semua aliran video dan audio diproses setempat pada komputer pengguna.',
+    copyright: 'FSR Studio. Semua aliran video dan audio diproses setempat pada komputer pengguna.',
     chooseLanguage: 'Pilih Bahasa / Choose Language',
   },
 };

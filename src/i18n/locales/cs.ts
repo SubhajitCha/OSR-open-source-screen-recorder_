@@ -2,12 +2,12 @@ import { TranslationDictionary } from '../types';
 
 export const cs: TranslationDictionary = {
   meta: {
-    title: 'OSR — Bezplatný Online Záznamník Obrazovky | Bez Vodoznaku a Soukromý',
+    title: 'FSR Studio — Bezplatný Online Záznamník Obrazovky | Bez Vodoznaku a Soukromý',
     description:
       'Bezplatný online záznamník obrazovky s webkamerou v obraze (PIP), mixováním systémového zvuku, okamžitým exportem do MP4 a střihem videa. 100% v prohlížeči, bez vodoznaku a bez časového limitu.',
     keywords:
       'zaznam obrazovky online, nahravani obrazovky zdarma, nahravat obrazovku chrome, zaznam obrazovky bez vodoznaku, nahravani obrazovky a kamery, nahravani obrazovky se zvukem',
-    ogTitle: 'OSR — Bezplatný Online Záznamník Obrazovky',
+    ogTitle: 'FSR Studio — Bezplatný Online Záznamník Obrazovky',
     ogDescription:
       'Nahrávejte obrazovku, zvuk a webkameru přímo v prohlížeči bez nutnosti instalovat software.',
   },
@@ -135,10 +135,10 @@ export const cs: TranslationDictionary = {
     badge: 'Kompletní Průvodce a Technický Přehled',
     mainHeading: 'Špičkový bezplatný online záznamník obrazovky pro tvůrce, učitele a vývojáře',
     introParagraph:
-      'OSR Studio běží kompletně ve vašem webovém prohlížeči pomocí WebCodecs a HTML5 Canvas. Můžete nahrávat ve vysokém rozlišení 1080p a 4K se zvukem systému a mikrofonem bez vodoznaků a bez nutnosti instalovat software.',
+      'FSR Studio běží kompletně ve vašem webovém prohlížeči pomocí WebCodecs a HTML5 Canvas. Můžete nahrávat ve vysokém rozlišení 1080p a 4K se zvukem systému a mikrofonem bez vodoznaků a bez nutnosti instalovat software.',
     section1Title: 'Proč zvolit nahrávání v prohlížeči?',
     section1P1:
-      'Běžné desktopové aplikace zabírají místo a vyžadují instalaci. OSR se spustí během několika sekund v Chromu, Edge nebo Firefoxu.',
+      'Běžné desktopové aplikace zabírají místo a vyžadují instalaci. FSR Studio se spustí během několika sekund v Chromu, Edge nebo Firefoxu.',
     section1P2:
       'Běží hladce na Windows, macOS, Linuxu i Chromeboocích s hardwarovou akcelerací.',
     section2Title: 'Krok za krokem: Jak nahrávat obrazovku zdarma',
@@ -185,7 +185,7 @@ export const cs: TranslationDictionary = {
     faqs: [
       {
         q: 'Jaký je nejlepší bezplatný online záznamník obrazovky?',
-        a: 'OSR Studio nabízí záznam ve 4K, PIP webkameru a okamžitý export do MP4 bez vodoznaků.',
+        a: 'FSR Studio nabízí záznam ve 4K, PIP webkameru a okamžitý export do MP4 bez vodoznaků.',
       },
       {
         q: 'Lze nahrávat déle než 1 hodinu?',
@@ -236,7 +236,7 @@ export const cs: TranslationDictionary = {
       'zaznam obrazovky bez vodoznaku',
       'nahravani obrazovky pc zdarma',
     ],
-    copyright: 'OSR Studio. Veškeré audio a video streamy jsou zpracovávány lokálně.',
+    copyright: 'FSR Studio. Veškeré audio a video streamy jsou zpracovávány lokálně.',
     chooseLanguage: 'Vybrat jazyk / Choose Language',
   },
 };

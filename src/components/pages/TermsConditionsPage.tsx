@@ -53,7 +53,7 @@ export const TermsConditionsPage: React.FC<TermsConditionsPageProps> = ({
           Terms &amp; Conditions
         </h1>
         <p className="text-base sm:text-lg text-slate-600 dark:text-zinc-400 leading-relaxed max-w-3xl">
-          Please review these Terms &amp; Conditions before using OSR Studio. Because OSR Studio runs 100% locally in your browser, our terms are designed to be straightforward, fair, and respectful of your ownership rights.
+          Please review these Terms &amp; Conditions before using FSR Studio. Because FSR Studio runs 100% locally in your browser, our terms are designed to be straightforward, fair, and respectful of your ownership rights.
         </p>
       </header>
 
@@ -77,7 +77,7 @@ export const TermsConditionsPage: React.FC<TermsConditionsPageProps> = ({
             Acceptance of Terms
           </h2>
           <p>
-            By accessing or using the OSR Studio web application at any URL where it is hosted, you agree to be bound by these Terms and Conditions. If you do not agree with any part of these terms, you should not access or use the application.
+            By accessing or using the FSR Studio web application at any URL where it is hosted, you agree to be bound by these Terms and Conditions. If you do not agree with any part of these terms, you should not access or use the application.
           </p>
         </section>
 
@@ -88,7 +88,7 @@ export const TermsConditionsPage: React.FC<TermsConditionsPageProps> = ({
             License of Use
           </h2>
           <p>
-            OSR Studio grants you a free, non-exclusive, worldwide license to access and use the recording platform for:
+            FSR Studio grants you a free, non-exclusive, worldwide license to access and use the recording platform for:
           </p>
           <ul className="space-y-1.5 list-disc list-inside pl-2">
             <li>Personal and educational video recording.</li>
@@ -96,7 +96,7 @@ export const TermsConditionsPage: React.FC<TermsConditionsPageProps> = ({
             <li>Internal organizational communications and software bug reproductions.</li>
           </ul>
           <p>
-            You are free to use your exported recordings for commercial monetization, distribution, or broadcasting without owing any attribution or royalty fees to OSR Studio.
+            You are free to use your exported recordings for commercial monetization, distribution, or broadcasting without owing any attribution or royalty fees to FSR Studio.
           </p>
         </section>
 
@@ -107,7 +107,7 @@ export const TermsConditionsPage: React.FC<TermsConditionsPageProps> = ({
             100% User Content Ownership
           </h2>
           <p>
-            OSR Studio asserts <strong>no intellectual property rights or ownership claims</strong> over any screen captures, webcam videos, audio recordings, or metadata generated during your use of the application.
+            FSR Studio asserts <strong>no intellectual property rights or ownership claims</strong> over any screen captures, webcam videos, audio recordings, or metadata generated during your use of the application.
           </p>
           <p>
             Because all encoding and saving takes place inside your client browser, our team has no access to your media files. You retain sole ownership, copyright, and full liability for all material you record and export.
@@ -121,7 +121,7 @@ export const TermsConditionsPage: React.FC<TermsConditionsPageProps> = ({
             Responsible &amp; Lawful Use
           </h2>
           <p>
-            When utilizing OSR Studio, you agree to adhere to all applicable local, national, and international laws, including:
+            When utilizing FSR Studio, you agree to adhere to all applicable local, national, and international laws, including:
           </p>
           <ul className="space-y-1.5 list-disc list-inside pl-2">
             <li>
@@ -143,7 +143,7 @@ export const TermsConditionsPage: React.FC<TermsConditionsPageProps> = ({
             Local Storage &amp; Data Responsibility
           </h2>
           <p>
-            OSR Studio records directly to your browser&apos;s internal IndexedDB storage. You understand and acknowledge that:
+            FSR Studio records directly to your browser&apos;s internal IndexedDB storage. You understand and acknowledge that:
           </p>
           <ul className="space-y-1.5 list-disc list-inside pl-2">
             <li>
@@ -153,7 +153,7 @@ export const TermsConditionsPage: React.FC<TermsConditionsPageProps> = ({
               You are strongly advised to export or download important recordings to your computer&apos;s physical hard drive immediately following capture.
             </li>
             <li>
-              OSR Studio maintains no central cloud backup and cannot recover files lost through local browser storage purging.
+              FSR Studio maintains no central cloud backup and cannot recover files lost through local browser storage purging.
             </li>
           </ul>
         </section>
@@ -165,10 +165,10 @@ export const TermsConditionsPage: React.FC<TermsConditionsPageProps> = ({
             Disclaimer of Warranties &amp; Limitation of Liability
           </h2>
           <p>
-            OSR Studio is provided on an &quot;AS IS&quot; and &quot;AS AVAILABLE&quot; basis without warranties of any kind, either express or implied.
+            FSR Studio is provided on an &quot;AS IS&quot; and &quot;AS AVAILABLE&quot; basis without warranties of any kind, either express or implied.
           </p>
           <p>
-            To the maximum extent permitted by applicable law, OSR Studio developers, contributors, and operators shall not be liable for any indirect, incidental, special, consequential, or punitive damages—including loss of recordings, hardware resource contention, or business interruptions—arising out of your use of or inability to use the software.
+            To the maximum extent permitted by applicable law, FSR Studio developers, contributors, and operators shall not be liable for any indirect, incidental, special, consequential, or punitive damages—including loss of recordings, hardware resource contention, or business interruptions—arising out of your use of or inability to use the software.
           </p>
         </section>
 

@@ -314,7 +314,7 @@ export const TechDocsPage: React.FC<TechDocsPageProps> = ({ onOpenStudio }) => {
               Zero-Cloud Privacy & Sandbox Architecture
             </h2>
             <p className="text-xs sm:text-sm text-slate-600 dark:text-zinc-400 leading-relaxed">
-              OSR is built ground-up to never transmit video data, audio data, or metadata to external servers. All operations happen in-memory inside your browser tab using IndexedDB.
+              FSR Studio is built ground-up to never transmit video data, audio data, or metadata to external servers. All operations happen in-memory inside your browser tab using IndexedDB.
             </p>
           </div>
 
@@ -339,8 +339,8 @@ export const TechDocsPage: React.FC<TechDocsPageProps> = ({ onOpenStudio }) => {
       {activeTab === 'deployment' && (
         <div className="bg-white dark:bg-zinc-950 p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-zinc-800 shadow-xs space-y-6 animate-in fade-in duration-150 transition-colors">
           <div className="space-y-2">
-            <h2 className="text-lg font-bold text-slate-900 dark:text-zinc-100">Self-Hosting & Docker Guide</h2>
-            <p className="text-xs text-slate-600 dark:text-zinc-400">OSR can be deployed statically to Cloudflare Pages, Vercel, Netlify, or Docker.</p>
+            <h2 className="text-lg font-bold text-slate-900 dark:text-zinc-100">Self-Hosting & Deployment Guide</h2>
+            <p className="text-xs text-slate-600 dark:text-zinc-400">FSR Studio can be deployed statically to Cloudflare Pages, Vercel, Netlify, or Docker.</p>
           </div>
 
           <div className="relative p-4 rounded-2xl bg-slate-900 dark:bg-black text-slate-200 dark:text-zinc-200 border border-transparent dark:border-zinc-800 font-mono text-xs overflow-x-auto">

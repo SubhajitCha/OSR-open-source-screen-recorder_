@@ -356,11 +356,11 @@ export default function App() {
       const mins = Math.floor(durationSeconds / 60);
       const secs = durationSeconds % 60;
       const formatted = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-      document.title = `🔴 Recording (${formatted}) — OSR`;
+      document.title = `🔴 Recording (${formatted}) — FSR Studio`;
     } else if (recordingState === 'paused') {
-      document.title = `⏸️ Paused — OSR`;
+      document.title = `⏸️ Paused — FSR Studio`;
     } else {
-      document.title = `OSR — Open Source Screen Recorder`;
+      document.title = `Free Screen Record Studio | No Watermark & Private`;
     }
   }, [recordingState, durationSeconds]);
 

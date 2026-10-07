@@ -601,7 +601,7 @@ export const RecordingsLibrary: React.FC<RecordingsLibraryProps> = ({
             </div>
 
             <div className="flex items-center justify-between px-6 py-3.5 border-t border-slate-200 dark:border-zinc-800 bg-white dark:bg-[#121215] text-xs">
-              <span className="text-slate-500 dark:text-zinc-400">Recorded offline with OSR Studio</span>
+              <span className="text-slate-500 dark:text-zinc-400">Recorded offline with FSR Studio</span>
               <div className="flex items-center gap-2">
                 {onSelectRecordingForEdit && (
                   <button

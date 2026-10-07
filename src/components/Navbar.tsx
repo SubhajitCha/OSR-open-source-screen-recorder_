@@ -239,7 +239,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             type="button"
             onClick={handleBrandClick}
             className="flex items-center gap-2 cursor-pointer group text-left border-0 bg-transparent p-0"
-            title="OSR Studio - Go to start screen"
+            title="FSR Studio - Go to start screen"
           >
             {/* Minimalist Studio Aperture Badge */}
             <div className="relative flex items-center justify-center shrink-0">
@@ -262,7 +262,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             {/* Clean Brand Name - hidden on small mobile to prevent any collision */}
             <span className="hidden sm:inline text-sm sm:text-base font-black tracking-tight text-slate-900 dark:text-zinc-100 font-sans group-hover:text-slate-700 dark:group-hover:text-white transition-colors whitespace-nowrap">
-              OSR Studio
+              FSR Studio
             </span>
           </button>
         </div>

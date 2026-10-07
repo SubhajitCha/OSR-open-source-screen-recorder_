@@ -47,7 +47,7 @@ export const AppFooter: React.FC<AppFooterProps> = ({ onNavigate, activeView, is
               type="button"
               onClick={() => handleNav('studio')}
               className="flex items-center gap-2 cursor-pointer group text-left border-0 bg-transparent p-0"
-              title="OSR Studio - Home"
+              title="FSR Studio - Home"
             >
               <div className="w-7 h-7 rounded-lg bg-black flex items-center justify-center p-1 border border-white/10 group-hover:scale-105 transition-transform">
                 <div className="w-3.5 h-3.5 rounded-full bg-gradient-to-tr from-[#8DB355] to-[#FFEA93] p-[1px] flex items-center justify-center">
@@ -55,7 +55,7 @@ export const AppFooter: React.FC<AppFooterProps> = ({ onNavigate, activeView, is
                 </div>
               </div>
               <span className="font-extrabold text-base tracking-tight text-slate-900 dark:text-white">
-                OSR Studio
+                FSR Studio
               </span>
             </button>
             <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed max-w-sm">

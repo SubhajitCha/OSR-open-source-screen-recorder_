@@ -2,12 +2,12 @@ import { TranslationDictionary } from '../types';
 
 export const en: TranslationDictionary = {
   meta: {
-    title: 'OSR — Free Online Screen Recorder | No Watermark & Private',
+    title: 'Free Screen Record Studio | No Watermark & Private',
     description:
       'Free online screen recorder with webcam PIP, system audio mixing, instant MP4 export, and video trimming. 100% browser-based, no watermark, unlimited recording duration, and zero cloud uploads.',
     keywords:
-      'online screen recorder, free online screen recorder, screen recorder chrome, best free online screen recorder, free screen video recorder, record screen online, how to use free screen video recorder, screen recorder no watermark, record screen with audio, browser screen recorder, screen and camera recorder, free screen recorder download, mp4 screen recorder, unlimited screen recorder',
-    ogTitle: 'OSR — Free Online Screen Recorder | No Watermark & Private',
+      'free screen record, free screen record studio, screen record studio, online screen recorder, free online screen recorder, screen recorder chrome, best free online screen recorder, free screen video recorder, record screen online, how to use free screen video recorder, screen recorder no watermark, record screen with audio, browser screen recorder, screen and camera recorder, free screen recorder download, mp4 screen recorder, unlimited screen recorder',
+    ogTitle: 'Free Screen Record Studio | No Watermark & Private',
     ogDescription:
       'Free online screen recorder with webcam PIP, system audio mixing, instant MP4 export, and video trimming. 100% browser-based, no watermark, unlimited recording, and zero cloud uploads.',
   },
@@ -128,7 +128,7 @@ export const en: TranslationDictionary = {
     subtitle: 'Offline recordings stored securely in browser IndexedDB',
     storageUsage: 'Local Storage',
     emptyTitle: 'No recordings saved yet',
-    emptyDesc: 'Start your first screen recording with OSR. Everything is recorded offline with zero server lag.',
+    emptyDesc: 'Start your first screen recording with FSR Studio. Everything is recorded offline with zero server lag.',
     startFirstRecording: 'Start First Recording',
     recordingsTag: 'recordings',
     editInStudio: 'Edit in Studio',
@@ -243,14 +243,14 @@ export const en: TranslationDictionary = {
     section3Title:
       'Advanced Features: Picture-in-Picture, Dual Audio Mixing & MP4 Muxing',
     section3P1:
-      'OSR Studio is built for professional presentation fidelity. Presenters can position their live webcam feed in any corner of the screen, toggle between circle, square, and rounded rectangle frames, and customize canvas margins and backgrounds for polished tutorial presentations.',
+      'FSR Studio is built for professional presentation fidelity. Presenters can position their live webcam feed in any corner of the screen, toggle between circle, square, and rounded rectangle frames, and customize canvas margins and backgrounds for polished tutorial presentations.',
     section3P2:
       'Our multi-channel audio mixing pipeline leverages the browser’s Web Audio API to combine system audio (music, video playback, game sound, or meeting attendees) with your external USB or headset microphone, ensuring balanced levels with built-in visual volume meters and noise suppression.',
 
     section4Title:
       'Uncompromising Privacy: 100% Client-Side In-Browser Processing',
     section4Intro:
-      'Most commercial online recorders secretly stream your screen captures to cloud servers where your confidential data, business source code, and private conversations are stored. OSR Studio is architected with strict client-side isolation:',
+      'Most commercial online recorders secretly stream your screen captures to cloud servers where your confidential data, business source code, and private conversations are stored. FSR Studio is architected with strict client-side isolation:',
     privacyBullet1Title: 'Zero Cloud Uploads',
     privacyBullet1Desc:
       'Every byte of video and audio is processed and stored strictly within your browser’s local sandbox and IndexedDB storage.',
@@ -262,14 +262,14 @@ export const en: TranslationDictionary = {
       'We never imprint promotional logos over your footage or artificially cut off your recording after five minutes.',
     privacyBullet4Title: 'Progressive Web App (PWA)',
     privacyBullet4Desc:
-      'Install OSR Studio as a standalone desktop app from your browser address bar for instant offline access even without an active internet connection.',
+      'Install FSR Studio as a standalone desktop app from your browser address bar for instant offline access even without an active internet connection.',
 
     faqTitle:
       'Frequently Asked Questions About Our Free Online Screen Recorder',
     faqs: [
       {
         q: 'What is the best free online screen recorder?',
-        a: 'OSR Studio is one of the best free online screen recorders available. It runs 100% inside your web browser without requiring any software downloads, account registration, or subscriptions. It delivers watermark-free HD and 4K recording, webcam picture-in-picture overlay, system audio and microphone mixing, and instant offline exports in both WebM and MP4 formats.',
+        a: 'FSR Studio is one of the best free online screen recorders available. It runs 100% inside your web browser without requiring any software downloads, account registration, or subscriptions. It delivers watermark-free HD and 4K recording, webcam picture-in-picture overlay, system audio and microphone mixing, and instant offline exports in both WebM and MP4 formats.',
       },
       {
         q: 'How to use free screen video recorder',
@@ -371,7 +371,7 @@ export const en: TranslationDictionary = {
       'webcam picture in picture recorder',
       'safe screen recorder',
     ],
-    copyright: 'OSR Studio. All video and audio streams are processed entirely client-side.',
+    copyright: 'FSR Studio. All video and audio streams are processed entirely client-side.',
     chooseLanguage: 'Choose Language',
   },
 };

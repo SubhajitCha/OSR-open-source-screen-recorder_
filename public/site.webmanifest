@@ -1,6 +1,6 @@
 {
-  "name": "OSR — Free Online Screen Recorder",
-  "short_name": "OSR Studio",
+  "name": "Free Screen Record Studio",
+  "short_name": "FSR Studio",
   "description": "Free online screen recorder with webcam PIP, system audio mixing, instant MP4 export, and video trimming with zero cloud uploads.",
   "start_url": "/",
   "display": "standalone",

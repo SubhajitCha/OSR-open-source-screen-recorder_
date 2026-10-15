@@ -39,7 +39,21 @@ export const AboutUsPage: React.FC<AboutUsPageProps> = ({
           <span>{t.common?.back || 'Back to Studio'}</span>
         </a>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-3">
+          <a
+            href="https://www.betterlaunch.co/product/fsr-studio-free-screen-record"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block transition-transform duration-200 hover:scale-[1.03] active:scale-[0.98]"
+          >
+            <img
+              src="https://www.betterlaunch.co/badge-live-light.svg"
+              alt="Better Launch"
+              width="200"
+              height="56"
+              className="h-8 w-auto object-contain rounded-md"
+            />
+          </a>
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-100/70 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400 border border-blue-200/60 dark:border-blue-800/40">
             <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
             Open Source Initiative

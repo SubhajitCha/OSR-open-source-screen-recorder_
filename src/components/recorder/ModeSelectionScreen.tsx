@@ -100,16 +100,39 @@ export const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
       className="w-full min-h-[calc(100vh-4rem)] flex flex-col items-center bg-slate-50 dark:bg-[#07090c] text-slate-900 dark:text-white transition-colors"
     >
       {/* Primary Above-the-Fold Hero: Mode Selection */}
-      <div className="w-full min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center px-4 sm:px-8 py-10 relative overflow-hidden select-none">
+      <div className="w-full flex flex-col items-center justify-center px-4 sm:px-8 pt-6 pb-14 sm:pt-10 sm:pb-18 relative select-none">
+        {/* Subtle Google Labs Ambient Hero Gradient */}
+        <div
+          aria-hidden="true"
+          className="absolute top-0 inset-x-0 h-64 pointer-events-none bg-gradient-to-b from-slate-200/50 via-slate-100/20 to-transparent dark:from-white/[0.06] dark:via-white/[0.015] dark:to-transparent z-0"
+        />
         <div className="relative z-10 max-w-5xl w-full flex flex-col items-center text-center space-y-8">
           {/* Minimal Header */}
-          <div className="space-y-1.5 max-w-xl">
+          <div className="space-y-2.5 max-w-xl flex flex-col items-center">
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
               {t.hero.title}
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400">
               {t.hero.subtitle}
             </p>
+
+            {/* Better Launch Live Badge */}
+            <div className="pt-1.5 flex justify-center">
+              <a
+                href="https://www.betterlaunch.co/product/fsr-studio-free-screen-record"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group inline-flex items-center transition-all duration-200 hover:scale-[1.03] active:scale-[0.98] drop-shadow-xs hover:drop-shadow-md"
+              >
+                <img
+                  src="https://www.betterlaunch.co/badge-live-light.svg"
+                  alt="Better Launch"
+                  width="200"
+                  height="56"
+                  className="h-10 sm:h-11 w-auto object-contain rounded-lg"
+                />
+              </a>
+            </div>
           </div>
 
           {/* 4 Visual Cards Grid */}

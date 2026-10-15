@@ -119,4 +119,191 @@ html.dark ::-webkit-scrollbar-thumb:hover {
     linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
 }
 
+/* ==========================================================================
+   Google Labs Header System: Exact Properties, Blur & Interaction
+   Source: https://labs.google/
+   ========================================================================== */
+
+:root {
+  --nav-height: 3.75rem;
+  --nav-padding-block: 0.5rem;
+  --nav-padding-inline: 1rem;
+  --scrollbar-width: 0px;
+}
+
+@media (min-width: 640px) {
+  :root {
+    --nav-height: 4rem;
+    --nav-padding-block: 0.625rem;
+    --nav-padding-inline: 1.5rem;
+  }
+}
+
+/* Base Header */
+.header {
+  background-color: transparent;
+  position: relative;
+  min-height: var(--nav-height);
+  z-index: 40;
+  width: 100%;
+}
+
+.header.surface--dark {
+  --icon-border: rgba(243, 239, 234, 0.15);
+  --icon-hover-bg: rgba(243, 239, 234, 0.1);
+  position: relative;
+}
+
+.header.surface--light {
+  --icon-border: rgba(50, 50, 50, 0.15);
+  --icon-hover-bg: rgba(50, 50, 50, 0.08);
+  position: relative;
+}
+
+/* Fixed Header Container matching Google Labs */
+.header .container,
+.header .header__nav {
+  box-sizing: border-box;
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  padding: var(--nav-padding-block) var(--nav-padding-inline);
+  position: fixed;
+  left: 0 !important;
+  right: var(--scrollbar-width, 0px) !important;
+  top: 0;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  min-height: var(--nav-height);
+  z-index: 50;
+  pointer-events: auto;
+}
+
+/* Google Labs Multi-Layer Progressive Blur Container */
+.header__blur {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  width: 100vw;
+  height: calc(var(--nav-height) + 1.8rem);
+  pointer-events: none;
+  z-index: 0;
+  display: block;
+  overflow: visible;
+  will-change: transform;
+}
+
+.header.surface--dark .header__blur,
+.header.surface--light .header__blur,
+.header.surface--auto .header__blur {
+  display: block;
+}
+
+/* Google Labs Exact 5-Layer Progressive Blur System:
+   - 100% pure transparent background (#0000) with zero color tinting or muddy wash
+   - Staggered backdrop-filter blur intensities (4px, 6px, 10px, 18px, 34px)
+   - Staggered gradient masks that feather seamlessly down to 100% transparency at the bottom edge
+*/
+.header__blur-layer {
+  position: absolute;
+  inset: 0;
+  background: #0000;
+  backdrop-filter: blur(var(--blur));
+  -webkit-backdrop-filter: blur(var(--blur));
+  mask-repeat: no-repeat;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+  pointer-events: none;
+  transform: translateZ(0);
+}
+
+.header__blur-layer--1 {
+  --blur: 4px;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  mask-image: linear-gradient(to bottom, transparent 0%, transparent 40%, #000 60%, #000 80%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, transparent 40%, #000 60%, #000 80%, transparent 100%);
+}
+
+.header__blur-layer--2 {
+  --blur: 6px;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  mask-image: linear-gradient(to bottom, transparent 0%, transparent 20%, #000 40%, #000 60%, transparent 80%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, transparent 20%, #000 40%, #000 60%, transparent 80%, transparent 100%);
+}
+
+.header__blur-layer--3 {
+  --blur: 10px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  mask-image: linear-gradient(to bottom, transparent 0%, #000 20%, #000 40%, transparent 60%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 20%, #000 40%, transparent 60%, transparent 100%);
+}
+
+.header__blur-layer--4 {
+  --blur: 18px;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 20%, transparent 40%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 20%, transparent 40%, transparent 100%);
+}
+
+.header__blur-layer--5 {
+  --blur: 34px;
+  backdrop-filter: blur(34px);
+  -webkit-backdrop-filter: blur(34px);
+  mask-image: linear-gradient(to bottom, #000 0%, transparent 20%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent 20%, transparent 100%);
+}
+
+/* Google Labs Scroll Interaction: Smooth Hide on Scroll Down, Reveal on Scroll Up */
+.header[data-open="false"][data-can-hide="true"] .header__nav,
+.header[data-open="false"][data-can-hide="true"] .container,
+.header[data-open="false"][data-can-hide="true"] .header__blur {
+  transform: translateY(-200%);
+  transition: 0.3s transform ease-in-out;
+}
+
+.header[data-open="false"][data-can-hide="false"] .header__nav,
+.header[data-open="false"][data-can-hide="false"] .container,
+.header[data-open="false"][data-can-hide="false"] .header__blur {
+  transform: translateY(0);
+  transition: 0.3s transform ease-in-out;
+}
+
+/* Google Labs Interaction Colors */
+.header.surface--dark[data-open="false"] .header__nav button,
+.header.surface--dark[data-open="false"] .header__nav a,
+.header.surface--dark[data-open="false"] .container button,
+.header.surface--dark[data-open="false"] .container a {
+  color: #fff;
+}
+.header.surface--dark[data-open="false"] .header__nav a:hover,
+.header.surface--dark[data-open="false"] .header__nav button:hover,
+.header.surface--dark[data-open="false"] .container a:hover,
+.header.surface--dark[data-open="false"] .container button:hover {
+  color: #ccc;
+}
+
+.header.surface--light[data-open="false"] .header__nav button,
+.header.surface--light[data-open="false"] .header__nav a,
+.header.surface--light[data-open="false"] .container button,
+.header.surface--light[data-open="false"] .container a {
+  color: #1e293b;
+}
+.header.surface--light[data-open="false"] .header__nav a:hover,
+.header.surface--light[data-open="false"] .header__nav button:hover,
+.header.surface--light[data-open="false"] .container a:hover,
+.header.surface--light[data-open="false"] .container button:hover {
+  color: #475569;
+}
+
+
+
+
 

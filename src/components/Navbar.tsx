@@ -58,6 +58,40 @@ export const Navbar: React.FC<NavbarProps> = ({
   const { resolvedTheme, toggleTheme } = useTheme();
   const { t } = useLanguage();
 
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [canHide, setCanHide] = useState(false);
+  const prevYRef = useRef(0);
+  const rafPendingRef = useRef(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 12);
+
+      if (rafPendingRef.current) return;
+      rafPendingRef.current = true;
+      requestAnimationFrame(() => {
+        const currentY = window.scrollY;
+        const deltaY = currentY - prevYRef.current;
+        // Google Labs scroll interaction: deltaY > 8 and scrolled down hides, deltaY < -4 or near top reveals
+        if (!isRecording) {
+          if (deltaY > 8 && currentY > 50) {
+            setCanHide(true);
+          } else if (deltaY < -4 || currentY <= 15) {
+            setCanHide(false);
+          }
+        } else {
+          setCanHide(false);
+        }
+        prevYRef.current = currentY;
+        rafPendingRef.current = false;
+      });
+    };
+
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isRecording]);
+
   const recordingModes: {
     id: RecordingMode;
     tooltip: string;
@@ -183,7 +217,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           id="header-mode-switcher"
           role="radiogroup"
           aria-label="Recording Mode Switcher"
-          className="flex items-center p-0.5 sm:p-1 bg-slate-100/90 dark:bg-zinc-900/90 rounded-full border border-slate-200/90 dark:border-white/10 shadow-xs backdrop-blur-md gap-0.5"
+          className="flex items-center p-0.5 sm:p-1 bg-slate-200/50 dark:bg-white/5 rounded-full border border-slate-300/60 dark:border-white/10 shadow-xs backdrop-blur-md gap-0.5"
         >
           {recordingModes.map((item) => {
             const isSelected = mode === item.id;
@@ -229,10 +263,22 @@ export const Navbar: React.FC<NavbarProps> = ({
   return (
     <header
       id="main-navbar"
-      className="sticky top-0 z-40 w-full relative bg-white/90 dark:bg-[#000000]/95 backdrop-blur-xl border-b border-slate-200/80 dark:border-white/10 transition-all select-none shadow-[0_1px_6px_rgba(0,0,0,0.03)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.4)]"
+      className={`header ${resolvedTheme === 'dark' ? 'surface--dark' : 'surface--light'}`}
+      data-can-hide={canHide ? 'true' : 'false'}
+      data-open="false"
     >
-      <div className="max-w-7xl mx-auto h-13 sm:h-14 px-2 sm:px-6 flex items-center justify-between gap-1 sm:gap-4 relative">
-        {/* ── LEFT: Clean Brand Identity ── */}
+      <nav aria-label="Main navigation" className="header__nav">
+        {/* Google Labs Multi-Layer Progressive Blur System */}
+        <div aria-hidden="true" className="header__blur">
+          <span className="header__blur-layer header__blur-layer--1" />
+          <span className="header__blur-layer header__blur-layer--2" />
+          <span className="header__blur-layer header__blur-layer--3" />
+          <span className="header__blur-layer header__blur-layer--4" />
+          <span className="header__blur-layer header__blur-layer--5" />
+        </div>
+
+        <div className="max-w-7xl mx-auto w-full h-13 sm:h-14 px-2 sm:px-6 flex items-center justify-between gap-1 sm:gap-4 relative z-10">
+          {/* ── LEFT: Clean Brand Identity ── */}
         <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0 z-10">
           <button
             id="brand-logo-btn"
@@ -291,7 +337,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             className={`items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-xs font-semibold rounded-xl border transition-all cursor-pointer active:scale-95 ${
               activeView === 'library'
                 ? 'bg-[#000000] dark:bg-white text-white dark:text-[#000000] border-[#000000] dark:border-white shadow-xs'
-                : 'bg-white dark:bg-[#000000] hover:bg-slate-50 dark:hover:bg-zinc-900 text-slate-700 dark:text-zinc-300 border-slate-200/90 dark:border-white/10 shadow-xs'
+                : 'bg-white/70 dark:bg-white/5 hover:bg-white/90 dark:hover:bg-white/10 text-slate-700 dark:text-zinc-300 border-slate-200/90 dark:border-white/10 shadow-xs backdrop-blur-md'
             } ${isRecording ? 'opacity-50 cursor-not-allowed' : ''} ${
               hasSelectedInitialMode && activeView === 'studio' ? 'hidden sm:flex' : 'flex'
             }`}
@@ -319,7 +365,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             aria-label="Toggle theme"
             onClick={toggleTheme}
             title={resolvedTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-            className="sm:hidden flex items-center justify-center w-7 h-7 rounded-full bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-slate-700 dark:text-zinc-200 cursor-pointer active:scale-95 shadow-xs"
+            className="sm:hidden flex items-center justify-center w-7 h-7 rounded-full bg-slate-200/60 dark:bg-zinc-800/80 backdrop-blur-md border border-slate-300/70 dark:border-zinc-700 text-slate-700 dark:text-zinc-200 cursor-pointer active:scale-95 shadow-xs"
           >
             {resolvedTheme === 'dark' ? (
               <Sun01Icon className="w-3.5 h-3.5 text-amber-500" />
@@ -337,7 +383,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             aria-label="Toggle theme"
             onClick={toggleTheme}
             title={resolvedTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-            className="hidden sm:inline-flex relative items-center justify-between w-[52px] h-7 p-1 rounded-full bg-slate-200/90 dark:bg-zinc-800 border border-slate-300/80 dark:border-zinc-700/80 cursor-pointer transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 shadow-xs active:scale-95"
+            className="hidden sm:inline-flex relative items-center justify-between w-[52px] h-7 p-1 rounded-full bg-slate-200/70 dark:bg-zinc-900/80 backdrop-blur-md border border-slate-300/80 dark:border-zinc-700/80 cursor-pointer transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 shadow-xs active:scale-95"
           >
             {/* Sun slot on left */}
             <span className="w-5 h-5 flex items-center justify-center pointer-events-none">
@@ -422,6 +468,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           )}
         </div>
       </div>
+      </nav>
     </header>
   );
 };

@@ -65,6 +65,23 @@ export const AppFooter: React.FC<AppFooterProps> = ({ onNavigate, activeView, is
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               <span>{f.clientSideNotice}</span>
             </div>
+            {/* Better Launch Badge */}
+            <div className="pt-2">
+              <a
+                href="https://www.betterlaunch.co/product/fsr-studio-free-screen-record"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block transition-transform duration-200 hover:scale-[1.03] active:scale-[0.98]"
+              >
+                <img
+                  src="https://www.betterlaunch.co/badge-live-light.svg"
+                  alt="Better Launch"
+                  width="200"
+                  height="56"
+                  className="h-10 w-auto object-contain rounded-lg"
+                />
+              </a>
+            </div>
           </div>
 
           {/* Column 1: Recording Presets */}

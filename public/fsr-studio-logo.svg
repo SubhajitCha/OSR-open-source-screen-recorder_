@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1c1917" />
+      <stop offset="50%" stop-color="#0a0a0a" />
+      <stop offset="100%" stop-color="#000000" />
+    </linearGradient>
+
+    <!-- Border Highlight -->
+    <linearGradient id="borderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#52525b" />
+      <stop offset="100%" stop-color="#27272a" />
+    </linearGradient>
+
+    <!-- Aperture Ring Gradient (#8DB355 to #FFEA93) -->
+    <linearGradient id="ringGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#8DB355" />
+      <stop offset="100%" stop-color="#FFEA93" />
+    </linearGradient>
+
+    <!-- Inner Core Red Recording Dot Gradient -->
+    <radialGradient id="recDot" cx="38%" cy="38%" r="62%">
+      <stop offset="0%" stop-color="#ff4d4d" />
+      <stop offset="60%" stop-color="#D90000" />
+      <stop offset="100%" stop-color="#8a0000" />
+    </radialGradient>
+
+    <!-- Subtle Red Glow -->
+    <radialGradient id="recGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#D90000" stop-opacity="0.35" />
+      <stop offset="100%" stop-color="#D90000" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+
+  <!-- Dark Squircle Container -->
+  <rect x="20" y="20" width="472" height="472" rx="120" ry="120" fill="url(#bgGrad)" stroke="url(#borderGrad)" stroke-width="14" />
+
+  <!-- Outer Ambient Glow behind Lens -->
+  <circle cx="256" cy="256" r="160" fill="url(#recGlow)" />
+
+  <!-- Aperture Outer Ring -->
+  <circle cx="256" cy="256" r="116" fill="none" stroke="url(#ringGrad)" stroke-width="26" />
+
+  <!-- Inner Dark Lens Housing -->
+  <circle cx="256" cy="256" r="92" fill="#000000" />
+
+  <!-- Recording Center Red Core -->
+  <circle cx="256" cy="256" r="64" fill="url(#recDot)" />
+
+  <!-- Lens Glint / Specular Highlight -->
+  <ellipse cx="236" cy="232" rx="22" ry="12" fill="#ffffff" opacity="0.35" transform="rotate(-25 236 232)" />
+</svg>

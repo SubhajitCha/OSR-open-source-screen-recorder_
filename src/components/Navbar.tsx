@@ -65,18 +65,21 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 12);
+      const currentY = window.scrollY;
+      setIsScrolled(currentY > 8);
 
       if (rafPendingRef.current) return;
       rafPendingRef.current = true;
       requestAnimationFrame(() => {
-        const currentY = window.scrollY;
         const deltaY = currentY - prevYRef.current;
-        // Google Labs scroll interaction: deltaY > 8 and scrolled down hides, deltaY < -4 or near top reveals
+        // Google Labs scroll interaction:
+        // Keep header locked visible in hero area (< 180px) so cards pass behind frosted blur
         if (!isRecording) {
-          if (deltaY > 8 && currentY > 50) {
+          if (currentY < 180) {
+            setCanHide(false);
+          } else if (deltaY > 10 && currentY > 200) {
             setCanHide(true);
-          } else if (deltaY < -4 || currentY <= 15) {
+          } else if (deltaY < -5) {
             setCanHide(false);
           }
         } else {
@@ -265,18 +268,19 @@ export const Navbar: React.FC<NavbarProps> = ({
       id="main-navbar"
       className={`header ${resolvedTheme === 'dark' ? 'surface--dark' : 'surface--light'}`}
       data-can-hide={canHide ? 'true' : 'false'}
+      data-scrolled={isScrolled ? 'true' : 'false'}
       data-open="false"
     >
-      <nav aria-label="Main navigation" className="header__nav">
-        {/* Google Labs Multi-Layer Progressive Blur System */}
-        <div aria-hidden="true" className="header__blur">
-          <span className="header__blur-layer header__blur-layer--1" />
-          <span className="header__blur-layer header__blur-layer--2" />
-          <span className="header__blur-layer header__blur-layer--3" />
-          <span className="header__blur-layer header__blur-layer--4" />
-          <span className="header__blur-layer header__blur-layer--5" />
-        </div>
+      {/* Google Labs Multi-Layer Progressive Blur System */}
+      <div aria-hidden="true" className="header__blur">
+        <span className="header__blur-layer header__blur-layer--1" />
+        <span className="header__blur-layer header__blur-layer--2" />
+        <span className="header__blur-layer header__blur-layer--3" />
+        <span className="header__blur-layer header__blur-layer--4" />
+        <span className="header__blur-layer header__blur-layer--5" />
+      </div>
 
+      <nav aria-label="Main navigation" className="header__nav">
         <div className="max-w-7xl mx-auto w-full h-13 sm:h-14 px-2 sm:px-6 flex items-center justify-between gap-1 sm:gap-4 relative z-10">
           {/* ── LEFT: Clean Brand Identity ── */}
         <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0 z-10">

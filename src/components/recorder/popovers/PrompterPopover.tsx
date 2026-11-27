@@ -19,7 +19,7 @@ export const PrompterPopover: React.FC<PrompterPopoverProps> = ({
 
   return (
     <div
-      className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 w-80 bg-white dark:bg-[#151718] text-slate-900 dark:text-white rounded-2xl border border-slate-200 dark:border-white/10 shadow-2xl shadow-slate-900/15 dark:shadow-black/60 p-4 z-50 backdrop-blur-xl animate-in fade-in zoom-in-95 duration-150"
+      className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 w-80 bg-white dark:bg-[#232936] text-slate-900 dark:text-white rounded-2xl border border-slate-200 dark:border-white/15 shadow-2xl shadow-slate-900/15 dark:shadow-black/45 p-4 z-50 backdrop-blur-xl animate-in fade-in zoom-in-95 duration-150"
       onClick={(e) => e.stopPropagation()}
     >
       <div className="flex items-center justify-between pb-2.5 mb-3 border-b border-slate-100 dark:border-white/10">
@@ -42,7 +42,7 @@ export const PrompterPopover: React.FC<PrompterPopoverProps> = ({
 
       <div className="space-y-3">
         {/* Enable Prompter Toggle */}
-        <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10">
+        <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.07] border border-slate-200 dark:border-white/10">
           <span className="text-xs font-semibold text-slate-700 dark:text-zinc-200">
             Show Floating Script
           </span>
@@ -69,7 +69,7 @@ export const PrompterPopover: React.FC<PrompterPopoverProps> = ({
             value={prompter.text}
             onChange={(e) => onUpdatePrompter({ text: e.target.value })}
             placeholder="Type or paste your script here..."
-            className="w-full p-2.5 rounded-xl bg-slate-50 dark:bg-black/30 border border-slate-200 dark:border-white/10 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 resize-none font-sans"
+            className="w-full p-2.5 rounded-xl bg-slate-50 dark:bg-[#1B202B] border border-slate-200 dark:border-white/15 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 resize-none font-sans"
           />
         </div>
 

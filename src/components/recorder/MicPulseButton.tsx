@@ -200,11 +200,11 @@ export const MicPulseButton: React.FC<MicPulseButtonProps> = ({
           const btnScale = 1 + smoothedEnergy * 0.025;
           buttonCoreRef.current.style.transform = `scale(${btnScale.toFixed(4)})`;
 
-          // Vibrant, luminous sage glow shadow proportional to frequency intensity
-          const innerSpread = Math.round(8 + smoothedEnergy * 14);
-          const outerSpread = Math.round(18 + smoothedEnergy * 20);
-          const innerAlpha = (0.45 + smoothedEnergy * 0.35).toFixed(3);
-          const outerAlpha = (0.22 + smoothedEnergy * 0.3).toFixed(3);
+          // Crisp, sharper green shadow proportional to voice frequency intensity
+          const innerSpread = Math.round(3 + smoothedEnergy * 6);
+          const outerSpread = Math.round(7 + smoothedEnergy * 10);
+          const innerAlpha = (0.5 + smoothedEnergy * 0.35).toFixed(3);
+          const outerAlpha = (0.28 + smoothedEnergy * 0.28).toFixed(3);
           buttonCoreRef.current.style.boxShadow = `0 0 ${innerSpread}px rgba(141, 179, 85, ${innerAlpha}), 0 0 ${outerSpread}px rgba(141, 179, 85, ${outerAlpha})`;
         }
 
@@ -231,9 +231,9 @@ export const MicPulseButton: React.FC<MicPulseButtonProps> = ({
         }
 
         if (glowRef.current) {
-          // Luminous Radial Backlight Aura
-          const glowScale = 1 + smoothedEnergy * 0.08;
-          const glowOpacity = isMicActive ? (0.35 + smoothedEnergy * 0.45).toFixed(3) : '0';
+          // Tight, sharper backlight edge glow
+          const glowScale = 1 + smoothedEnergy * 0.05;
+          const glowOpacity = isMicActive ? (0.22 + smoothedEnergy * 0.38).toFixed(3) : '0';
           glowRef.current.style.transform = `scale(${glowScale.toFixed(4)})`;
           glowRef.current.style.opacity = glowOpacity;
         }
@@ -275,27 +275,27 @@ export const MicPulseButton: React.FC<MicPulseButtonProps> = ({
 
   return (
     <div ref={containerRef} className="relative flex items-center justify-center isolate">
-      {/* 1. SOFT SECONDARY AURA RING */}
+      {/* 1. SECONDARY AURA RING */}
       <div
         ref={ring2Ref}
         className="absolute inset-0 rounded-full border border-[#8DB355]/30 bg-[#8DB355]/5 pointer-events-none -z-20 transition-transform duration-75 will-change-transform"
         style={{ transform: 'scale(1)', opacity: 0 }}
       />
 
-      {/* 2. SOFT PRIMARY HARMONIC RING */}
+      {/* 2. PRIMARY HARMONIC RING */}
       <div
         ref={ring1Ref}
-        className="absolute inset-0 rounded-full border border-[#8DB355]/70 bg-[#8DB355]/15 shadow-[0_0_12px_rgba(141,179,85,0.35)] pointer-events-none -z-10 transition-transform duration-75 will-change-transform"
+        className="absolute inset-0 rounded-full border border-[#8DB355]/70 bg-[#8DB355]/15 shadow-[0_0_7px_rgba(141,179,85,0.4)] pointer-events-none -z-10 transition-transform duration-75 will-change-transform"
         style={{ transform: 'scale(1)', opacity: 0 }}
       />
 
-      {/* 3. LUMINOUS RADIAL BACKLIGHT GLOW */}
+      {/* 3. SHARPER BACKLIGHT EDGE GLOW */}
       <div
         ref={glowRef}
-        className={`absolute -inset-1 rounded-full blur-sm pointer-events-none -z-10 transition-opacity duration-150 ${
+        className={`absolute inset-0 rounded-full blur-[1.5px] pointer-events-none -z-10 transition-opacity duration-150 ${
           isMicActive ? 'bg-[#8DB355]' : 'bg-transparent'
         }`}
-        style={{ transform: 'scale(1)', opacity: isMicActive ? 0.35 : 0 }}
+        style={{ transform: 'scale(1)', opacity: isMicActive ? 0.24 : 0 }}
       />
 
       {/* 4. MAIN MIC BUTTON (Switch Toggle) */}
@@ -308,7 +308,7 @@ export const MicPulseButton: React.FC<MicPulseButtonProps> = ({
           }
           onClick();
         }}
-        title={
+        aria-label={
           isMicBlocked
             ? 'Microphone blocked by browser — click to allow'
             : isMicActive
@@ -342,7 +342,7 @@ export const MicPulseButton: React.FC<MicPulseButtonProps> = ({
       {/* 5. DEDICATED CHEVRON DROPDOWN BUTTON FOR MIC DEVICE SELECTION */}
       <button
         type="button"
-        title="Choose Microphone Device & Settings"
+        aria-label="Choose Microphone Device & Settings"
         onClick={(e) => {
           e.stopPropagation();
           onTogglePopover(e);
@@ -351,8 +351,8 @@ export const MicPulseButton: React.FC<MicPulseButtonProps> = ({
           size === 'sm' ? '-bottom-0.5 -right-0.5 w-4.5 h-4.5' : '-bottom-0.5 -right-1 w-5 h-5'
         } rounded-full flex items-center justify-center border shadow-xs cursor-pointer hover:scale-115 transition-all z-20 ${
           isPopoverOpen
-            ? 'bg-zinc-800 dark:bg-white text-white dark:text-zinc-950 border-zinc-700 dark:border-white'
-            : 'bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 border-slate-300 dark:border-white/20 hover:bg-slate-100 dark:hover:bg-zinc-700'
+            ? 'bg-slate-800 dark:bg-[#31394D] text-white border-slate-700 dark:border-white/30'
+            : 'bg-white dark:bg-[#2E3546] text-slate-700 dark:text-zinc-200 border-slate-300 dark:border-white/20 hover:bg-slate-100 dark:hover:bg-[#3B4459]'
         }`}
       >
         <ArrowDown01Icon className={size === 'sm' ? 'w-2.5 h-2.5 stroke-[2.5]' : 'w-3 h-3 stroke-[2.5]'} />

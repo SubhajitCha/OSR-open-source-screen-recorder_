@@ -1,6 +1,6 @@
 import { AudioSettings, CompositionLayout, PipConfig, RecorderBackgroundConfig, RecordingMode, VideoBookmark, VideoSettings, RecordingMetadata } from '../types';
 import { createAudioMixer, AudioMixerController } from './audioMixer';
-import { createStreamCompositor, CompositorController } from './streamCompositor';
+import { createStreamCompositor, waitForScreenStreamDimensions, CompositorController } from './streamCompositor';
 import { fixWebmDuration } from './webmDurationFixer';
 import { CursorTracker } from './cursorTracker';
 import { EventTracker, buildRecordingMetadata } from './eventTracker';
@@ -57,7 +57,8 @@ export class RecorderEngine {
       micStream?: MediaStream | null;
     },
     layout: CompositionLayout = 'framed',
-    background?: RecorderBackgroundConfig
+    background?: RecorderBackgroundConfig,
+    aspectRatio: import('../types').RecorderAspectRatio = '16:9'
   ): Promise<{ webcamStream: MediaStream | null; screenStream: MediaStream | null; micStream: MediaStream | null }> {
     if (this.isStarting || this.isRecording) {
       console.warn('RecorderEngine: prepareStreams called while already starting or recording.');
@@ -208,24 +209,47 @@ export class RecorderEngine {
         audioSettings.systemVolume
       );
 
-      // 4. Setup Video Stream & Compositor
+      // 4. Wait briefly for settled screen frame dimensions before creating compositor or MediaRecorder
+      // (ensures macOS Retina / 16:10 streams never lock MediaRecorder onto a 1920x1080 fallback)
+      let resolvedScreenDims: { width: number; height: number } | null = null;
+      let displaySurface: string | undefined;
+      if ((mode === 'screen' || mode === 'screen_cam') && this.screenStream) {
+        const screenTrack = this.screenStream.getVideoTracks()[0];
+        displaySurface = (screenTrack?.getSettings() as { displaySurface?: string } | undefined)?.displaySurface;
+        resolvedScreenDims = await waitForScreenStreamDimensions(this.screenStream, 450);
+      }
+
+      // 5. Setup Video Stream & Compositor
       let finalVideoStream: MediaStream;
+      const isFixedMonitorSurface = !displaySurface || displaySurface === 'monitor';
 
       if (mode === 'audio_only') {
         finalVideoStream = new MediaStream();
       } else if (mode === 'cam_only') {
         finalVideoStream = this.webcamStream || new MediaStream();
+      } else if (
+        mode === 'screen' &&
+        (layout === 'overlay' || layout === 'screen') &&
+        aspectRatio === '16:9' &&
+        isFixedMonitorSurface &&
+        this.screenStream
+      ) {
+        // Direct hardware passthrough for fixed monitor shares when no camera PiP, background framing, or custom aspect ratio is needed
+        finalVideoStream = this.screenStream;
       } else if ((mode === 'screen_cam' || mode === 'screen') && this.screenStream) {
-        // Compose Screen (+ Camera if available) into resilient worker-driven compositor
-        // This guarantees continuous 60/30fps rendering even when switching tabs, windows, or monitors
+        // Compose Screen (+ Camera if available) into cached-background compositor
         this.compositor = createStreamCompositor(
           this.screenStream,
           this.webcamStream,
           pipConfig,
-          videoSettings.fps || 60,
+          videoSettings.fps || 30,
           layout,
-          background
+          background,
+          videoSettings.resolution,
+          aspectRatio,
+          resolvedScreenDims
         );
+        await this.compositor.waitForFirstFrame(350);
         finalVideoStream = this.compositor.stream;
       } else {
         finalVideoStream = this.screenStream || this.webcamStream || new MediaStream();
@@ -290,7 +314,7 @@ export class RecorderEngine {
       this.mediaRecorder = new MediaRecorder(finalStream, recorderOptions);
       this.recordedChunks = [];
 
-      // Setup secondary isolated recorders if both screen and webcam are active
+      // Setup lightweight secondary isolated recorders if both screen and webcam are active
       if (this.screenStream && this.webcamStream) {
         try {
           const isolatedScreenStream = new MediaStream();
@@ -298,7 +322,11 @@ export class RecorderEngine {
           if (shouldAttachAudio && this.audioMixer) {
             this.audioMixer.destinationStream.getAudioTracks().forEach((track) => isolatedScreenStream.addTrack(track));
           }
-          this.screenRecorder = new MediaRecorder(isolatedScreenStream, recorderOptions);
+          const screenOpts: MediaRecorderOptions = {
+            mimeType,
+            videoBitsPerSecond: Math.min(videoSettings.bitrateMbps || 6, 4) * 1000000,
+          };
+          this.screenRecorder = new MediaRecorder(isolatedScreenStream, screenOpts);
           this.screenChunks = [];
           this.screenRecorder.ondataavailable = (ev) => {
             if (ev.data && ev.data.size > 0) {
@@ -313,7 +341,10 @@ export class RecorderEngine {
         try {
           const isolatedCamStream = new MediaStream();
           this.webcamStream.getVideoTracks().forEach((track) => isolatedCamStream.addTrack(track));
-          this.camRecorder = new MediaRecorder(isolatedCamStream, { mimeType });
+          this.camRecorder = new MediaRecorder(isolatedCamStream, {
+            mimeType,
+            videoBitsPerSecond: 1200000,
+          });
           this.camChunks = [];
           this.camRecorder.ondataavailable = (ev) => {
             if (ev.data && ev.data.size > 0) {
@@ -423,18 +454,18 @@ export class RecorderEngine {
       throw new Error('No media streams prepared for recording.');
     }
     if (this.mediaRecorder.state === 'inactive') {
-      this.mediaRecorder.start(1000);
+      this.mediaRecorder.start(3000);
     }
     if (this.screenRecorder && this.screenRecorder.state === 'inactive') {
       try {
-        this.screenRecorder.start(1000);
+        this.screenRecorder.start(3000);
       } catch (e) {
         console.warn('screenRecorder start failed:', e);
       }
     }
     if (this.camRecorder && this.camRecorder.state === 'inactive') {
       try {
-        this.camRecorder.start(1000);
+        this.camRecorder.start(3000);
       } catch (e) {
         console.warn('camRecorder start failed:', e);
       }
@@ -658,27 +689,14 @@ export class RecorderEngine {
   private startTimer(): void {
     this.stopTimer();
 
-    let lastChunkRequestTime = Date.now();
-
     const onTick = () => {
       if (this.isRecording && !this.isPaused) {
         const dur = (Date.now() - this.startTime - this.totalPausedDuration) / 1000;
         this.callbacks.onTimeUpdate(dur);
-
-        // Background Watchdog: Periodically request data chunk if recording to avoid browser buffer stalling
-        const now = Date.now();
-        if (now - lastChunkRequestTime >= 2000) {
-          lastChunkRequestTime = now;
-          if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
-            try {
-              this.mediaRecorder.requestData();
-            } catch (_) {}
-          }
-        }
       }
     };
 
-    // Dedicated unthrottled Web Worker heartbeat for background execution
+    // Dedicated unthrottled Web Worker heartbeat for timer (falls back to setInterval if unavailable)
     try {
       const script = `
         let id = null;
@@ -687,7 +705,7 @@ export class RecorderEngine {
             if (!id) {
               id = setInterval(function() {
                 self.postMessage('tick');
-              }, 250);
+              }, 500);
             }
           } else if (e.data === 'stop') {
             if (id) {
@@ -703,10 +721,8 @@ export class RecorderEngine {
       this.timerWorker.onmessage = () => onTick();
       this.timerWorker.postMessage('start');
     } catch (_) {
-      // Fallback to window.setInterval if Web Worker is unavailable
+      this.timerInterval = window.setInterval(onTick, 500);
     }
-
-    this.timerInterval = window.setInterval(onTick, 250);
   }
 
   private stopTimer(): void {

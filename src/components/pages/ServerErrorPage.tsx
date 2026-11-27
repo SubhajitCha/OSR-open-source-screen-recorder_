@@ -122,7 +122,7 @@ export const ServerErrorPage: React.FC<ServerErrorPageProps> = ({
               if (onResetError) onResetError();
               onOpenStudio();
             }}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white hover:bg-slate-50 dark:bg-zinc-900 dark:hover:bg-zinc-800 text-slate-800 dark:text-zinc-200 border border-slate-200 dark:border-zinc-700 font-semibold text-sm transition-all shadow-xs active:scale-95 cursor-pointer"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white hover:bg-slate-50 dark:bg-[#252C3B] dark:hover:bg-[#31394D] text-slate-800 dark:text-zinc-200 border border-slate-200 dark:border-white/15 font-semibold text-sm transition-all shadow-xs active:scale-95 cursor-pointer"
           >
             <Home01Icon className="w-4 h-4" />
             <span>Go to Studio Home</span>
@@ -132,7 +132,7 @@ export const ServerErrorPage: React.FC<ServerErrorPageProps> = ({
             type="button"
             id="server-error-diagnostics-btn"
             onClick={() => onNavigate?.('services')}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white hover:bg-slate-50 dark:bg-zinc-900 dark:hover:bg-zinc-800 text-slate-800 dark:text-zinc-200 border border-slate-200 dark:border-zinc-700 font-semibold text-sm transition-all shadow-xs active:scale-95 cursor-pointer"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white hover:bg-slate-50 dark:bg-[#252C3B] dark:hover:bg-[#31394D] text-slate-800 dark:text-zinc-200 border border-slate-200 dark:border-white/15 font-semibold text-sm transition-all shadow-xs active:scale-95 cursor-pointer"
           >
             <CpuIcon className="w-4 h-4 text-blue-600 dark:text-blue-400" />
             <span>System Diagnostics</span>
@@ -141,7 +141,7 @@ export const ServerErrorPage: React.FC<ServerErrorPageProps> = ({
       </div>
 
       {/* Collapsible Error Inspector */}
-      <div className="mt-12 p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200/90 dark:border-zinc-800 space-y-4 shadow-xs">
+      <div className="mt-12 p-6 rounded-2xl bg-white dark:bg-[#1E232E] border border-slate-200/90 dark:border-white/10 space-y-4 shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="space-y-1">
             <h2 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
@@ -158,7 +158,7 @@ export const ServerErrorPage: React.FC<ServerErrorPageProps> = ({
               type="button"
               id="copy-error-details-btn"
               onClick={handleCopyDiagnostics}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-800 dark:text-zinc-200 transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-[#252C3B] dark:hover:bg-[#31394D] text-slate-800 dark:text-zinc-200 transition-colors cursor-pointer"
             >
               {copied ? (
                 <>
@@ -195,7 +195,7 @@ export const ServerErrorPage: React.FC<ServerErrorPageProps> = ({
             <h3 className="text-xs font-bold text-slate-700 dark:text-zinc-300 uppercase tracking-wider">
               Component Stack Trace
             </h3>
-            <pre className="p-4 rounded-xl bg-slate-950 text-slate-200 font-mono text-xs overflow-x-auto max-h-72 leading-relaxed border border-slate-800 select-all">
+            <pre className="p-4 rounded-xl bg-[#12161E] text-slate-200 font-mono text-xs overflow-x-auto max-h-72 leading-relaxed border border-white/10 select-all">
               {errorStack}
             </pre>
           </div>
@@ -203,7 +203,7 @@ export const ServerErrorPage: React.FC<ServerErrorPageProps> = ({
       </div>
 
       {/* Helpful Guidance Card */}
-      <div className="mt-8 p-5 rounded-xl bg-slate-50 dark:bg-zinc-900/50 border border-slate-200/80 dark:border-zinc-800/80 flex items-start gap-3.5 text-xs text-slate-600 dark:text-zinc-400">
+      <div className="mt-8 p-5 rounded-xl bg-slate-50 dark:bg-[#1E232E] border border-slate-200/80 dark:border-white/10 flex items-start gap-3.5 text-xs text-slate-600 dark:text-zinc-400">
         <HelpCircleIcon className="w-5 h-5 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" />
         <div className="space-y-1.5">
           <span className="font-semibold text-slate-900 dark:text-white">

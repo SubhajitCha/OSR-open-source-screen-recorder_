@@ -170,29 +170,34 @@ export const Inspector: React.FC<InspectorProps> = ({
   return (
     <aside
       style={{ width: isCollapsed ? 0 : width }}
-      className={`shrink-0 bg-white dark:bg-[#121215] border-r border-slate-200 dark:border-zinc-800 flex flex-col h-full overflow-hidden select-none text-slate-800 dark:text-[#EDEDED] font-sans transition-[width] duration-300 ${
+      className={`shrink-0 bg-white dark:bg-[#1E232E] border-r border-slate-200 dark:border-white/10 flex flex-col h-full overflow-hidden select-none text-slate-800 dark:text-[#EDEDED] font-sans transition-[width] duration-300 ${
         isCollapsed ? 'w-0 border-r-0 pointer-events-none ease-out' : 'ease-in'
       } relative`}
     >
       {/* Sidebar Header */}
-      <div className="px-4 py-3 border-b border-slate-200 dark:border-zinc-800 flex items-center justify-between transition-colors bg-slate-50/50 dark:bg-zinc-900/30 shrink-0">
+      <div className="px-4 py-3 border-b border-slate-200 dark:border-white/10 flex items-center justify-between transition-colors bg-slate-50/50 dark:bg-[#232936]/60 shrink-0">
         <h3 className="font-bold text-xs text-slate-900 dark:text-white tracking-wider uppercase flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-[#D90000]" />
           <span>{t.editor?.studioTools || 'STUDIO TOOLS'}</span>
         </h3>
         <div className="flex items-center gap-1.5">
-          <span className="text-[10px] font-mono text-slate-500 dark:text-zinc-400 bg-white dark:bg-zinc-900 px-2 py-0.5 rounded border border-slate-200 dark:border-zinc-700 font-semibold shadow-2xs">
+          <span className="text-[10px] font-mono text-slate-500 dark:text-zinc-400 bg-white dark:bg-[#252C3B] px-2 py-0.5 rounded border border-slate-200 dark:border-white/10 font-semibold shadow-2xs">
             {t.editor?.inspector || 'INSPECTOR'}
           </span>
           {onToggleCollapse && (
-            <button
-              type="button"
-              onClick={onToggleCollapse}
-              className="p-1 rounded-md text-slate-400 hover:text-slate-700 dark:text-zinc-400 dark:hover:text-zinc-200 hover:bg-slate-200/60 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
-              title="Minimize studio tools"
-            >
-              <ArrowLeft01Icon className="w-3.5 h-3.5" />
-            </button>
+            <div className="relative group">
+              <button
+                type="button"
+                onClick={onToggleCollapse}
+                className="p-1 rounded-md text-slate-400 hover:text-slate-700 dark:text-zinc-400 dark:hover:text-zinc-200 hover:bg-slate-200/60 dark:hover:bg-[#2B3242] transition-colors cursor-pointer"
+                aria-label="Minimize studio tools"
+              >
+                <ArrowLeft01Icon className="w-3.5 h-3.5" />
+              </button>
+              <div className="pointer-events-none opacity-0 group-hover:opacity-100 transition-all duration-150 absolute top-full right-0 mt-1.5 px-2.5 py-1 rounded-lg bg-slate-900/95 dark:bg-white/95 text-white dark:text-slate-950 text-xs font-semibold shadow-xl whitespace-nowrap z-50 border border-white/10 dark:border-black/10">
+                Minimize studio tools
+              </div>
+            </div>
           )}
         </div>
       </div>
@@ -200,10 +205,10 @@ export const Inspector: React.FC<InspectorProps> = ({
       {/* Accordion Scroll Body */}
       <div className="flex-1 overflow-y-auto p-3 space-y-3 text-xs">
         {/* SECTION 1: STAGE LAYOUT */}
-        <div className="bg-slate-50 dark:bg-zinc-900/60 rounded-xl border border-slate-200 dark:border-zinc-800 overflow-hidden shadow-xs">
+        <div className="bg-slate-50 dark:bg-[#232936]/75 rounded-xl border border-slate-200 dark:border-white/10 overflow-hidden shadow-xs">
           <div
             onClick={() => toggleSection('layout')}
-            className="p-3 flex items-center justify-between cursor-pointer hover:bg-slate-100/80 dark:hover:bg-zinc-800/60 transition-colors"
+            className="p-3 flex items-center justify-between cursor-pointer hover:bg-slate-100/80 dark:hover:bg-[#2B3242]/60 transition-colors"
           >
             <div className="flex items-center gap-2">
               <div className="p-1 rounded-md bg-[#D90000]/12 text-[#D90000] dark:bg-[#D90000]/20 dark:text-[#FF6666]">
@@ -221,7 +226,7 @@ export const Inspector: React.FC<InspectorProps> = ({
           </div>
 
           {openSections.layout && (
-            <div className="px-3 pb-3 pt-2 space-y-3 border-t border-slate-200 dark:border-zinc-800">
+            <div className="px-3 pb-3 pt-2 space-y-3 border-t border-slate-200 dark:border-white/10">
               {/* Layout Grid */}
               <div className="grid grid-cols-2 gap-2">
                 {layoutPresets.map((item) => {
@@ -234,7 +239,7 @@ export const Inspector: React.FC<InspectorProps> = ({
                       className={`group relative flex flex-col p-2 rounded-xl text-left transition-all cursor-pointer border ${
                         isSelected
                           ? 'bg-[#8DB355]/10 border-[#8DB355] ring-2 ring-[#8DB355]/25 shadow-xs'
-                          : 'bg-white dark:bg-zinc-800/80 border-slate-200 dark:border-zinc-700 hover:border-slate-300 dark:hover:border-zinc-600'
+                          : 'bg-white dark:bg-[#2B3242] border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20'
                       }`}
                     >
                       {/* Graphical Layout Diagram */}
@@ -249,9 +254,9 @@ export const Inspector: React.FC<InspectorProps> = ({
                       >
                         {/* 1. End to End (Screen edge-to-edge, camera sitting flush at corner) */}
                         {item.type === 'end-to-end' && (
-                          <div className="relative w-full h-full bg-white dark:bg-zinc-800 flex flex-col items-center justify-center p-1.5">
-                            <div className="w-8 h-1 rounded-full bg-slate-300 dark:bg-zinc-600 mb-1" />
-                            <div className="w-5 h-1 rounded-full bg-slate-200 dark:bg-zinc-700" />
+                          <div className="relative w-full h-full bg-white dark:bg-[#252C3B] flex flex-col items-center justify-center p-1.5">
+                            <div className="w-8 h-1 rounded-full bg-slate-300 dark:bg-zinc-500/70 mb-1" />
+                            <div className="w-5 h-1 rounded-full bg-slate-200 dark:bg-zinc-600/70" />
 
                             <div className="absolute bottom-0 right-0 w-4.5 h-4.5 rounded-tl-md bg-slate-900 text-white border-t border-l border-white/20 flex items-center justify-center shadow-xs">
                               <svg viewBox="0 0 24 24" fill="currentColor" className="w-2.5 h-2.5 text-[#bef264]">
@@ -263,9 +268,9 @@ export const Inspector: React.FC<InspectorProps> = ({
 
                         {/* 2. Floating Corner (Screen edge-to-edge, floating camera with margin) */}
                         {item.type === 'corner-cam' && (
-                          <div className="relative w-full h-full bg-white dark:bg-zinc-800 flex flex-col items-center justify-center p-1.5">
-                            <div className="w-8 h-1 rounded-full bg-slate-300 dark:bg-zinc-600 mb-1" />
-                            <div className="w-5 h-1 rounded-full bg-slate-200 dark:bg-zinc-700" />
+                          <div className="relative w-full h-full bg-white dark:bg-[#252C3B] flex flex-col items-center justify-center p-1.5">
+                            <div className="w-8 h-1 rounded-full bg-slate-300 dark:bg-zinc-500/70 mb-1" />
+                            <div className="w-5 h-1 rounded-full bg-slate-200 dark:bg-zinc-600/70" />
 
                             <div className="absolute bottom-1 right-1.5 w-4 h-4 rounded-md bg-slate-900 text-white border border-white/20 flex items-center justify-center shadow-md">
                               <svg viewBox="0 0 24 24" fill="currentColor" className="w-2 h-2 text-[#bef264]">
@@ -278,9 +283,9 @@ export const Inspector: React.FC<InspectorProps> = ({
                         {/* 3. Spacing Around (Framed with visible background, corner camera) */}
                         {item.type === 'spaced' && (
                           <div className="relative w-full h-full flex items-center justify-center p-1.5">
-                            <div className="w-[82%] h-[82%] rounded-md bg-white dark:bg-zinc-900 border border-black/10 dark:border-white/10 shadow-sm flex flex-col items-center justify-center">
-                              <div className="w-6 h-1 rounded-full bg-slate-300 dark:bg-zinc-600 mb-0.5" />
-                              <div className="w-4 h-1 rounded-full bg-slate-200 dark:bg-zinc-700" />
+                            <div className="w-[82%] h-[82%] rounded-md bg-white dark:bg-[#1B202B] border border-black/10 dark:border-white/10 shadow-sm flex flex-col items-center justify-center">
+                              <div className="w-6 h-1 rounded-full bg-slate-300 dark:bg-zinc-500/70 mb-0.5" />
+                              <div className="w-4 h-1 rounded-full bg-slate-200 dark:bg-zinc-600/70" />
                             </div>
 
                             <div className="absolute bottom-1 left-1.5 w-4.5 h-4.5 rounded-md bg-slate-900 text-white border border-white/20 flex items-center justify-center shadow-xs">
@@ -300,9 +305,9 @@ export const Inspector: React.FC<InspectorProps> = ({
                               </svg>
                             </div>
 
-                            <div className="flex-1 h-[82%] rounded-md bg-white dark:bg-zinc-900 border border-black/10 dark:border-white/10 shadow-sm flex flex-col items-center justify-center">
-                              <div className="w-7 h-1 rounded-full bg-slate-300 dark:bg-zinc-600 mb-0.5" />
-                              <div className="w-4 h-1 rounded-full bg-slate-200 dark:bg-zinc-700" />
+                            <div className="flex-1 h-[82%] rounded-md bg-white dark:bg-[#1B202B] border border-black/10 dark:border-white/10 shadow-sm flex flex-col items-center justify-center">
+                              <div className="w-7 h-1 rounded-full bg-slate-300 dark:bg-zinc-500/70 mb-0.5" />
+                              <div className="w-4 h-1 rounded-full bg-slate-200 dark:bg-zinc-600/70" />
                             </div>
                           </div>
                         )}
@@ -340,7 +345,7 @@ export const Inspector: React.FC<InspectorProps> = ({
                       className={`py-1 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
                         appearance.aspectRatio === ratio
                           ? 'bg-[#D90000] border-[#D90000] text-white font-bold shadow-xs'
-                          : 'bg-white dark:bg-zinc-800/80 border-slate-200 dark:border-zinc-700 text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-700'
+                          : 'bg-white dark:bg-[#2B3242] border-slate-200 dark:border-white/10 text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-[#353E54]'
                       }`}
                     >
                       {ratio}
@@ -364,7 +369,7 @@ export const Inspector: React.FC<InspectorProps> = ({
                   step="4"
                   value={appearance.padding}
                   onChange={(e) => onUpdateAppearance({ padding: parseInt(e.target.value, 10) })}
-                  className="w-full h-1.5 bg-slate-200 dark:bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-[#D90000]"
+                  className="w-full h-1.5 bg-slate-200 dark:bg-white/15 rounded-lg appearance-none cursor-pointer accent-[#D90000]"
                 />
               </div>
 
@@ -383,13 +388,13 @@ export const Inspector: React.FC<InspectorProps> = ({
                   step="2"
                   value={appearance.borderRadius}
                   onChange={(e) => onUpdateAppearance({ borderRadius: parseInt(e.target.value, 10) })}
-                  className="w-full h-1.5 bg-slate-200 dark:bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-[#D90000]"
+                  className="w-full h-1.5 bg-slate-200 dark:bg-white/15 rounded-lg appearance-none cursor-pointer accent-[#D90000]"
                 />
               </div>
 
               {/* Camera Frame Controls (Position, Shape, Size) */}
               {(currentLayout === 'corner-cam' || project.source.camBlob) && (
-                <div className="pt-2 border-t border-slate-200/80 dark:border-zinc-800 space-y-2.5">
+                <div className="pt-2 border-t border-slate-200/80 dark:border-white/10 space-y-2.5">
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">
                       Presenter Camera
@@ -430,7 +435,7 @@ export const Inspector: React.FC<InspectorProps> = ({
                               className={`py-1 text-[10px] font-semibold rounded border transition-all cursor-pointer ${
                                 (appearance.cameraPosition || 'bottom-right') === pos.id
                                   ? 'bg-[#D90000] border-[#D90000] text-white font-bold'
-                                  : 'bg-white dark:bg-zinc-800 border-slate-200 dark:border-zinc-700 text-slate-700 dark:text-zinc-300'
+                                  : 'bg-white dark:bg-[#2B3242] border-slate-200 dark:border-white/10 text-slate-700 dark:text-zinc-300'
                               }`}
                             >
                               {pos.label}
@@ -459,7 +464,7 @@ export const Inspector: React.FC<InspectorProps> = ({
                               className={`py-1 text-[10px] font-semibold rounded border transition-all cursor-pointer ${
                                 (appearance.cameraShape || 'circle') === sh.id
                                   ? 'bg-[#8DB355] border-[#8DB355] text-white font-bold'
-                                  : 'bg-white dark:bg-zinc-800 border-slate-200 dark:border-zinc-700 text-slate-700 dark:text-zinc-300'
+                                  : 'bg-white dark:bg-[#2B3242] border-slate-200 dark:border-white/10 text-slate-700 dark:text-zinc-300'
                               }`}
                             >
                               {sh.label}
@@ -483,7 +488,7 @@ export const Inspector: React.FC<InspectorProps> = ({
                           step="1"
                           value={appearance.cameraSize || 25}
                           onChange={(e) => onUpdateAppearance({ cameraSize: parseInt(e.target.value, 10) })}
-                          className="w-full h-1 bg-slate-200 dark:bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-[#D90000]"
+                          className="w-full h-1 bg-slate-200 dark:bg-white/15 rounded-lg appearance-none cursor-pointer accent-[#D90000]"
                         />
                       </div>
                     </>
@@ -495,10 +500,10 @@ export const Inspector: React.FC<InspectorProps> = ({
         </div>
 
         {/* SECTION 2: CANVAS BACKGROUND */}
-        <div className="bg-slate-50 dark:bg-zinc-900/60 rounded-xl border border-slate-200 dark:border-zinc-800 overflow-hidden shadow-xs">
+        <div className="bg-slate-50 dark:bg-[#232936]/75 rounded-xl border border-slate-200 dark:border-white/10 overflow-hidden shadow-xs">
           <div
             onClick={() => toggleSection('background')}
-            className="p-3 flex items-center justify-between cursor-pointer hover:bg-slate-100/80 dark:hover:bg-zinc-800/60 transition-colors"
+            className="p-3 flex items-center justify-between cursor-pointer hover:bg-slate-100/80 dark:hover:bg-[#2B3242]/60 transition-colors"
           >
             <div className="flex items-center gap-2">
               <div className="p-1 rounded-md bg-[#D90000]/12 text-[#D90000] dark:bg-[#D90000]/20 dark:text-[#FF6666]">
@@ -516,9 +521,9 @@ export const Inspector: React.FC<InspectorProps> = ({
           </div>
 
           {openSections.background && (
-            <div className="px-3 pb-3 pt-2 space-y-3 border-t border-slate-200 dark:border-zinc-800">
+            <div className="px-3 pb-3 pt-2 space-y-3 border-t border-slate-200 dark:border-white/10">
               {/* Category Tabs */}
-              <div className="flex items-center gap-1 p-0.5 rounded-lg bg-slate-200/70 dark:bg-zinc-800/80 border border-slate-300/60 dark:border-zinc-700/60">
+              <div className="flex items-center gap-1 p-0.5 rounded-lg bg-slate-200/70 dark:bg-[#1B202B] border border-slate-300/60 dark:border-white/10">
                 {bgCategories.map((cat) => (
                   <button
                     key={cat.id}
@@ -526,7 +531,7 @@ export const Inspector: React.FC<InspectorProps> = ({
                     onClick={() => setActiveBgCategory(cat.id)}
                     className={`flex-1 py-1 px-1 rounded-md text-[10px] font-semibold transition-all cursor-pointer truncate text-center ${
                       activeBgCategory === cat.id
-                        ? 'bg-[#000000] dark:bg-white text-white dark:text-[#000000] shadow-xs font-bold'
+                        ? 'bg-white dark:bg-[#31394D] text-slate-900 dark:text-white shadow-xs font-bold'
                         : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200'
                     }`}
                   >
@@ -548,9 +553,9 @@ export const Inspector: React.FC<InspectorProps> = ({
                       className={`group relative flex flex-col p-1.5 rounded-xl border transition-all cursor-pointer text-left ${
                         isSelected
                           ? 'border-[#8DB355] ring-2 ring-[#8DB355]/30 bg-[#8DB355]/10 shadow-xs'
-                          : 'border-slate-200 dark:border-zinc-700 hover:border-slate-300 dark:hover:border-zinc-600 bg-white dark:bg-zinc-800/70'
+                          : 'border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 bg-white dark:bg-[#2B3242]'
                       }`}
-                      title={preset.name}
+                      aria-label={preset.name}
                     >
                       {/* Swatch */}
                       <div
@@ -579,10 +584,10 @@ export const Inspector: React.FC<InspectorProps> = ({
         </div>
 
         {/* SECTION 3: TRIM VIDEO */}
-        <div className="bg-slate-50 dark:bg-zinc-900/60 rounded-xl border border-slate-200 dark:border-zinc-800 overflow-hidden shadow-xs">
+        <div className="bg-slate-50 dark:bg-[#232936]/75 rounded-xl border border-slate-200 dark:border-white/10 overflow-hidden shadow-xs">
           <div
             onClick={() => toggleSection('trim')}
-            className="p-3 flex items-center justify-between cursor-pointer hover:bg-slate-100/80 dark:hover:bg-zinc-800/60 transition-colors"
+            className="p-3 flex items-center justify-between cursor-pointer hover:bg-slate-100/80 dark:hover:bg-[#2B3242]/60 transition-colors"
           >
             <div className="flex items-center gap-2">
               <div className="p-1 rounded-md bg-[#D90000]/15 text-[#D90000]">
@@ -600,13 +605,13 @@ export const Inspector: React.FC<InspectorProps> = ({
           </div>
 
           {openSections.trim && (
-            <div className="px-3 pb-3 pt-2 space-y-3 border-t border-slate-200 dark:border-zinc-800">
+            <div className="px-3 pb-3 pt-2 space-y-3 border-t border-slate-200 dark:border-white/10">
               <div className="grid grid-cols-2 gap-2 text-center">
-                <div className="p-2 bg-white dark:bg-zinc-800/80 rounded-lg border border-slate-200 dark:border-zinc-700">
+                <div className="p-2 bg-white dark:bg-[#1B202B] rounded-lg border border-slate-200 dark:border-white/10">
                   <span className="block text-[9px] font-bold uppercase text-slate-500 dark:text-zinc-400">Trim In</span>
                   <span className="font-mono text-xs font-bold text-slate-900 dark:text-white">{trimStart.toFixed(1)}s</span>
                 </div>
-                <div className="p-2 bg-white dark:bg-zinc-800/80 rounded-lg border border-slate-200 dark:border-zinc-700">
+                <div className="p-2 bg-white dark:bg-[#1B202B] rounded-lg border border-slate-200 dark:border-white/10">
                   <span className="block text-[9px] font-bold uppercase text-slate-500 dark:text-zinc-400">Trim Out</span>
                   <span className="font-mono text-xs font-bold text-slate-900 dark:text-white">{trimEnd.toFixed(1)}s</span>
                 </div>
@@ -616,7 +621,7 @@ export const Inspector: React.FC<InspectorProps> = ({
                 <button
                   type="button"
                   onClick={() => onUpdateTrim?.(currentTime, trimEnd)}
-                  className="w-full py-1.5 px-2.5 rounded-lg text-xs font-semibold bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 hover:border-[#8DB355] text-slate-700 dark:text-zinc-200 transition-colors cursor-pointer flex items-center justify-between"
+                  className="w-full py-1.5 px-2.5 rounded-lg text-xs font-semibold bg-white dark:bg-[#2B3242] hover:bg-slate-50 dark:hover:bg-[#353E54] border border-slate-200 dark:border-white/10 hover:border-[#8DB355] text-slate-700 dark:text-zinc-200 transition-colors cursor-pointer flex items-center justify-between"
                 >
                   <span>Set Trim In at Playhead</span>
                   <span className="font-mono text-[10px] text-[#8DB355] font-bold">{currentTime.toFixed(1)}s</span>
@@ -625,7 +630,7 @@ export const Inspector: React.FC<InspectorProps> = ({
                 <button
                   type="button"
                   onClick={() => onUpdateTrim?.(trimStart, currentTime)}
-                  className="w-full py-1.5 px-2.5 rounded-lg text-xs font-semibold bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 hover:border-[#8DB355] text-slate-700 dark:text-zinc-200 transition-colors cursor-pointer flex items-center justify-between"
+                  className="w-full py-1.5 px-2.5 rounded-lg text-xs font-semibold bg-white dark:bg-[#2B3242] hover:bg-slate-50 dark:hover:bg-[#353E54] border border-slate-200 dark:border-white/10 hover:border-[#8DB355] text-slate-700 dark:text-zinc-200 transition-colors cursor-pointer flex items-center justify-between"
                 >
                   <span>Set Trim Out at Playhead</span>
                   <span className="font-mono text-[10px] text-[#8DB355] font-bold">{currentTime.toFixed(1)}s</span>
@@ -650,10 +655,10 @@ export const Inspector: React.FC<InspectorProps> = ({
         </div>
 
         {/* SECTION 4: ZOOM EFFECTS */}
-        <div ref={zoomSectionRef} className="bg-slate-50 dark:bg-zinc-900/60 rounded-xl border border-slate-200 dark:border-zinc-800 overflow-hidden shadow-xs">
+        <div ref={zoomSectionRef} className="bg-slate-50 dark:bg-[#232936]/75 rounded-xl border border-slate-200 dark:border-white/10 overflow-hidden shadow-xs">
           <div
             onClick={() => toggleSection('zoom')}
-            className="p-3 flex items-center justify-between cursor-pointer hover:bg-slate-100/80 dark:hover:bg-zinc-800/60 transition-colors"
+            className="p-3 flex items-center justify-between cursor-pointer hover:bg-slate-100/80 dark:hover:bg-[#2B3242]/60 transition-colors"
           >
             <div className="flex items-center gap-2">
               <div className="p-1 rounded-md bg-[#D90000]/15 text-[#D90000]">
@@ -676,10 +681,10 @@ export const Inspector: React.FC<InspectorProps> = ({
           </div>
 
           {openSections.zoom && (
-            <div className="px-3 pb-3 pt-2 space-y-3 border-t border-slate-200 dark:border-zinc-800">
+            <div className="px-3 pb-3 pt-2 space-y-3 border-t border-slate-200 dark:border-white/10">
               {/* Selected Zoom Segment Controls if one is active */}
               {selectedZoom && onUpdateZoomSegment && (
-                <div className="p-3 rounded-xl bg-white dark:bg-zinc-800/80 border border-[#D90000]/30 shadow-2xs flex flex-col gap-3">
+                <div className="p-3 rounded-xl bg-white dark:bg-[#1B202B] border border-[#D90000]/30 shadow-2xs flex flex-col gap-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5">
                       <div className="w-1.5 h-1.5 rounded-full bg-[#D90000] animate-pulse" />
@@ -694,7 +699,7 @@ export const Inspector: React.FC<InspectorProps> = ({
                           type="button"
                           onClick={() => onRemoveZoomSegment(selectedZoom.id)}
                           className="text-[10px] font-semibold text-rose-500 hover:text-rose-600 hover:bg-rose-500/10 px-1.5 py-0.5 rounded transition-colors cursor-pointer"
-                          title="Delete this zoom segment"
+                          aria-label="Delete this zoom segment"
                         >
                           Delete
                         </button>
@@ -724,7 +729,7 @@ export const Inspector: React.FC<InspectorProps> = ({
                   </div>
 
                   {/* Zoom Easing Curve */}
-                  <div className="flex flex-col gap-1.5 pt-1 border-t border-slate-200/80 dark:border-zinc-800/80">
+                  <div className="flex flex-col gap-1.5 pt-1 border-t border-slate-200/80 dark:border-white/10">
                     <div className="flex justify-between text-xs">
                       <span className="text-slate-500 dark:text-zinc-400 font-medium">Easing Curve</span>
                       <span className="font-mono text-[10px] text-[#D90000] font-bold uppercase">
@@ -736,26 +741,30 @@ export const Inspector: React.FC<InspectorProps> = ({
                         const currentEasing = selectedZoom.easing || appearance.zoomEasing || 'easeInOut';
                         const isActive = currentEasing === opt.id;
                         return (
-                          <button
-                            key={opt.id}
-                            type="button"
-                            onClick={() => onUpdateZoomSegment(selectedZoom.id, { easing: opt.id })}
-                            className={`py-1 px-1.5 rounded-md text-[10px] font-semibold transition-all cursor-pointer text-center ${
-                              isActive
-                                ? 'bg-[#D90000] text-white shadow-2xs'
-                                : 'bg-white dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-700 border border-slate-200 dark:border-zinc-700'
-                            }`}
-                            title={opt.desc}
-                          >
-                            {opt.label}
-                          </button>
+                          <div key={opt.id} className="relative group">
+                            <button
+                              type="button"
+                              onClick={() => onUpdateZoomSegment(selectedZoom.id, { easing: opt.id })}
+                              className={`w-full py-1 px-1.5 rounded-md text-[10px] font-semibold transition-all cursor-pointer text-center ${
+                                isActive
+                                  ? 'bg-[#D90000] text-white shadow-2xs'
+                                  : 'bg-white dark:bg-[#2B3242] text-slate-600 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-[#353E54] border border-slate-200 dark:border-white/10'
+                              }`}
+                              aria-label={opt.desc}
+                            >
+                              {opt.label}
+                            </button>
+                            <div className="pointer-events-none opacity-0 group-hover:opacity-100 transition-all duration-150 absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2.5 py-1 rounded-lg bg-slate-900/95 dark:bg-white/95 text-white dark:text-slate-950 text-[11px] font-semibold shadow-xl whitespace-nowrap z-50 border border-white/10 dark:border-black/10">
+                              {opt.desc}
+                            </div>
+                          </div>
                         );
                       })}
                     </div>
                   </div>
 
                   {/* Motion Blur */}
-                  <div className="flex flex-col gap-2 pt-1 border-t border-slate-200/80 dark:border-zinc-800/80">
+                  <div className="flex flex-col gap-2 pt-1 border-t border-slate-200/80 dark:border-white/10">
                     <div className="flex items-center justify-between">
                       <div className="flex flex-col">
                         <span className="text-xs font-medium text-slate-700 dark:text-zinc-300">Motion Blur</span>
@@ -770,7 +779,7 @@ export const Inspector: React.FC<InspectorProps> = ({
                         className={`w-9 h-5 rounded-full transition-colors relative cursor-pointer ${
                           (selectedZoom.motionBlur ?? appearance.zoomMotionBlur ?? true)
                             ? 'bg-[#D90000]'
-                            : 'bg-slate-300 dark:bg-zinc-700'
+                            : 'bg-slate-300 dark:bg-white/15'
                         }`}
                       >
                         <div
@@ -867,26 +876,30 @@ export const Inspector: React.FC<InspectorProps> = ({
                     {EASING_OPTIONS.map((opt) => {
                       const isActive = (appearance.zoomEasing || 'easeInOut') === opt.id;
                       return (
-                        <button
-                          key={opt.id}
-                          type="button"
-                          onClick={() => onUpdateAppearance({ zoomEasing: opt.id })}
-                          className={`py-1 px-1.5 rounded-md text-[10px] font-semibold transition-all cursor-pointer text-center ${
-                            isActive
-                              ? 'bg-[#D90000] text-white shadow-2xs'
-                              : 'bg-white dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-700 border border-slate-200 dark:border-zinc-700'
-                          }`}
-                          title={opt.desc}
-                        >
-                          {opt.label}
-                        </button>
+                        <div key={opt.id} className="relative group">
+                          <button
+                            type="button"
+                            onClick={() => onUpdateAppearance({ zoomEasing: opt.id })}
+                            className={`w-full py-1 px-1.5 rounded-md text-[10px] font-semibold transition-all cursor-pointer text-center ${
+                              isActive
+                                ? 'bg-[#D90000] text-white shadow-2xs'
+                                : 'bg-white dark:bg-[#2B3242] text-slate-600 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-[#353E54] border border-slate-200 dark:border-white/10'
+                            }`}
+                            aria-label={opt.desc}
+                          >
+                            {opt.label}
+                          </button>
+                          <div className="pointer-events-none opacity-0 group-hover:opacity-100 transition-all duration-150 absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2.5 py-1 rounded-lg bg-slate-900/95 dark:bg-white/95 text-white dark:text-slate-950 text-[11px] font-semibold shadow-xl whitespace-nowrap z-50 border border-white/10 dark:border-black/10">
+                            {opt.desc}
+                          </div>
+                        </div>
                       );
                     })}
                   </div>
                 </div>
 
                 {/* Default Motion Blur */}
-                <div className="flex flex-col gap-2 pt-1 border-t border-slate-200/80 dark:border-zinc-800/80">
+                <div className="flex flex-col gap-2 pt-1 border-t border-slate-200/80 dark:border-white/10">
                   <div className="flex items-center justify-between">
                     <div className="flex flex-col">
                       <span className="text-xs font-medium text-slate-700 dark:text-zinc-300">Default Motion Blur</span>
@@ -900,7 +913,7 @@ export const Inspector: React.FC<InspectorProps> = ({
                       className={`w-9 h-5 rounded-full transition-colors relative cursor-pointer ${
                         (appearance.zoomMotionBlur ?? true)
                           ? 'bg-[#D90000]'
-                          : 'bg-slate-300 dark:bg-zinc-700'
+                          : 'bg-slate-300 dark:bg-white/15'
                       }`}
                     >
                       <div

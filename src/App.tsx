@@ -21,8 +21,13 @@ import {
   RecorderBackgroundConfig,
   SmartRecordingConfig,
   PrompterConfig,
+  InputSourceMode,
+  MobileConnectionStatus,
+  MobileDeviceInfo,
+  MobileCameraFacing,
 } from './types';
 import { RecorderEngine } from './services/recorderEngine';
+import { MobileHostSession } from './services/mobileBridge';
 import { DEFAULT_RECORDER_BACKGROUND } from './services/backgroundPresets';
 import { getAllRecordings, saveRecordingToDB, generateThumbnailFromBlob, saveActiveEditingSession, getActiveEditingSession, clearActiveEditingSession } from './services/db';
 import { getBestSupportedVideoMimeType } from './services/browserCapabilities';
@@ -38,6 +43,8 @@ import { TechDocsPage } from './components/TechDocsPage';
 import { LogbookPage } from './components/LogbookPage';
 import { RecordingReviewScreen } from './components/recorder/RecordingReviewScreen';
 import { ModeSelectionScreen } from './components/recorder/ModeSelectionScreen';
+import { MobileConnectModal } from './components/recorder/MobileConnectModal';
+import { MobileCompanionView } from './components/mobile/MobileCompanionView';
 import { PrivacyPolicyPage } from './components/pages/PrivacyPolicyPage';
 import { AboutUsPage } from './components/pages/AboutUsPage';
 import { TermsConditionsPage } from './components/pages/TermsConditionsPage';
@@ -47,6 +54,23 @@ import { ServerErrorPage } from './components/pages/ServerErrorPage';
 import { AppFooter } from './components/AppFooter';
 
 export default function App() {
+  // Phone Companion Route Check (?pair=XXXXXX or /mobile)
+  const [mobilePairParam] = useState<{ isMobile: boolean; code: string }>(() => {
+    try {
+      if (typeof window !== 'undefined') {
+        const searchParams = new URLSearchParams(window.location.search);
+        const pairCode = searchParams.get('pair');
+        const rawPath = window.location.pathname.replace(/^\/+|\/+$/g, '').toLowerCase();
+        if (pairCode || rawPath === 'mobile') {
+          return { isMobile: true, code: (pairCode || '').toUpperCase() };
+        }
+      }
+    } catch {
+      // ignore
+    }
+    return { isMobile: false, code: '' };
+  });
+
   // Navigation & Views with deep-link hash/search support
   const getInitialView = (): ActiveView => {
     try {
@@ -239,17 +263,33 @@ export default function App() {
 
   const [isMicBlocked, setIsMicBlocked] = useState<boolean>(false);
 
+  // Switchable Input Source State: System Cam & Audio vs Mobile Cam & Audio
+  const [inputSource, setInputSource] = useState<InputSourceMode>('system');
+  const inputSourceRef = useRef<InputSourceMode>('system');
+  const [isMobileModalOpen, setIsMobileModalOpen] = useState<boolean>(false);
+  const [mobileStatus, setMobileStatus] = useState<MobileConnectionStatus>('disconnected');
+  const [mobileRoomCode, setMobileRoomCode] = useState<string>('');
+  const [mobileError, setMobileError] = useState<string | null>(null);
+  const [mobileDeviceInfo, setMobileDeviceInfo] = useState<MobileDeviceInfo | null>(null);
+  const mobileHostRef = useRef<MobileHostSession | null>(null);
+
   const [videoSettings, setVideoSettings] = useState<VideoSettings>({
     resolution: 'native',
-    fps: 60,
-    codec: 'video/webm;codecs=vp9,opus',
-    bitrateMbps: 8,
-    countdownSeconds: 3,
+    fps: 30,
+    codec: 'video/webm;codecs=h264,opus',
+    bitrateMbps: 6,
+    countdownSeconds: 0,
     directSaveToFileSystem: false,
   });
 
+  const modeRef = useRef<RecordingMode>(mode);
+  modeRef.current = mode;
+  const audioSettingsRef = useRef<AudioSettings>(audioSettings);
+  audioSettingsRef.current = audioSettings;
+
   // Auto-detect optimal video codec and initialize logbook observer & capture handle config on mount
   useEffect(() => {
+    if (mobilePairParam.isMobile) return;
     logbook.init();
     const bestCodec = getBestSupportedVideoMimeType();
     setVideoSettings((prev) => ({ ...prev, codec: bestCodec }));
@@ -282,7 +322,7 @@ export default function App() {
           .catch(() => {});
       } catch (_) {}
     }
-  }, []);
+  }, [mobilePairParam.isMobile]);
 
   // Cleanup media access when navigating away from studio or unmounting unless actively recording
   useEffect(() => {
@@ -294,6 +334,10 @@ export default function App() {
   useEffect(() => {
     return () => {
       stopAllActiveMediaAccess();
+      if (mobileHostRef.current) {
+        mobileHostRef.current.destroy();
+        mobileHostRef.current = null;
+      }
     };
   }, [stopAllActiveMediaAccess]);
 
@@ -400,10 +444,12 @@ export default function App() {
   const initRecorderEngine = useCallback(() => {
     if (!recorderEngineRef.current) {
       recorderEngineRef.current = new RecorderEngine({
-        onTimeUpdate: (dur) => setDurationSeconds(Math.round(dur)),
-        onDataChunk: (bytes, bitrate) => {
-          setBytesRecorded(bytes);
-          setBitrateMbps(bitrate);
+        onTimeUpdate: (dur) => {
+          const rounded = Math.round(dur);
+          setDurationSeconds((prev) => (prev === rounded ? prev : rounded));
+        },
+        onDataChunk: () => {
+          // Intentionally no root App state churn during active recording chunks
         },
         onStateChange: (state) => {
           if (state === 'recording') setRecordingState('recording');
@@ -416,7 +462,7 @@ export default function App() {
           console.warn('Recorder Engine Error:', err);
           const msg = err.message || 'Screen share was not provided or was cancelled.';
           showToast(msg, 'error');
-          setActiveWebcamStream(null);
+          updateActiveWebcamStream(null);
           isStartingRecordingRef.current = false;
           // Guard: NEVER reset to idle if user is in review or editing
           setRecordingState((prev) => (prev === 'review' || prev === 'editing' ? prev : 'idle'));
@@ -427,7 +473,7 @@ export default function App() {
       });
     }
     return recorderEngineRef.current;
-  }, [showToast]);
+  }, [showToast, updateActiveWebcamStream]);
 
   const countdownStartTimerRef = useRef<number | null>(null);
 
@@ -456,12 +502,12 @@ export default function App() {
           recorderEngineRef.current.cleanupStreams();
           recorderEngineRef.current = null;
         }
-        setActiveWebcamStream(null);
+        updateActiveWebcamStream(null);
         setRecordingState('idle');
         showToast('Could not start recording', 'error');
       }
     }, 500);
-  }, [showToast]);
+  }, [showToast, updateActiveWebcamStream]);
 
   const handleCountdownCancel = useCallback(() => {
     if (countdownStartTimerRef.current) {
@@ -521,6 +567,137 @@ export default function App() {
     }
   }, [activeScreenStream, updateActiveScreenStream]);
 
+  const stopWebcamAndMicLocalTracks = useCallback(() => {
+    if (activeWebcamStreamRef.current) {
+      activeWebcamStreamRef.current.getTracks().forEach((t) => {
+        try {
+          t.onended = null;
+          t.enabled = false;
+          t.stop();
+        } catch (_) {}
+      });
+      updateActiveWebcamStream(null);
+    }
+    if (activeMicStreamRef.current) {
+      activeMicStreamRef.current.getTracks().forEach((t) => {
+        try {
+          t.onended = null;
+          t.enabled = false;
+          t.stop();
+        } catch (_) {}
+      });
+      updateActiveMicStream(null);
+    }
+  }, [updateActiveWebcamStream, updateActiveMicStream]);
+
+  const applyMobileStreamsToStudio = useCallback(
+    (session: MobileHostSession, info?: MobileDeviceInfo | null) => {
+      stopWebcamAndMicLocalTracks();
+
+      const currentMode = modeRef.current;
+      const shouldEnableCam = currentMode === 'screen_cam' || currentMode === 'cam_only';
+      const shouldEnableMic = audioSettingsRef.current.includeMic || currentMode === 'audio_only';
+
+      if (shouldEnableCam) {
+        const mobileCam = session.getClonedVideoStream();
+        if (mobileCam) {
+          updateActiveWebcamStream(mobileCam);
+        }
+      }
+
+      if (shouldEnableMic) {
+        const mobileMic = session.getClonedAudioStream();
+        if (mobileMic) {
+          updateActiveMicStream(mobileMic);
+          setAudioSettings((prev) => ({ ...prev, includeMic: true }));
+          setIsMicBlocked(false);
+        }
+      }
+
+      if (info) {
+        setPipConfig((prev) => ({
+          ...prev,
+          mirror: info.facing !== 'environment',
+        }));
+      }
+    },
+    [stopWebcamAndMicLocalTracks, updateActiveWebcamStream, updateActiveMicStream]
+  );
+
+  const ensureMobileHostSession = useCallback(() => {
+    if (mobileHostRef.current) {
+      return mobileHostRef.current;
+    }
+
+    const session = new MobileHostSession({
+      onStatusChange: (nextStatus, code, errMsg) => {
+        setMobileStatus(nextStatus);
+        setMobileRoomCode(code);
+        setMobileError(errMsg || null);
+      },
+      onStreamReady: (info) => {
+        setMobileDeviceInfo(info);
+        inputSourceRef.current = 'mobile';
+        setInputSource('mobile');
+        applyMobileStreamsToStudio(session, info);
+        showToast(`Connected to ${info.deviceName} — using mobile camera & audio`, 'success');
+        window.setTimeout(() => {
+          setIsMobileModalOpen(false);
+        }, 650);
+      },
+      onDeviceInfoUpdate: (info) => {
+        setMobileDeviceInfo(info);
+        if (inputSourceRef.current === 'mobile') {
+          setPipConfig((prev) => ({
+            ...prev,
+            mirror: info.facing !== 'environment',
+          }));
+        }
+      },
+      onDisconnected: (reason) => {
+        setMobileDeviceInfo(null);
+        if (inputSourceRef.current === 'mobile') {
+          stopWebcamAndMicLocalTracks();
+          inputSourceRef.current = 'system';
+          setInputSource('system');
+          setPipConfig((prev) => ({ ...prev, mirror: true }));
+          showToast(reason ? `${reason} — switched to system source` : 'Phone disconnected', 'info');
+        }
+      },
+    });
+
+    mobileHostRef.current = session;
+    const code = session.start();
+    setMobileRoomCode(code);
+    return session;
+  }, [applyMobileStreamsToStudio, showToast, stopWebcamAndMicLocalTracks]);
+
+  const handleOpenMobilePairModal = useCallback(() => {
+    ensureMobileHostSession();
+    setIsMobileModalOpen(true);
+  }, [ensureMobileHostSession]);
+
+  const handleFlipMobileCamera = useCallback(
+    (facing: MobileCameraFacing) => {
+      const session = mobileHostRef.current;
+      if (!session || mobileStatus !== 'connected') return;
+      session.switchPhoneCamera(facing);
+      setMobileDeviceInfo((prev) => (prev ? { ...prev, facing } : prev));
+      setPipConfig((prev) => ({
+        ...prev,
+        mirror: facing !== 'environment',
+      }));
+    },
+    [mobileStatus]
+  );
+
+  const handleDisconnectPhone = useCallback(() => {
+    if (mobileHostRef.current) {
+      mobileHostRef.current.disconnectPhone();
+    }
+    setIsMobileModalOpen(false);
+  }, []);
+
   const handleToggleCameraPreview = useCallback(async (enable?: boolean) => {
     const shouldEnable = enable !== undefined ? enable : !activeWebcamStream;
     if (!shouldEnable) {
@@ -535,6 +712,20 @@ export default function App() {
       }
       return;
     }
+
+    if (inputSourceRef.current === 'mobile') {
+      const session = mobileHostRef.current;
+      if (session && session.hasLiveVideo()) {
+        const clonedCam = session.getClonedVideoStream();
+        if (clonedCam) {
+          updateActiveWebcamStream(clonedCam);
+          return clonedCam;
+        }
+      }
+      handleOpenMobilePairModal();
+      return;
+    }
+
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
@@ -571,10 +762,10 @@ export default function App() {
         showToast('Could not access camera', 'error');
       }
     }
-  }, [activeWebcamStream, showToast, updateActiveWebcamStream]);
+  }, [activeWebcamStream, handleOpenMobilePairModal, showToast, updateActiveWebcamStream]);
 
   const handleEnableMicPreview = useCallback(
-    async (enable?: boolean, isSilentAutoCheck = false) => {
+    async (enable?: boolean, _isSilentAutoCheck = false) => {
       const shouldEnable =
         enable !== undefined ? enable : !activeMicStream || !audioSettings.includeMic;
       if (!shouldEnable) {
@@ -593,6 +784,22 @@ export default function App() {
       if (recordingState === 'editing') {
         return;
       }
+
+      if (inputSourceRef.current === 'mobile') {
+        const session = mobileHostRef.current;
+        if (session && session.hasLiveAudio()) {
+          const clonedMic = session.getClonedAudioStream();
+          if (clonedMic) {
+            updateActiveMicStream(clonedMic);
+            setAudioSettings((prev) => ({ ...prev, includeMic: true }));
+            setIsMicBlocked(false);
+            return clonedMic;
+          }
+        }
+        handleOpenMobilePairModal();
+        return;
+      }
+
       try {
         const micConstraints: MediaTrackConstraints = {
           echoCancellation: audioSettings.echoCancellation,
@@ -634,7 +841,93 @@ export default function App() {
         }
       }
     },
-    [activeMicStream, audioSettings, recordingState, updateActiveMicStream]
+    [activeMicStream, audioSettings, handleOpenMobilePairModal, recordingState, updateActiveMicStream]
+  );
+
+  const handleSelectInputSource = useCallback(
+    async (nextSource: InputSourceMode) => {
+      if (recordingState === 'recording' || recordingState === 'paused') return;
+
+      if (nextSource === 'mobile') {
+        const session = mobileHostRef.current;
+        if (
+          session &&
+          mobileStatus === 'connected' &&
+          (session.hasLiveVideo() || session.hasLiveAudio())
+        ) {
+          inputSourceRef.current = 'mobile';
+          setInputSource('mobile');
+          applyMobileStreamsToStudio(session, mobileDeviceInfo);
+        } else {
+          handleOpenMobilePairModal();
+        }
+        return;
+      }
+
+      // Switching back to System Camera & Audio (keeps phone paired in standby)
+      inputSourceRef.current = 'system';
+      setInputSource('system');
+      stopWebcamAndMicLocalTracks();
+      setPipConfig((prev) => ({ ...prev, mirror: true }));
+
+      const currentMode = modeRef.current;
+      if (currentMode === 'screen_cam' || currentMode === 'cam_only') {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              width: { ideal: 1280, max: 1920 },
+              height: { ideal: 720, max: 1080 },
+              frameRate: { ideal: 30, max: 60 },
+              facingMode: 'user',
+            },
+          });
+          const videoTrack = stream.getVideoTracks()[0];
+          if (videoTrack) {
+            videoTrack.onended = () => updateActiveWebcamStream(null);
+          }
+          updateActiveWebcamStream(stream);
+        } catch {
+          showToast('Could not access system camera', 'error');
+        }
+      }
+
+      if (audioSettingsRef.current.includeMic || currentMode === 'audio_only') {
+        try {
+          const micConstraints: MediaTrackConstraints = {
+            echoCancellation: audioSettingsRef.current.echoCancellation,
+            noiseSuppression: audioSettingsRef.current.noiseSuppression,
+            autoGainControl: audioSettingsRef.current.autoGainControl,
+          };
+          if (audioSettingsRef.current.micDeviceId) {
+            micConstraints.deviceId = { exact: audioSettingsRef.current.micDeviceId };
+          }
+          const micStream = await navigator.mediaDevices.getUserMedia({ audio: micConstraints });
+          const audioTrack = micStream.getAudioTracks()[0];
+          if (audioTrack) {
+            audioTrack.onended = () => {
+              updateActiveMicStream(null);
+              setAudioSettings((prev) => ({ ...prev, includeMic: false }));
+            };
+          }
+          updateActiveMicStream(micStream);
+          setAudioSettings((prev) => ({ ...prev, includeMic: true }));
+          setIsMicBlocked(false);
+        } catch {
+          setIsMicBlocked(true);
+        }
+      }
+    },
+    [
+      applyMobileStreamsToStudio,
+      handleOpenMobilePairModal,
+      mobileDeviceInfo,
+      mobileStatus,
+      recordingState,
+      showToast,
+      stopWebcamAndMicLocalTracks,
+      updateActiveMicStream,
+      updateActiveWebcamStream,
+    ]
   );
 
   const handleSelectRecordingSetup = useCallback(
@@ -675,7 +968,7 @@ export default function App() {
         // Revoke camera hardware access
         if (activeWebcamStream) {
           activeWebcamStream.getTracks().forEach((t) => t.stop());
-          setActiveWebcamStream(null);
+          updateActiveWebcamStream(null);
         }
 
         // Trigger Screen access automatically if not active
@@ -721,7 +1014,7 @@ export default function App() {
         // Revoke Screen access
         if (activeScreenStream) {
           activeScreenStream.getTracks().forEach((t) => t.stop());
-          setActiveScreenStream(null);
+          updateActiveScreenStream(null);
         }
 
         // Trigger Camera access automatically if not active
@@ -743,11 +1036,11 @@ export default function App() {
         // Revoke Camera and Screen access
         if (activeWebcamStream) {
           activeWebcamStream.getTracks().forEach((t) => t.stop());
-          setActiveWebcamStream(null);
+          updateActiveWebcamStream(null);
         }
         if (activeScreenStream) {
           activeScreenStream.getTracks().forEach((t) => t.stop());
-          setActiveScreenStream(null);
+          updateActiveScreenStream(null);
         }
 
         // Trigger Microphone access automatically if not active
@@ -768,6 +1061,8 @@ export default function App() {
       handleShareScreenPreview,
       handleToggleCameraPreview,
       handleEnableMicPreview,
+      updateActiveWebcamStream,
+      updateActiveScreenStream,
     ]
   );
 
@@ -796,10 +1091,12 @@ export default function App() {
       setLastRecordingData(null);
 
       const engine = new RecorderEngine({
-        onTimeUpdate: (dur) => setDurationSeconds(Math.round(dur)),
-        onDataChunk: (bytes, bitrate) => {
-          setBytesRecorded(bytes);
-          setBitrateMbps(bitrate);
+        onTimeUpdate: (dur) => {
+          const rounded = Math.round(dur);
+          setDurationSeconds((prev) => (prev === rounded ? prev : rounded));
+        },
+        onDataChunk: () => {
+          // Intentionally no root App state churn during active recording chunks
         },
         onStateChange: (state) => {
           if (state === 'recording') setRecordingState('recording');
@@ -812,7 +1109,7 @@ export default function App() {
           console.warn('Recorder Engine Error:', err);
           const msg = err.message || 'Screen share was not provided or was cancelled.';
           showToast(msg, 'error');
-          setActiveWebcamStream(null);
+          updateActiveWebcamStream(null);
           isStartingRecordingRef.current = false;
           // Guard: NEVER reset to idle if user is in review or editing
           setRecordingState((prev) => (prev === 'review' || prev === 'editing' ? prev : 'idle'));
@@ -835,7 +1132,8 @@ export default function App() {
           micStream: activeMicStream,
         },
         compositionLayout,
-        background
+        background,
+        aspectRatio
       );
       if (result && result.webcamStream) {
         updateActiveWebcamStream(result.webcamStream);
@@ -876,6 +1174,7 @@ export default function App() {
     showToast,
     compositionLayout,
     background,
+    aspectRatio,
     updateActiveWebcamStream,
     updateActiveScreenStream,
     updateActiveMicStream,
@@ -1011,13 +1310,16 @@ export default function App() {
     setBitrateMbps(0);
     setBitrateMbps(0);
 
-    // Request permissions again for screen & camera preview without auto-starting recording
+    // Request permissions again for screen, camera & mic preview without auto-starting recording
     try {
       if (mode === 'screen' || mode === 'screen_cam') {
         await handleShareScreenPreview();
       }
       if (mode === 'screen_cam' || mode === 'cam_only') {
         await handleToggleCameraPreview(true);
+      }
+      if (audioSettingsRef.current.includeMic || mode === 'audio_only') {
+        await handleEnableMicPreview(true);
       }
     } catch (e) {
       console.warn('Retake preview stream request:', e);
@@ -1139,7 +1441,7 @@ export default function App() {
       sessionStorage.removeItem('fsr_active_state');
     } catch (_) {}
     setLastRecordingData(null);
-    setActiveWebcamStream(null);
+    updateActiveWebcamStream(null);
     setHasSelectedInitialMode(false);
     setActiveView('studio');
     setRecordingState('idle');
@@ -1147,10 +1449,14 @@ export default function App() {
     setBytesRecorded(0);
     setBitrateMbps(0);
     refreshLibraryCount();
-  }, [refreshLibraryCount]);
+  }, [refreshLibraryCount, updateActiveWebcamStream]);
+
+  if (mobilePairParam.isMobile) {
+    return <MobileCompanionView initialRoomCode={mobilePairParam.code} />;
+  }
 
   return (
-    <div id="screen-recorder-app" className="min-h-screen bg-[#F8FAFC] dark:bg-[#000000] text-gray-900 dark:text-zinc-100 flex flex-col font-sans selection:bg-[#D90000] selection:text-white dark:selection:bg-[#D90000] dark:selection:text-white transition-colors duration-200">
+    <div id="screen-recorder-app" className="min-h-screen bg-[#F8FAFC] dark:bg-[#161A22] text-gray-900 dark:text-zinc-100 flex flex-col font-sans selection:bg-[#D90000] selection:text-white dark:selection:bg-[#D90000] dark:selection:text-white transition-colors duration-200">
       {/* Top Navigation Bar - Unified Master Header */}
       <Navbar
         activeView={activeView}
@@ -1325,13 +1631,16 @@ export default function App() {
                 sessionStorage.removeItem('fsr_active_state');
               } catch (_) {}
               setLastRecordingData(null);
-              setActiveWebcamStream(null);
+              updateActiveWebcamStream(null);
               setDurationSeconds(0);
               setBytesRecorded(0);
               setBitrateMbps(0);
               setRecordingState('idle');
               setActiveView('studio');
               refreshLibraryCount();
+              if (inputSourceRef.current === 'mobile' && mobileHostRef.current) {
+                applyMobileStreamsToStudio(mobileHostRef.current, mobileDeviceInfo);
+              }
             }}
             onSavedToLibrary={() => {
               if (recorderEngineRef.current) {
@@ -1343,7 +1652,7 @@ export default function App() {
                 sessionStorage.removeItem('fsr_active_state');
               } catch (_) {}
               refreshLibraryCount();
-              setActiveWebcamStream(null);
+              updateActiveWebcamStream(null);
               setActiveView('library');
               setRecordingState('idle');
             }}
@@ -1406,6 +1715,12 @@ export default function App() {
             onUpdateSmartConfig={(updates) => setSmartConfig((prev) => ({ ...prev, ...updates }))}
             prompter={prompter}
             onUpdatePrompter={(updates) => setPrompter((prev) => ({ ...prev, ...updates }))}
+            inputSource={inputSource}
+            onSelectInputSource={handleSelectInputSource}
+            mobileStatus={mobileStatus}
+            mobileDeviceInfo={mobileDeviceInfo}
+            onOpenMobilePairModal={handleOpenMobilePairModal}
+            onFlipMobileCamera={handleFlipMobileCamera}
           />
         )}
       </main>
@@ -1431,6 +1746,30 @@ export default function App() {
         />
       )}
 
+      {/* Mobile QR Pairing Modal */}
+      <MobileConnectModal
+        isOpen={isMobileModalOpen}
+        onClose={() => setIsMobileModalOpen(false)}
+        roomCode={mobileRoomCode}
+        status={mobileStatus}
+        errorMessage={mobileError}
+        deviceInfo={mobileDeviceInfo}
+        onRegenerateCode={() => {
+          const session = ensureMobileHostSession();
+          const newCode = session.regenerateCode();
+          setMobileRoomCode(newCode);
+        }}
+        onRetryConnection={() => {
+          if (mobileHostRef.current) {
+            mobileHostRef.current.destroy();
+            mobileHostRef.current = null;
+          }
+          ensureMobileHostSession();
+        }}
+        onFlipCamera={handleFlipMobileCamera}
+        onDisconnectPhone={handleDisconnectPhone}
+      />
+
       {/* Settings Modal */}
       {isSettingsOpen && (
         <SettingsModal
@@ -1448,10 +1787,10 @@ export default function App() {
           id="app-toast-notification"
           className={`fixed top-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl shadow-xl border backdrop-blur-md max-w-md w-full mx-4 animate-in slide-in-from-top-4 fade-in duration-200 transition-all select-none ${
             toast.type === 'error'
-              ? 'bg-red-50/95 dark:bg-zinc-950/95 border-red-200 dark:border-red-900/80 text-red-950 dark:text-red-300'
+              ? 'bg-red-50/95 dark:bg-[#232936]/95 border-red-200 dark:border-red-900/80 text-red-950 dark:text-red-300'
               : toast.type === 'success'
-              ? 'bg-emerald-50/95 dark:bg-zinc-950/95 border-emerald-200 dark:border-emerald-900/80 text-emerald-950 dark:text-emerald-300'
-              : 'bg-slate-50/95 dark:bg-zinc-950/95 border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100'
+              ? 'bg-emerald-50/95 dark:bg-[#232936]/95 border-emerald-200 dark:border-emerald-900/80 text-emerald-950 dark:text-emerald-300'
+              : 'bg-slate-50/95 dark:bg-[#232936]/95 border-slate-200 dark:border-white/15 text-slate-900 dark:text-zinc-100'
           }`}
         >
           <div

@@ -1,7 +1,15 @@
-import React, { useState } from 'react';
+import React from 'react';
+import {
+  ComputerIcon,
+  SmartPhone01Icon,
+} from 'hugeicons-react';
 import {
   AudioSettings,
   CompositionLayout,
+  InputSourceMode,
+  MobileCameraFacing,
+  MobileConnectionStatus,
+  MobileDeviceInfo,
   PipConfig,
   PrompterConfig,
   RecorderAspectRatio,
@@ -12,7 +20,6 @@ import {
 } from '../types';
 import { RecordingCanvas } from './recorder/RecordingCanvas';
 import { RecorderToolbar } from './recorder/RecorderToolbar';
-// RecordingControls removed from bottom as requested
 
 interface RecorderDashboardProps {
   mode: RecordingMode;
@@ -53,6 +60,13 @@ interface RecorderDashboardProps {
   onUpdateSmartConfig: (updates: Partial<SmartRecordingConfig>) => void;
   prompter: PrompterConfig;
   onUpdatePrompter: (updates: Partial<PrompterConfig>) => void;
+  // Mobile / Input Source Props
+  inputSource?: InputSourceMode;
+  onSelectInputSource?: (source: InputSourceMode) => void;
+  mobileStatus?: MobileConnectionStatus;
+  mobileDeviceInfo?: MobileDeviceInfo | null;
+  onOpenMobilePairModal?: () => void;
+  onFlipMobileCamera?: (facing: MobileCameraFacing) => void;
 }
 
 export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
@@ -93,6 +107,12 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
   onUpdateSmartConfig,
   prompter,
   onUpdatePrompter,
+  inputSource = 'system',
+  onSelectInputSource,
+  mobileStatus = 'disconnected',
+  mobileDeviceInfo = null,
+  onOpenMobilePairModal,
+  onFlipMobileCamera,
 }) => {
   const isRecording = recordingState === 'recording' || recordingState === 'paused';
   const isScreenActive =
@@ -165,12 +185,74 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
   return (
     <div
       id="main-recorder-dashboard"
-      className="w-full flex-1 flex flex-col justify-between bg-white dark:bg-[#090B0E] text-slate-900 dark:text-white select-none transition-colors duration-200 overflow-x-hidden min-h-[calc(100vh-3.75rem)]"
+      className="w-full flex-1 flex flex-col justify-between bg-white dark:bg-[#161A22] text-slate-900 dark:text-white select-none transition-colors duration-200 overflow-x-hidden min-h-[calc(100vh-3.75rem)]"
     >
       {/* ─────────────────────────────────────────────────────────────
           STAGE: VIDEO PREVIEW WINDOW + VERTICAL BUTTONS BESIDE IT
          ───────────────────────────────────────────────────────────── */}
-      <main className="w-full flex-1 flex items-center justify-center px-4 py-3 min-h-0 my-auto">
+      <main className="w-full flex-1 flex flex-col items-center justify-center px-4 py-3 gap-3 min-h-0 my-auto">
+        {/* Direct Two-Option Input Source Switcher: System Cam & Audio vs Mobile Cam & Audio */}
+        {onSelectInputSource && (
+          <div
+            id="input-source-switcher-bar"
+            className="flex flex-wrap items-center justify-center gap-2 z-30 select-none"
+          >
+            <div
+              role="radiogroup"
+              aria-label="Camera and Audio Input Source"
+              className="inline-flex items-center p-1 rounded-2xl bg-slate-100 dark:bg-[#232936] border border-slate-200/90 dark:border-white/15 shadow-xs gap-1"
+            >
+              <button
+                id="source-btn-system"
+                type="button"
+                role="radio"
+                aria-checked={inputSource === 'system'}
+                disabled={isRecording}
+                onClick={() => onSelectInputSource('system')}
+                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap shrink-0 ${
+                  isRecording ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'
+                } ${
+                  inputSource === 'system'
+                    ? 'bg-white dark:bg-[#31394D] text-slate-900 dark:text-white shadow-xs border border-slate-200/80 dark:border-white/15'
+                    : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white border border-transparent'
+                }`}
+              >
+                <ComputerIcon className="w-3.5 h-3.5 shrink-0" />
+                <span>System Cam &amp; Audio</span>
+              </button>
+
+              <button
+                id="source-btn-mobile"
+                type="button"
+                role="radio"
+                aria-checked={inputSource === 'mobile'}
+                disabled={isRecording}
+                onClick={() => onSelectInputSource('mobile')}
+                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap shrink-0 ${
+                  isRecording ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'
+                } ${
+                  inputSource === 'mobile'
+                    ? 'bg-white dark:bg-[#31394D] text-slate-900 dark:text-white shadow-xs border border-slate-200/80 dark:border-white/15'
+                    : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white border border-transparent'
+                }`}
+              >
+                <SmartPhone01Icon className="w-3.5 h-3.5 shrink-0" />
+                <span>Mobile Cam &amp; Audio</span>
+                {mobileStatus === 'connected' ? (
+                  <span
+                    className="w-2 h-2 rounded-full bg-emerald-500 shrink-0"
+                    aria-label="Phone connected"
+                  />
+                ) : (
+                  <span className="text-[10px] font-medium text-slate-400 dark:text-zinc-500">
+                    · Pair
+                  </span>
+                )}
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Centered Preview + Vertical Buttons cluster */}
         <div className="flex flex-col md:flex-row items-center justify-center gap-2.5 sm:gap-3 max-w-full">
           {/* Video Preview Window */}
@@ -239,6 +321,12 @@ export const RecorderDashboard: React.FC<RecorderDashboardProps> = ({
               micStream={micStream}
               onOpenSettings={onOpenSettings}
               disabled={isRecording}
+              inputSource={inputSource}
+              onSelectInputSource={onSelectInputSource}
+              mobileStatus={mobileStatus}
+              mobileDeviceInfo={mobileDeviceInfo}
+              onOpenMobilePairModal={onOpenMobilePairModal}
+              onFlipMobileCamera={onFlipMobileCamera}
             />
           </aside>
         </div>

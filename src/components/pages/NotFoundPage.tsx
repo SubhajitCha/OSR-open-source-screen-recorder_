@@ -88,7 +88,7 @@ export const NotFoundPage: React.FC<NotFoundPageProps> = ({
             type="button"
             id="not-found-library-btn"
             onClick={() => onNavigate?.('library')}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white hover:bg-slate-50 dark:bg-zinc-900 dark:hover:bg-zinc-800 text-slate-800 dark:text-zinc-200 border border-slate-200 dark:border-zinc-700 font-semibold text-sm transition-all shadow-xs active:scale-95 cursor-pointer"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white hover:bg-slate-50 dark:bg-[#252C3B] dark:hover:bg-[#31394D] text-slate-800 dark:text-zinc-200 border border-slate-200 dark:border-white/15 font-semibold text-sm transition-all shadow-xs active:scale-95 cursor-pointer"
           >
             <Film01Icon className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
             <span>View Saved Recordings</span>
@@ -97,7 +97,7 @@ export const NotFoundPage: React.FC<NotFoundPageProps> = ({
       </div>
 
       {/* Suggested Helpful Destinations */}
-      <div className="mt-14 pt-10 border-t border-slate-200/80 dark:border-zinc-800/80">
+      <div className="mt-14 pt-10 border-t border-slate-200/80 dark:border-white/10">
         <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-5 text-center sm:text-left">
           Explore Available Studio Areas
         </h2>
@@ -107,7 +107,7 @@ export const NotFoundPage: React.FC<NotFoundPageProps> = ({
             type="button"
             id="nav-to-studio-card"
             onClick={onOpenStudio}
-            className="p-4 rounded-xl text-left bg-white dark:bg-zinc-900/60 border border-slate-200/80 dark:border-zinc-800 hover:border-slate-300 dark:hover:border-zinc-700 transition-all hover:shadow-xs group cursor-pointer"
+            className="p-4 rounded-xl text-left bg-white dark:bg-[#1E232E] border border-slate-200/80 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 transition-all hover:shadow-xs group cursor-pointer"
           >
             <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
               <Home01Icon className="w-4 h-4" />
@@ -124,7 +124,7 @@ export const NotFoundPage: React.FC<NotFoundPageProps> = ({
             type="button"
             id="nav-to-library-card"
             onClick={() => onNavigate?.('library')}
-            className="p-4 rounded-xl text-left bg-white dark:bg-zinc-900/60 border border-slate-200/80 dark:border-zinc-800 hover:border-slate-300 dark:hover:border-zinc-700 transition-all hover:shadow-xs group cursor-pointer"
+            className="p-4 rounded-xl text-left bg-white dark:bg-[#1E232E] border border-slate-200/80 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 transition-all hover:shadow-xs group cursor-pointer"
           >
             <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
               <Film01Icon className="w-4 h-4" />
@@ -141,7 +141,7 @@ export const NotFoundPage: React.FC<NotFoundPageProps> = ({
             type="button"
             id="nav-to-docs-card"
             onClick={() => onNavigate?.('docs')}
-            className="p-4 rounded-xl text-left bg-white dark:bg-zinc-900/60 border border-slate-200/80 dark:border-zinc-800 hover:border-slate-300 dark:hover:border-zinc-700 transition-all hover:shadow-xs group cursor-pointer"
+            className="p-4 rounded-xl text-left bg-white dark:bg-[#1E232E] border border-slate-200/80 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 transition-all hover:shadow-xs group cursor-pointer"
           >
             <div className="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
               <Book02Icon className="w-4 h-4" />
@@ -158,7 +158,7 @@ export const NotFoundPage: React.FC<NotFoundPageProps> = ({
             type="button"
             id="nav-to-services-card"
             onClick={() => onNavigate?.('services')}
-            className="p-4 rounded-xl text-left bg-white dark:bg-zinc-900/60 border border-slate-200/80 dark:border-zinc-800 hover:border-slate-300 dark:hover:border-zinc-700 transition-all hover:shadow-xs group cursor-pointer"
+            className="p-4 rounded-xl text-left bg-white dark:bg-[#1E232E] border border-slate-200/80 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 transition-all hover:shadow-xs group cursor-pointer"
           >
             <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
               <CpuIcon className="w-4 h-4" />
@@ -174,7 +174,7 @@ export const NotFoundPage: React.FC<NotFoundPageProps> = ({
       </div>
 
       {/* Troubleshooting Tips Footer */}
-      <div className="mt-8 p-4 rounded-xl bg-slate-50 dark:bg-zinc-900/40 border border-slate-200/60 dark:border-zinc-800/60 flex items-start gap-3 text-xs text-slate-600 dark:text-zinc-400">
+      <div className="mt-8 p-4 rounded-xl bg-slate-50 dark:bg-[#1E232E] border border-slate-200/60 dark:border-white/10 flex items-start gap-3 text-xs text-slate-600 dark:text-zinc-400">
         <HelpCircleIcon className="w-4 h-4 text-slate-400 dark:text-zinc-500 shrink-0 mt-0.5" />
         <div className="space-y-1">
           <span className="font-semibold text-slate-800 dark:text-zinc-200">

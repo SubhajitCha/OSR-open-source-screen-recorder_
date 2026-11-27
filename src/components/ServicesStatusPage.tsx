@@ -162,20 +162,20 @@ export const ServicesStatusPage: React.FC = () => {
   return (
     <div id="services-status-page" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-in fade-in duration-200">
       {/* Top Banner */}
-      <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="bg-white dark:bg-[#1E232E] p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-white/10 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6 transition-colors">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center shadow-xs">
+            <div className="w-10 h-10 rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800/40 flex items-center justify-center shadow-xs">
               <SecurityCheckIcon className="w-5 h-5" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-xl font-bold text-slate-900 tracking-tight">Services Diagnostic Engine</h1>
-                <span className="px-2.5 py-0.5 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full">
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Services Diagnostic Engine</h1>
+                <span className="px-2.5 py-0.5 text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800/40 rounded-full">
                   All Systems Operational
                 </span>
               </div>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-500 dark:text-zinc-400">
                 Real-time health monitoring of offline browser subsystems, audio DSP graphs, and storage engines.
               </p>
             </div>
@@ -196,10 +196,10 @@ export const ServicesStatusPage: React.FC = () => {
 
       {/* Self Test Live Output Console */}
       {selfTestLogs.length > 0 && (
-        <div className="p-5 rounded-3xl bg-slate-950 text-slate-200 font-mono text-xs border border-slate-800 shadow-lg space-y-1.5 animate-in fade-in duration-200">
-          <div className="flex items-center justify-between pb-2 border-b border-slate-800 mb-2">
+        <div className="p-5 rounded-3xl bg-[#181D27] text-slate-200 font-mono text-xs border border-slate-800 dark:border-white/10 shadow-lg space-y-1.5 animate-in fade-in duration-200">
+          <div className="flex items-center justify-between pb-2 border-b border-white/10 mb-2">
             <span className="text-[10px] font-bold uppercase tracking-wider text-blue-400">Diagnostic Live Telemetry</span>
-            <span className="text-[10px] text-slate-500">{selfTestLogs.length} events logged</span>
+            <span className="text-[10px] text-slate-400">{selfTestLogs.length} events logged</span>
           </div>
           {selfTestLogs.map((log, idx) => (
             <div key={idx} className={log.startsWith('✓') ? 'text-emerald-400 font-semibold' : log.startsWith('[COMPLETE]') ? 'text-blue-400 font-bold' : 'text-slate-400'}>
@@ -214,30 +214,30 @@ export const ServicesStatusPage: React.FC = () => {
         {servicesList.map((srv) => (
           <div
             key={srv.id}
-            className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-4 flex flex-col justify-between hover:border-slate-300 transition-colors"
+            className="bg-white dark:bg-[#1E232E] p-6 rounded-3xl border border-slate-200 dark:border-white/10 shadow-xs space-y-4 flex flex-col justify-between hover:border-slate-300 dark:hover:border-white/20 transition-colors"
           >
             <div className="space-y-3">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-                  <h3 className="text-sm font-bold text-slate-900">{srv.name}</h3>
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-zinc-100">{srv.name}</h3>
                 </div>
-                <span className="text-[10px] font-bold text-blue-600 bg-blue-50 border border-blue-200/60 px-2.5 py-0.5 rounded-full">
+                <span className="text-[10px] font-bold text-blue-600 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/50 border border-blue-200/60 dark:border-blue-800/40 px-2.5 py-0.5 rounded-full shrink-0">
                   {srv.category}
                 </span>
               </div>
 
-              <p className="text-xs text-slate-600 leading-relaxed">{srv.description}</p>
+              <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed">{srv.description}</p>
             </div>
 
-            <div className="space-y-2 pt-3 border-t border-slate-100">
-              <div className="flex items-center justify-between text-xs text-slate-500">
+            <div className="space-y-2 pt-3 border-t border-slate-100 dark:border-white/10">
+              <div className="flex items-center justify-between text-xs text-slate-500 dark:text-zinc-400">
                 <span>Metric:</span>
-                <span className="font-bold text-slate-900 font-mono">{srv.quickStat}</span>
+                <span className="font-bold text-slate-900 dark:text-zinc-100 font-mono">{srv.quickStat}</span>
               </div>
-              <div className="flex items-center justify-between text-xs text-slate-500">
+              <div className="flex items-center justify-between text-xs text-slate-500 dark:text-zinc-400">
                 <span>Latency:</span>
-                <span className="font-semibold text-emerald-600 font-mono">{srv.latencyMs} ms</span>
+                <span className="font-semibold text-emerald-600 dark:text-emerald-400 font-mono">{srv.latencyMs} ms</span>
               </div>
             </div>
           </div>

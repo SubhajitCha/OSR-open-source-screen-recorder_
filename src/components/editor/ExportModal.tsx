@@ -10,6 +10,7 @@ import confetti from 'canvas-confetti';
 import { Project } from '../../types';
 import { ExportOptions, ExportProgress, renderProjectToVideo } from '../../services/exportRenderer';
 import { saveRecordingToDB, generateThumbnailFromBlob, formatBytes } from '../../services/db';
+import { useLanguage } from '../../context/LanguageContext';
 
 interface ExportModalProps {
   project: Project;
@@ -22,6 +23,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   onClose,
   onSavedToLibrary,
 }) => {
+  const { currentLang } = useLanguage();
   const [options, setOptions] = useState<ExportOptions>({
     resolutionPreset: '1080p',
     fps: 60,
@@ -114,10 +116,10 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-150 font-sans">
-      <div className="bg-[#18181C] border border-[#282832] rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden flex flex-col text-[#EDEDED]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/65 backdrop-blur-md animate-in fade-in duration-150 font-sans">
+      <div className="bg-[#232936] border border-white/15 rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden flex flex-col text-[#EDEDED]">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#26262E]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-[#D90000]/15 text-[#D90000] flex items-center justify-center">
               <Film01Icon className="w-4 h-4" />
@@ -160,7 +162,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                       className={`py-2.5 px-2 rounded-xl border text-center font-semibold transition-all cursor-pointer ${
                         options.resolutionPreset === res.id
                           ? 'bg-[#D90000] border-[#D90000] text-white font-bold shadow-[0_0_12px_rgba(217,0,0,0.35)]'
-                          : 'bg-[#141418] border-[#282830] text-[#A1A1AA] hover:bg-[#202026]'
+                          : 'bg-[#1B202B] border-white/10 text-zinc-300 hover:bg-[#2B3242]'
                       }`}
                     >
                       {res.label}
@@ -178,7 +180,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                   <select
                     value={options.format}
                     onChange={(e) => setOptions({ ...options, format: e.target.value as 'mp4' | 'webm' })}
-                    className="w-full bg-[#141418] border border-[#282830] rounded-xl px-3 py-2.5 text-xs font-semibold text-white focus:outline-none focus:border-[#D90000]"
+                    className="w-full bg-[#1B202B] border border-white/10 rounded-xl px-3 py-2.5 text-xs font-semibold text-white focus:outline-none focus:border-[#D90000]"
                   >
                     <option value="mp4">MP4 (H.264 / AAC)</option>
                     <option value="webm">WebM (VP9 / Opus)</option>
@@ -192,7 +194,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                   <select
                     value={options.fps}
                     onChange={(e) => setOptions({ ...options, fps: parseInt(e.target.value, 10) })}
-                    className="w-full bg-[#141418] border border-[#282830] rounded-xl px-3 py-2.5 text-xs font-semibold text-white focus:outline-none focus:border-[#D90000]"
+                    className="w-full bg-[#1B202B] border border-white/10 rounded-xl px-3 py-2.5 text-xs font-semibold text-white focus:outline-none focus:border-[#D90000]"
                   >
                     <option value={60}>60 FPS (Ultra Smooth)</option>
                     <option value={30}>30 FPS (Standard)</option>
@@ -206,7 +208,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                   <select
                     value={options.bitrateMbps}
                     onChange={(e) => setOptions({ ...options, bitrateMbps: parseInt(e.target.value, 10) })}
-                    className="w-full bg-[#141418] border border-[#282830] rounded-xl px-3 py-2.5 text-xs font-semibold text-white focus:outline-none focus:border-[#D90000]"
+                    className="w-full bg-[#1B202B] border border-white/10 rounded-xl px-3 py-2.5 text-xs font-semibold text-white focus:outline-none focus:border-[#D90000]"
                   >
                     <option value={12}>12 Mbps (High)</option>
                     <option value={20}>20 Mbps (Max)</option>
@@ -216,7 +218,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
               </div>
 
               {/* Summary box */}
-              <div className="p-3.5 bg-[#141418] rounded-2xl border border-[#26262E] space-y-1.5 text-[11px] text-[#8E8E98]">
+              <div className="p-3.5 bg-[#1B202B] rounded-2xl border border-white/10 space-y-1.5 text-[11px] text-[#8E8E98]">
                 <div className="flex justify-between">
                   <span>Aspect Ratio:</span>
                   <span className="font-semibold text-white">{project.appearance.aspectRatio}</span>
@@ -237,7 +239,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
             /* Rendering Progress State */
             <div className="py-6 flex flex-col items-center justify-center text-center space-y-4">
               <div className="relative flex items-center justify-center">
-                <div className="w-16 h-16 rounded-full border-4 border-[#282832] border-t-[#D90000] animate-spin" />
+                <div className="w-16 h-16 rounded-full border-4 border-white/15 border-t-[#D90000] animate-spin" />
                 <span className="absolute text-xs font-mono font-bold text-[#D90000]">
                   {progress?.progress || 0}%
                 </span>
@@ -253,7 +255,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
               </div>
 
               {/* Progress Bar */}
-              <div className="w-full bg-[#141418] h-2 rounded-full overflow-hidden border border-[#282830]">
+              <div className="w-full bg-[#1B202B] h-2 rounded-full overflow-hidden border border-white/10">
                 <div
                   className="bg-[#D90000] h-full transition-all duration-200 rounded-full shadow-[0_0_10px_rgba(217,0,0,0.5)]"
                   style={{ width: `${progress?.progress || 0}%` }}
@@ -272,7 +274,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                   Render Completed!
                 </h4>
                 <p className="text-xs text-[#8E8E98]">
-                  Output size: {exportedBlob ? formatBytes(exportedBlob.size) : 'Ready'} • {options.resolutionPreset} @ {options.fps} FPS
+                  Output size: {exportedBlob ? formatBytes(exportedBlob.size, 1, currentLang) : 'Ready'} • {options.resolutionPreset} @ {options.fps} FPS
                 </p>
               </div>
             </div>
@@ -280,12 +282,12 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         </div>
 
         {/* Footer Actions */}
-        <div className="px-6 py-4 border-t border-[#26262E] bg-[#141418] flex items-center justify-end gap-3">
+        <div className="px-6 py-4 border-t border-white/10 bg-[#1B202B] flex items-center justify-end gap-3">
           {!exportedBlob && !isExporting ? (
             <>
               <button
                 onClick={onClose}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-[#8E8E98] hover:text-white hover:bg-[#202026] transition-colors cursor-pointer"
+                className="px-4 py-2 rounded-xl text-xs font-semibold text-[#8E8E98] hover:text-white hover:bg-[#2B3242] transition-colors cursor-pointer"
               >
                 Cancel
               </button>
@@ -307,7 +309,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                 className={`flex-1 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 border transition-all cursor-pointer ${
                   isSaved
                     ? 'bg-[#18331E] border-[#8DB355] text-[#8DB355]'
-                    : 'bg-[#202026] hover:bg-[#282832] border-[#2E2E38] text-[#D1D1D6]'
+                    : 'bg-[#2B3242] hover:bg-[#353E54] border-white/15 text-[#D1D1D6]'
                 }`}
               >
                 {isSaved ? <Tick01Icon className="w-4 h-4" /> : <FloppyDiskIcon className="w-4 h-4" />}

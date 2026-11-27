@@ -40,7 +40,7 @@ export const BackgroundPopover: React.FC<BackgroundPopoverProps> = ({
 
   return (
     <div
-      className={`${positionClass} w-88 max-w-[calc(100vw-120px)] bg-white dark:bg-[#151718] text-slate-900 dark:text-white rounded-2xl border border-slate-200 dark:border-white/10 shadow-2xl shadow-slate-900/20 dark:shadow-black/70 p-4 z-50 backdrop-blur-xl animate-in fade-in zoom-in-95 duration-150`}
+      className={`${positionClass} w-88 max-w-[calc(100vw-120px)] bg-white dark:bg-[#232936] text-slate-900 dark:text-white rounded-2xl border border-slate-200 dark:border-white/15 shadow-2xl shadow-slate-900/20 dark:shadow-black/45 p-4 z-50 backdrop-blur-xl animate-in fade-in zoom-in-95 duration-150`}
       onClick={(e) => e.stopPropagation()}
     >
       {/* Header */}
@@ -63,7 +63,7 @@ export const BackgroundPopover: React.FC<BackgroundPopoverProps> = ({
       </div>
 
       {/* Category Tabs */}
-      <div className="flex items-center gap-1 p-1 mb-3 rounded-xl bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/5">
+      <div className="flex items-center gap-1 p-1 mb-3 rounded-xl bg-slate-100 dark:bg-[#1B202B] border border-slate-200 dark:border-white/10">
         {categories.map((cat) => (
           <button
             key={cat.id}
@@ -71,7 +71,7 @@ export const BackgroundPopover: React.FC<BackgroundPopoverProps> = ({
             onClick={() => setActiveCategory(cat.id)}
             className={`flex-1 py-1 px-1.5 rounded-lg text-[11px] font-semibold transition-all cursor-pointer truncate text-center ${
               activeCategory === cat.id
-                ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-xs font-bold'
+                ? 'bg-white dark:bg-[#31394D] text-slate-900 dark:text-white shadow-xs font-bold'
                 : 'text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200'
             }`}
           >
@@ -99,7 +99,7 @@ export const BackgroundPopover: React.FC<BackgroundPopoverProps> = ({
                 className={`group relative flex flex-col p-1.5 rounded-xl border transition-all cursor-pointer text-left ${
                   isSelected
                     ? 'border-[#8DB355] ring-2 ring-[#8DB355]/30 bg-[#8DB355]/5'
-                    : 'border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 bg-slate-50/80 dark:bg-white/[0.03]'
+                    : 'border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 bg-slate-50/80 dark:bg-[#1B202B]'
                 }`}
               >
                 {/* Visual Palette Preview */}

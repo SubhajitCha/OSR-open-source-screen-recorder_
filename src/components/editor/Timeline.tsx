@@ -249,20 +249,20 @@ export const Timeline: React.FC<TimelineProps> = ({
   }, []);
 
   return (
-    <div className="w-full bg-[#f3f5f8] dark:bg-[#111215] border-t-2 border-slate-300 dark:border-zinc-700 px-4 py-2.5 select-none flex flex-col gap-2 text-slate-800 dark:text-[#EDEDED] font-sans transition-colors relative shadow-[0_-6px_20px_rgba(0,0,0,0.06)] dark:shadow-none">
+    <div className="w-full bg-[#f3f5f8] dark:bg-[#1E232E] border-t-2 border-slate-300 dark:border-white/10 px-4 py-2.5 select-none flex flex-col gap-2 text-slate-800 dark:text-[#EDEDED] font-sans transition-colors relative shadow-[0_-6px_20px_rgba(0,0,0,0.06)] dark:shadow-none">
       {/* Top Edge Resize Drag Handle with Snatch-to-minimize support */}
       {onStartResizeDrag && (
         <div
           onMouseDown={onStartResizeDrag}
           onDoubleClick={onToggleCollapse}
           className="absolute -top-2 left-0 right-0 h-4 cursor-row-resize flex items-center justify-center group z-30 select-none"
-          title={
+          aria-label={
             isCollapsed
               ? 'Drag upward to expand timeline (or double-click)'
               : 'Drag downward past bottom to snatch-minimize (or double-click)'
           }
         >
-          <div className="w-16 h-1 bg-slate-300 dark:bg-zinc-700 group-hover:bg-[#D90000] group-hover:h-1.5 active:bg-[#D90000] rounded-full transition-all flex items-center justify-center">
+          <div className="w-16 h-1 bg-slate-300 dark:bg-zinc-600 group-hover:bg-[#D90000] group-hover:h-1.5 active:bg-[#D90000] rounded-full transition-all flex items-center justify-center">
             <div className="w-4 h-0.5 bg-white/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
           </div>
         </div>
@@ -272,19 +272,24 @@ export const Timeline: React.FC<TimelineProps> = ({
       <div className="flex items-center justify-between gap-3 text-xs">
         {/* Left: Track Indicator & Pro Workflow Tip */}
         <div className="flex items-center gap-2.5">
-          <button
-            type="button"
-            onClick={onToggleCollapse}
-            className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white dark:bg-zinc-900 hover:bg-slate-100 dark:hover:bg-zinc-800 border border-slate-300 dark:border-zinc-700 text-slate-800 dark:text-zinc-200 font-bold text-[11px] shadow-2xs transition-colors cursor-pointer"
-            title={isCollapsed ? 'Expand Timeline' : 'Minimize Timeline'}
-          >
-            <span className="tracking-wide uppercase">{t.editor?.timeline || 'TIMELINE'}</span>
-            {isCollapsed ? (
-              <ArrowUp01Icon className="w-3.5 h-3.5 text-[#D90000]" />
-            ) : (
-              <ArrowDown01Icon className="w-3.5 h-3.5 text-slate-500 dark:text-zinc-400" />
-            )}
-          </button>
+          <div className="relative group">
+            <button
+              type="button"
+              onClick={onToggleCollapse}
+              className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white dark:bg-[#252C3B] hover:bg-slate-100 dark:hover:bg-[#2B3242] border border-slate-300 dark:border-white/10 text-slate-800 dark:text-zinc-200 font-bold text-[11px] shadow-2xs transition-colors cursor-pointer"
+              aria-label={isCollapsed ? 'Expand Timeline' : 'Minimize Timeline'}
+            >
+              <span className="tracking-wide uppercase">{t.editor?.timeline || 'TIMELINE'}</span>
+              {isCollapsed ? (
+                <ArrowUp01Icon className="w-3.5 h-3.5 text-[#D90000]" />
+              ) : (
+                <ArrowDown01Icon className="w-3.5 h-3.5 text-slate-500 dark:text-zinc-400" />
+              )}
+            </button>
+            <div className="pointer-events-none opacity-0 group-hover:opacity-100 transition-all duration-150 absolute bottom-full left-0 mb-2 px-2.5 py-1 rounded-lg bg-slate-900/95 dark:bg-white/95 text-white dark:text-slate-950 text-xs font-semibold shadow-xl whitespace-nowrap z-50 border border-white/10 dark:border-black/10">
+              {isCollapsed ? 'Expand Timeline' : 'Minimize Timeline'}
+            </div>
+          </div>
           <span className="hidden lg:inline-block text-[11px] text-slate-500 dark:text-zinc-400 font-medium">
             Drag handles to trim clip • Hover on Zoom lane below to add zooms
           </span>
@@ -292,12 +297,12 @@ export const Timeline: React.FC<TimelineProps> = ({
 
         {/* Right: Studio Digital Timecode Capsule */}
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-2 bg-white dark:bg-zinc-900 px-3.5 py-1 rounded-full border border-slate-200 dark:border-zinc-800 shadow-2xs">
+          <div className="flex items-center gap-2 bg-white dark:bg-[#252C3B] px-3.5 py-1 rounded-full border border-slate-200 dark:border-white/10 shadow-2xs">
             <div className="flex items-center gap-1 font-mono text-xs">
               <span className="font-black text-[#D90000] dark:text-[#FF6666] tracking-tight">
                 {formatTimecode(currentTime)}
               </span>
-              <span className="text-slate-300 dark:text-zinc-700 font-light">/</span>
+              <span className="text-slate-300 dark:text-zinc-600 font-light">/</span>
               <span className="font-semibold text-slate-500 dark:text-zinc-400">
                 {formatTimecode(safeDuration)}
               </span>
@@ -317,8 +322,8 @@ export const Timeline: React.FC<TimelineProps> = ({
         <div
           ref={isCollapsed ? containerRef : undefined}
           onClick={handleTimelineClick}
-          className="relative h-3.5 bg-slate-200/90 dark:bg-zinc-800/90 rounded-full overflow-hidden cursor-pointer group shadow-inner"
-          title="Click to seek on minimized timeline"
+          className="relative h-3.5 bg-slate-200/90 dark:bg-[#252C3B] rounded-full overflow-hidden cursor-pointer group shadow-inner"
+          aria-label="Click to seek on minimized timeline"
         >
           <div
             className="absolute top-0 bottom-0 left-0 bg-[#D90000] rounded-full transition-all"
@@ -339,7 +344,7 @@ export const Timeline: React.FC<TimelineProps> = ({
             : 'max-h-[600px] opacity-100 ease-in scale-100'
         }`}
       >
-        <div className="bg-[#e9ecf2] dark:bg-[#0a0a0d] rounded-2xl border border-slate-300/80 dark:border-zinc-800/90 overflow-visible shadow-inner p-3 pt-6 pb-3 flex flex-col gap-2 relative">
+        <div className="bg-[#e9ecf2] dark:bg-[#151922] rounded-2xl border border-slate-300/80 dark:border-white/10 overflow-visible shadow-inner p-3 pt-6 pb-3 flex flex-col gap-2 relative">
           {/* Main interactive container */}
           <div
             ref={!isCollapsed ? containerRef : undefined}
@@ -349,7 +354,7 @@ export const Timeline: React.FC<TimelineProps> = ({
             className="relative cursor-pointer select-none overflow-visible flex flex-col gap-2"
           >
           {/* 1. TOP PRECISION RULER */}
-          <div className="relative h-5 w-full -mt-4 mb-1 pointer-events-none select-none border-b border-slate-300/70 dark:border-zinc-800/80">
+          <div className="relative h-5 w-full -mt-4 mb-1 pointer-events-none select-none border-b border-slate-300/70 dark:border-white/10">
             {rulerData.map((t, i) => (
               <div
                 key={i}
@@ -399,7 +404,7 @@ export const Timeline: React.FC<TimelineProps> = ({
                 });
               }}
               className="w-3.5 h-3.5 bg-[#D90000] rounded-b-md shadow-md -mt-5 cursor-ew-resize pointer-events-auto flex items-center justify-center transition-transform hover:scale-110"
-              title={`Playhead: ${formatTimecode(currentTime)} (drag to scrub)`}
+              aria-label={`Playhead: ${formatTimecode(currentTime)} (drag to scrub)`}
             >
               <div className="w-1 h-1 rounded-full bg-white shadow-xs" />
             </div>
@@ -418,7 +423,7 @@ export const Timeline: React.FC<TimelineProps> = ({
             {/* Video Track Container */}
             <div
               style={{ height: `${videoTrackHeightPx}px` }}
-              className="rounded-xl bg-slate-300/60 dark:bg-zinc-900/90 border border-slate-300/90 dark:border-zinc-800 relative overflow-hidden flex items-center shadow-inner"
+              className="rounded-xl bg-slate-300/60 dark:bg-[#1F2533] border border-slate-300/90 dark:border-white/10 relative overflow-hidden flex items-center shadow-inner"
             >
               {/* Active Video Clip Range */}
               <div
@@ -440,7 +445,7 @@ export const Timeline: React.FC<TimelineProps> = ({
                 </div>
 
                 {/* Clip Title & Duration Pill */}
-                <div className="relative z-10 flex items-center gap-2 pointer-events-none truncate bg-white/70 dark:bg-black/50 px-2.5 py-1 rounded-md border border-black/5 dark:border-white/10 shadow-2xs">
+                <div className="relative z-10 flex items-center gap-2 pointer-events-none truncate bg-white/70 dark:bg-[#181D27]/85 px-2.5 py-1 rounded-md border border-black/5 dark:border-white/10 shadow-2xs">
                   <div className="w-2 h-2 rounded-full bg-[#8DB355] shadow-xs" />
                   <span className="text-[11px] font-bold text-slate-900 dark:text-zinc-100 truncate">
                     {t.editor?.activeVideo || 'Active Video'} ({formatShortTime(trimEnd - trimStart)})
@@ -477,7 +482,7 @@ export const Timeline: React.FC<TimelineProps> = ({
                 }}
                 className="absolute top-0 bottom-0 w-4 hover:w-4.5 bg-[#8DB355] hover:bg-[#7a9d47] cursor-ew-resize flex items-center justify-center transition-all z-30 shadow-md rounded-l-lg group/handle"
                 style={{ left: `calc(${(trimStart / safeDuration) * 100}% - 2px)` }}
-                title={`Drag to trim video start (${trimStart.toFixed(1)}s)`}
+                aria-label={`Drag to trim video start (${trimStart.toFixed(1)}s)`}
               >
                 {/* Double knurl vertical notches */}
                 <div className="flex items-center gap-0.5 pointer-events-none">
@@ -515,7 +520,7 @@ export const Timeline: React.FC<TimelineProps> = ({
                 }}
                 className="absolute top-0 bottom-0 w-4 hover:w-4.5 bg-[#8DB355] hover:bg-[#7a9d47] cursor-ew-resize flex items-center justify-center transition-all z-30 shadow-md rounded-r-lg group/handle"
                 style={{ left: `calc(${(trimEnd / safeDuration) * 100}% - 14px)` }}
-                title={`Drag to trim video end (${trimEnd.toFixed(1)}s)`}
+                aria-label={`Drag to trim video end (${trimEnd.toFixed(1)}s)`}
               >
                 {/* Double knurl vertical notches */}
                 <div className="flex items-center gap-0.5 pointer-events-none">
@@ -537,7 +542,7 @@ export const Timeline: React.FC<TimelineProps> = ({
                       e.stopPropagation();
                       onRemoveTimelineItem?.(cut.id);
                     }}
-                    title="Cut Segment (Click to remove)"
+                    aria-label="Cut Segment (Click to remove)"
                   >
                     <span className="text-[9px] font-bold text-white bg-[#D90000] px-1.5 py-0.5 rounded shadow-sm opacity-90 group-hover/cut:opacity-100">
                       Cut ×
@@ -565,11 +570,11 @@ export const Timeline: React.FC<TimelineProps> = ({
               onMouseMove={handleZoomTrackMouseMove}
               onMouseLeave={handleZoomTrackMouseLeave}
               style={{ height: `${zoomTrackHeightPx}px` }}
-              className="rounded-xl bg-slate-300/40 dark:bg-zinc-900/70 border border-slate-300/80 dark:border-zinc-800/80 relative overflow-visible flex items-center shadow-xs cursor-crosshair hover:border-[#D90000]/40 transition-colors"
-              title="Click anywhere to add a Zoom effect at that point"
+              className="rounded-xl bg-slate-300/40 dark:bg-[#1B202B] border border-slate-300/80 dark:border-white/10 relative overflow-visible flex items-center shadow-xs cursor-crosshair hover:border-[#D90000]/40 transition-colors"
+              aria-label="Click anywhere to add a Zoom effect at that point"
             >
               {/* Subtle centerline guide for track automation feel */}
-              <div className="absolute left-16 right-4 top-1/2 h-[1px] border-b border-dashed border-slate-300/80 dark:border-zinc-800 pointer-events-none" />
+              <div className="absolute left-16 right-4 top-1/2 h-[1px] border-b border-dashed border-slate-300/80 dark:border-white/10 pointer-events-none" />
 
               {/* Dynamic Ghost Hover Box & "+ Add Zoom" badge on mouseover */}
               {zoomHover && !dragState && (
@@ -619,7 +624,7 @@ export const Timeline: React.FC<TimelineProps> = ({
                         ? 'bg-gradient-to-r from-[#D90000] to-[#E11D48] text-white border border-[#D90000] ring-2 ring-[#D90000]/50 shadow-md z-30'
                         : 'bg-gradient-to-r from-[#D90000]/85 to-[#E11D48]/85 hover:from-[#D90000] hover:to-[#E11D48] text-white border border-[#D90000]/60 z-20'
                     }`}
-                    title={`Zoom: ${zoom.scale.toFixed(1)}× (${zoom.start.toFixed(1)}s - ${zoom.end.toFixed(1)}s) • Drag to reposition`}
+                    aria-label={`Zoom: ${zoom.scale.toFixed(1)}× (${zoom.start.toFixed(1)}s - ${zoom.end.toFixed(1)}s) • Drag to reposition`}
                   >
                     {/* Left Resize Handle */}
                     <div
@@ -634,7 +639,7 @@ export const Timeline: React.FC<TimelineProps> = ({
                         });
                       }}
                       className="absolute -left-1 top-0 bottom-0 w-2.5 hover:w-3.5 bg-black/30 dark:bg-white/40 rounded-l cursor-ew-resize opacity-0 group-hover/segment:opacity-100 transition-opacity flex items-center justify-center"
-                      title="Drag to adjust zoom start"
+                      aria-label="Drag to adjust zoom start"
                     >
                       <div className="w-[1px] h-3 bg-white/90" />
                     </div>
@@ -658,7 +663,7 @@ export const Timeline: React.FC<TimelineProps> = ({
                         onRemoveTimelineItem?.(zoom.id);
                       }}
                       className="w-4 h-4 rounded-full flex items-center justify-center text-[11px] font-black opacity-0 group-hover/segment:opacity-100 hover:bg-black/20 text-white transition-opacity ml-1 cursor-pointer shrink-0"
-                      title="Remove zoom segment"
+                      aria-label="Remove zoom segment"
                     >
                       ×
                     </button>
@@ -676,7 +681,7 @@ export const Timeline: React.FC<TimelineProps> = ({
                         });
                       }}
                       className="absolute -right-1 top-0 bottom-0 w-2.5 hover:w-3.5 bg-black/30 dark:bg-white/40 rounded-r cursor-ew-resize opacity-0 group-hover/segment:opacity-100 transition-opacity flex items-center justify-center"
-                      title="Drag to adjust zoom end"
+                      aria-label="Drag to adjust zoom end"
                     >
                       <div className="w-[1px] h-3 bg-white/90" />
                     </div>

@@ -421,7 +421,7 @@ export const PreviewCanvas: React.FC<PreviewCanvasProps> = ({
 
       {/* Main Responsive Fitted Render Canvas Container */}
       <div
-        className="relative rounded-2xl overflow-hidden shadow-2xl border border-[#26262E] bg-zinc-950 flex items-center justify-center transition-all duration-150"
+        className="relative rounded-2xl overflow-hidden shadow-2xl border border-white/15 bg-[#12161E] flex items-center justify-center transition-all duration-150"
         style={{
           width: `${Math.round(displayW)}px`,
           height: `${Math.round(displayH)}px`,
@@ -443,7 +443,7 @@ export const PreviewCanvas: React.FC<PreviewCanvasProps> = ({
 
         {/* Instant Fallback Poster / Loading Overlay until video decoder presents first frame */}
         {!videoLoaded && (
-          <div className="absolute inset-0 flex items-center justify-center bg-zinc-950 z-20 pointer-events-none transition-opacity duration-200">
+          <div className="absolute inset-0 flex items-center justify-center bg-[#12161E] z-20 pointer-events-none transition-opacity duration-200">
             {thumbnailUrl ? (
               <img
                 src={thumbnailUrl}

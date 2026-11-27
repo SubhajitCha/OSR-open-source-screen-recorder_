@@ -1,4 +1,6 @@
 import { SavedRecording } from '../types';
+import { LanguageCode } from '../i18n/types';
+import { getReviewUiStrings } from '../i18n/formatters';
 
 const DB_NAME = 'ScreenStreamOpenDB';
 const DB_VERSION = 1;
@@ -220,7 +222,7 @@ export async function clearAllRecordingsFromDB(): Promise<void> {
   });
 }
 
-export async function getStorageInfo(): Promise<{
+export async function getStorageInfo(lang: LanguageCode = 'en'): Promise<{
   usage: number; // bytes
   quota: number; // bytes
   percentage: number;
@@ -238,8 +240,8 @@ export async function getStorageInfo(): Promise<{
         usage,
         quota,
         percentage: Math.min(percentage, 100),
-        formattedUsage: formatBytes(usage),
-        formattedQuota: formatBytes(quota),
+        formattedUsage: formatBytes(usage, 1, lang),
+        formattedQuota: formatBytes(quota, 1, lang),
       };
     } catch {
       // Fallback
@@ -250,17 +252,17 @@ export async function getStorageInfo(): Promise<{
     usage: 0,
     quota: 1024 * 1024 * 1024,
     percentage: 0,
-    formattedUsage: '0 B',
+    formattedUsage: formatBytes(0, 1, lang),
     formattedQuota: 'Unknown',
   };
 }
 
-export function formatBytes(bytes: number, decimals = 1): string {
-  if (bytes === 0) return '0 B';
+export function formatBytes(bytes: number, decimals = 1, lang: LanguageCode = 'en'): string {
+  const sizes = getReviewUiStrings(lang).byteUnits;
+  if (bytes === 0) return `0 ${sizes[0]}`;
   const k = 1024;
   const dm = decimals < 0 ? 0 : decimals;
-  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  const i = Math.min(sizes.length - 1, Math.floor(Math.log(bytes) / Math.log(k)));
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
 }
 

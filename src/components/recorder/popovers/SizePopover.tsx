@@ -52,7 +52,7 @@ export const SizePopover: React.FC<SizePopoverProps> = ({
 
   return (
     <div
-      className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 w-80 bg-white dark:bg-[#151718] text-slate-900 dark:text-white rounded-2xl border border-slate-200 dark:border-white/10 shadow-2xl shadow-slate-900/15 dark:shadow-black/60 p-4 z-50 backdrop-blur-xl animate-in fade-in zoom-in-95 duration-150"
+      className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 w-80 bg-white dark:bg-[#232936] text-slate-900 dark:text-white rounded-2xl border border-slate-200 dark:border-white/15 shadow-2xl shadow-slate-900/15 dark:shadow-black/45 p-4 z-50 backdrop-blur-xl animate-in fade-in zoom-in-95 duration-150"
       onClick={(e) => e.stopPropagation()}
     >
       <div className="flex items-center justify-between pb-2.5 mb-3 border-b border-slate-100 dark:border-white/10">
@@ -84,8 +84,8 @@ export const SizePopover: React.FC<SizePopoverProps> = ({
             }}
             className={`w-full flex items-center gap-3 p-2.5 rounded-xl text-left transition-all cursor-pointer border ${
               aspectRatio === item.id
-                ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-950 border-zinc-900 dark:border-white shadow-xs'
-                : 'bg-slate-50 dark:bg-white/[0.04] text-slate-700 dark:text-zinc-300 border-slate-200 dark:border-white/5 hover:bg-slate-100 dark:hover:bg-white/[0.08]'
+                ? 'bg-slate-800 dark:bg-[#31394D] text-white border-slate-800 dark:border-white/25 shadow-xs'
+                : 'bg-slate-50 dark:bg-white/[0.07] text-slate-700 dark:text-zinc-300 border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/[0.11]'
             }`}
           >
             <span className="text-base font-mono">{item.icon}</span>
@@ -93,7 +93,7 @@ export const SizePopover: React.FC<SizePopoverProps> = ({
               <span className="text-xs font-bold block truncate">{item.title}</span>
               <span
                 className={`text-[10px] block truncate ${
-                  aspectRatio === item.id ? 'text-zinc-300 dark:text-zinc-600' : 'text-slate-500 dark:text-zinc-400'
+                  aspectRatio === item.id ? 'text-slate-300 dark:text-zinc-300' : 'text-slate-500 dark:text-zinc-400'
                 }`}
               >
                 {item.subtitle}

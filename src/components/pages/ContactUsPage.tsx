@@ -114,7 +114,7 @@ export const ContactUsPage: React.FC<ContactUsPageProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
         {/* Left Column: Interactive Form */}
         <div className="lg:col-span-7">
-          <div className="bg-white dark:bg-zinc-900/80 rounded-3xl border border-slate-200 dark:border-zinc-800 p-6 sm:p-8 shadow-xs">
+          <div className="bg-white dark:bg-[#1E232E] rounded-3xl border border-slate-200 dark:border-white/10 p-6 sm:p-8 shadow-xs">
             {isSubmitted ? (
               <div className="py-8 text-center space-y-5 animate-in fade-in zoom-in-95 duration-200">
                 <div className="w-16 h-16 mx-auto rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50 flex items-center justify-center shadow-xs">
@@ -133,7 +133,7 @@ export const ContactUsPage: React.FC<ContactUsPageProps> = ({
                   <button
                     type="button"
                     onClick={handleReset}
-                    className="w-full sm:w-auto px-5 py-2.5 rounded-xl border border-slate-300 dark:border-zinc-700 text-xs sm:text-sm font-semibold hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+                    className="w-full sm:w-auto px-5 py-2.5 rounded-xl border border-slate-300 dark:border-white/15 text-xs sm:text-sm font-semibold hover:bg-slate-50 dark:hover:bg-[#252C3B] transition-colors cursor-pointer"
                   >
                     Send Another Note
                   </button>
@@ -169,7 +169,7 @@ export const ContactUsPage: React.FC<ContactUsPageProps> = ({
                         className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                           topic === t.id
                             ? 'bg-slate-900 text-white dark:bg-white dark:text-black shadow-xs'
-                            : 'bg-slate-100 text-slate-600 dark:bg-zinc-800 dark:text-zinc-400 hover:bg-slate-200 dark:hover:bg-zinc-700'
+                            : 'bg-slate-100 text-slate-600 dark:bg-[#252C3B] dark:text-zinc-300 hover:bg-slate-200 dark:hover:bg-[#31394D]'
                         }`}
                       >
                         {t.label}
@@ -190,7 +190,7 @@ export const ContactUsPage: React.FC<ContactUsPageProps> = ({
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="Jane Doe"
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-sm focus:outline-hidden focus:ring-2 focus:ring-slate-400 dark:focus:ring-zinc-600 transition-all text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-zinc-600"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-[#252C3B] border border-slate-200 dark:border-white/10 text-sm focus:outline-hidden focus:ring-2 focus:ring-slate-400 dark:focus:ring-white/25 transition-all text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-zinc-500"
                     />
                   </div>
 
@@ -204,7 +204,7 @@ export const ContactUsPage: React.FC<ContactUsPageProps> = ({
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="jane@example.com"
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-sm focus:outline-hidden focus:ring-2 focus:ring-slate-400 dark:focus:ring-zinc-600 transition-all text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-zinc-600"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-[#252C3B] border border-slate-200 dark:border-white/10 text-sm focus:outline-hidden focus:ring-2 focus:ring-slate-400 dark:focus:ring-white/25 transition-all text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-zinc-500"
                     />
                   </div>
                 </div>
@@ -220,7 +220,7 @@ export const ContactUsPage: React.FC<ContactUsPageProps> = ({
                     value={subject}
                     onChange={(e) => setSubject(e.target.value)}
                     placeholder="e.g. Webcam aspect ratio suggestion on iPad"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-sm focus:outline-hidden focus:ring-2 focus:ring-slate-400 dark:focus:ring-zinc-600 transition-all text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-zinc-600"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-[#252C3B] border border-slate-200 dark:border-white/10 text-sm focus:outline-hidden focus:ring-2 focus:ring-slate-400 dark:focus:ring-white/25 transition-all text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-zinc-500"
                   />
                 </div>
 
@@ -235,7 +235,7 @@ export const ContactUsPage: React.FC<ContactUsPageProps> = ({
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     placeholder="Tell us what you loved, what broke, or what feature would make your workflow faster..."
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-sm focus:outline-hidden focus:ring-2 focus:ring-slate-400 dark:focus:ring-zinc-600 transition-all text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-zinc-600 resize-y"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-[#252C3B] border border-slate-200 dark:border-white/10 text-sm focus:outline-hidden focus:ring-2 focus:ring-slate-400 dark:focus:ring-white/25 transition-all text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-zinc-500 resize-y"
                   />
                 </div>
 
@@ -262,19 +262,16 @@ export const ContactUsPage: React.FC<ContactUsPageProps> = ({
         {/* Right Column: Direct Info & Quick FAQ */}
         <div className="lg:col-span-5 space-y-6">
           {/* Direct Email Card */}
-          <div className="p-6 rounded-3xl bg-slate-50 dark:bg-zinc-900/60 border border-slate-200 dark:border-zinc-800 space-y-4">
+          <div className="p-6 rounded-3xl bg-slate-50 dark:bg-[#1E232E] border border-slate-200 dark:border-white/10 space-y-4">
             <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400">
               Direct Contact
             </h3>
             <div className="space-y-3 text-sm">
               <div>
-                <span className="text-xs text-slate-400 dark:text-zinc-500 block">Lead Designer &amp; Maintainer</span>
-                <a
-                  href="mailto:design.subhajit@gmail.com"
-                  className="font-mono font-semibold text-blue-600 dark:text-blue-400 hover:underline"
-                >
-                  design.subhajit@gmail.com
-                </a>
+                <span className="text-xs text-slate-400 dark:text-zinc-500 block">Support &amp; Maintenance</span>
+                <p className="font-semibold text-slate-900 dark:text-zinc-200">
+                  FSR Studio Team &middot; Use the inquiry form
+                </p>
               </div>
               <div>
                 <span className="text-xs text-slate-400 dark:text-zinc-500 block">Location &amp; Availability</span>
@@ -292,7 +289,7 @@ export const ContactUsPage: React.FC<ContactUsPageProps> = ({
           </div>
 
           {/* Quick Troubleshooting FAQ */}
-          <div className="p-6 rounded-3xl bg-white dark:bg-zinc-900/60 border border-slate-200 dark:border-zinc-800 space-y-4">
+          <div className="p-6 rounded-3xl bg-white dark:bg-[#1E232E] border border-slate-200 dark:border-white/10 space-y-4">
             <div className="flex items-center gap-2">
               <HelpCircleIcon className="w-5 h-5 text-amber-500" />
               <h3 className="font-bold text-slate-900 dark:text-white text-base">
@@ -333,7 +330,7 @@ export const ContactUsPage: React.FC<ContactUsPageProps> = ({
       </div>
 
       {/* Bottom Navigation Links */}
-      <div className="pt-8 border-t border-slate-200 dark:border-zinc-800 flex flex-wrap items-center justify-between gap-4 text-xs">
+      <div className="pt-8 border-t border-slate-200 dark:border-white/10 flex flex-wrap items-center justify-between gap-4 text-xs">
         <div className="flex items-center gap-4 text-slate-500 dark:text-zinc-400">
           <a
             href="?view=about"

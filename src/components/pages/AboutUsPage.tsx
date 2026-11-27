@@ -78,7 +78,7 @@ export const AboutUsPage: React.FC<AboutUsPageProps> = ({
       </header>
 
       {/* Why We Built FSR Studio Card */}
-      <div className="bg-white dark:bg-zinc-900/80 rounded-3xl border border-slate-200 dark:border-zinc-800 p-6 sm:p-8 shadow-xs space-y-6">
+      <div className="bg-white dark:bg-[#1E232E] rounded-3xl border border-slate-200 dark:border-white/10 p-6 sm:p-8 shadow-xs space-y-6">
         <div className="space-y-2">
           <span className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 font-mono">
             Origin &amp; Mission
@@ -110,7 +110,7 @@ export const AboutUsPage: React.FC<AboutUsPageProps> = ({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
           {/* Pillar 1 */}
-          <div className="p-6 rounded-2xl bg-white dark:bg-zinc-900/60 border border-slate-200 dark:border-zinc-800 space-y-3">
+          <div className="p-6 rounded-2xl bg-white dark:bg-[#1E232E] border border-slate-200 dark:border-white/10 space-y-3">
             <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800/40 flex items-center justify-center">
               <SecurityCheckIcon className="w-5 h-5" />
             </div>
@@ -123,7 +123,7 @@ export const AboutUsPage: React.FC<AboutUsPageProps> = ({
           </div>
 
           {/* Pillar 2 */}
-          <div className="p-6 rounded-2xl bg-white dark:bg-zinc-900/60 border border-slate-200 dark:border-zinc-800 space-y-3">
+          <div className="p-6 rounded-2xl bg-white dark:bg-[#1E232E] border border-slate-200 dark:border-white/10 space-y-3">
             <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-800/40 flex items-center justify-center">
               <CpuIcon className="w-5 h-5" />
             </div>
@@ -136,7 +136,7 @@ export const AboutUsPage: React.FC<AboutUsPageProps> = ({
           </div>
 
           {/* Pillar 3 */}
-          <div className="p-6 rounded-2xl bg-white dark:bg-zinc-900/60 border border-slate-200 dark:border-zinc-800 space-y-3">
+          <div className="p-6 rounded-2xl bg-white dark:bg-[#1E232E] border border-slate-200 dark:border-white/10 space-y-3">
             <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-800/40 flex items-center justify-center">
               <Layers01Icon className="w-5 h-5" />
             </div>
@@ -149,7 +149,7 @@ export const AboutUsPage: React.FC<AboutUsPageProps> = ({
           </div>
 
           {/* Pillar 4 */}
-          <div className="p-6 rounded-2xl bg-white dark:bg-zinc-900/60 border border-slate-200 dark:border-zinc-800 space-y-3">
+          <div className="p-6 rounded-2xl bg-white dark:bg-[#1E232E] border border-slate-200 dark:border-white/10 space-y-3">
             <div className="w-10 h-10 rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-800/40 flex items-center justify-center">
               <Video01Icon className="w-5 h-5" />
             </div>
@@ -170,21 +170,21 @@ export const AboutUsPage: React.FC<AboutUsPageProps> = ({
         </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="p-5 rounded-2xl bg-slate-50 dark:bg-zinc-900/40 border border-slate-200 dark:border-zinc-800/80 space-y-2">
+          <div className="p-5 rounded-2xl bg-slate-50 dark:bg-[#1E232E] border border-slate-200 dark:border-white/10 space-y-2">
             <h3 className="font-bold text-slate-900 dark:text-white text-base">Software Engineers</h3>
             <p className="text-xs sm:text-sm text-slate-600 dark:text-zinc-400">
               Record pull request walkthroughs, reproduce frontend bugs, and capture terminal workflows without leaving your browser tab.
             </p>
           </div>
 
-          <div className="p-5 rounded-2xl bg-slate-50 dark:bg-zinc-900/40 border border-slate-200 dark:border-zinc-800/80 space-y-2">
+          <div className="p-5 rounded-2xl bg-slate-50 dark:bg-[#1E232E] border border-slate-200 dark:border-white/10 space-y-2">
             <h3 className="font-bold text-slate-900 dark:text-white text-base">Designers &amp; PMs</h3>
             <p className="text-xs sm:text-sm text-slate-600 dark:text-zinc-400">
               Present Figma interactive prototypes, explain user experience flows, and share asynchronous design critique with your camera bubble.
             </p>
           </div>
 
-          <div className="p-5 rounded-2xl bg-slate-50 dark:bg-zinc-900/40 border border-slate-200 dark:border-zinc-800/80 space-y-2">
+          <div className="p-5 rounded-2xl bg-slate-50 dark:bg-[#1E232E] border border-slate-200 dark:border-white/10 space-y-2">
             <h3 className="font-bold text-slate-900 dark:text-white text-base">Teachers &amp; Students</h3>
             <p className="text-xs sm:text-sm text-slate-600 dark:text-zinc-400">
               Create video tutorials, record virtual classroom lessons, and submit video assignments with zero software installation overhead.
@@ -194,7 +194,7 @@ export const AboutUsPage: React.FC<AboutUsPageProps> = ({
       </div>
 
       {/* Open Source Tech Stack Callout */}
-      <div className="p-6 sm:p-8 rounded-3xl bg-zinc-950 text-white border border-zinc-800 space-y-4">
+      <div className="p-6 sm:p-8 rounded-3xl bg-[#1E2432] text-white border border-white/10 space-y-4">
         <div className="flex items-center gap-2 text-xs font-semibold text-emerald-400 font-mono">
           <BookOpen01Icon className="w-4 h-4" />
           <span>OPEN WEB STANDARDS</span>
@@ -202,20 +202,20 @@ export const AboutUsPage: React.FC<AboutUsPageProps> = ({
         <h2 className="text-xl sm:text-2xl font-bold">
           Powered by Pure Native Web Technologies
         </h2>
-        <p className="text-sm text-zinc-400 leading-relaxed max-w-2xl">
+        <p className="text-sm text-zinc-300 leading-relaxed max-w-2xl">
           FSR Studio is crafted with TypeScript, React 18, Tailwind CSS, HTML5 Canvas, Web Audio API, and IndexedDB. We actively contribute our architecture findings back to the open web developer ecosystem.
         </p>
         <div className="pt-2 flex flex-wrap gap-2 text-xs font-mono">
-          <span className="px-2.5 py-1 rounded-lg bg-zinc-900 text-zinc-300 border border-zinc-800">MediaStream API</span>
-          <span className="px-2.5 py-1 rounded-lg bg-zinc-900 text-zinc-300 border border-zinc-800">Web Audio API</span>
-          <span className="px-2.5 py-1 rounded-lg bg-zinc-900 text-zinc-300 border border-zinc-800">Canvas 2D Compositor</span>
-          <span className="px-2.5 py-1 rounded-lg bg-zinc-900 text-zinc-300 border border-zinc-800">IndexedDB Video Store</span>
-          <span className="px-2.5 py-1 rounded-lg bg-zinc-900 text-zinc-300 border border-zinc-800">WebCodecs MP4 Muxer</span>
+          <span className="px-2.5 py-1 rounded-lg bg-[#272F40] text-zinc-200 border border-white/10">MediaStream API</span>
+          <span className="px-2.5 py-1 rounded-lg bg-[#272F40] text-zinc-200 border border-white/10">Web Audio API</span>
+          <span className="px-2.5 py-1 rounded-lg bg-[#272F40] text-zinc-200 border border-white/10">Canvas 2D Compositor</span>
+          <span className="px-2.5 py-1 rounded-lg bg-[#272F40] text-zinc-200 border border-white/10">IndexedDB Video Store</span>
+          <span className="px-2.5 py-1 rounded-lg bg-[#272F40] text-zinc-200 border border-white/10">WebCodecs MP4 Muxer</span>
         </div>
       </div>
 
       {/* Bottom Navigation Links */}
-      <div className="pt-8 border-t border-slate-200 dark:border-zinc-800 flex flex-wrap items-center justify-between gap-4 text-xs">
+      <div className="pt-8 border-t border-slate-200 dark:border-white/10 flex flex-wrap items-center justify-between gap-4 text-xs">
         <div className="flex items-center gap-4 text-slate-500 dark:text-zinc-400">
           <a
             href="?view=privacy"

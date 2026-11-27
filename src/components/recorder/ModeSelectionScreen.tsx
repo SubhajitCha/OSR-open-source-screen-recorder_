@@ -48,7 +48,7 @@ export const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
 
   // Ultra-minimal desktop screen representation in neutral dark palette (no clock, no date, no busy charts)
   const renderScreenMockup = (withCam: boolean = false) => (
-    <div className="relative w-full h-full bg-[#18181B] dark:bg-[#121214] text-white flex flex-col justify-between p-3 sm:p-3.5 overflow-hidden select-none">
+    <div className="relative w-full h-full bg-[#18181B] dark:bg-[#222836] text-white flex flex-col justify-between p-3 sm:p-3.5 overflow-hidden select-none">
       {/* Subtle top window dots */}
       <div className="flex items-center gap-1.5">
         <span className="w-1.5 h-1.5 rounded-full bg-white/25" />
@@ -97,7 +97,7 @@ export const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
   return (
     <div
       id="mode-selection-screen"
-      className="w-full min-h-[calc(100vh-4rem)] flex flex-col items-center bg-slate-50 dark:bg-[#07090c] text-slate-900 dark:text-white transition-colors"
+      className="w-full min-h-[calc(100vh-4rem)] flex flex-col items-center bg-slate-50 dark:bg-[#161A22] text-slate-900 dark:text-white transition-colors"
     >
       {/* Primary Above-the-Fold Hero: Mode Selection */}
       <div className="w-full flex flex-col items-center justify-center px-4 sm:px-8 pt-6 pb-14 sm:pt-10 sm:pb-18 relative select-none">
@@ -157,7 +157,7 @@ export const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
                     className={`relative w-full aspect-[16/11] rounded-2xl sm:rounded-3xl overflow-hidden transition-all duration-200 shadow-sm group-hover:shadow-xl group-hover:-translate-y-1 ${
                       isCurrent
                         ? 'ring-2 ring-slate-900 dark:ring-white shadow-md'
-                        : 'ring-1 ring-black/5 dark:ring-white/10 group-hover:ring-1 group-hover:ring-slate-400 dark:group-hover:ring-zinc-400'
+                        : 'ring-1 ring-black/5 dark:ring-white/15 group-hover:ring-1 group-hover:ring-slate-400 dark:group-hover:ring-zinc-300'
                     }`}
                   >
                     {/* 1. SCREEN & CAMERA CARD */}
@@ -168,7 +168,7 @@ export const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
 
                     {/* 3. AUDIO CARD - Minimalist monochrome sound wave */}
                     {opt.id === 'audio_only' && (
-                      <div className="relative w-full h-full bg-[#18181B] dark:bg-[#121214] flex items-center justify-center p-4 overflow-hidden select-none">
+                      <div className="relative w-full h-full bg-[#18181B] dark:bg-[#222836] flex items-center justify-center p-4 overflow-hidden select-none">
                         <div className="flex items-center justify-center gap-1 sm:gap-1.5 w-full h-full">
                           {[
                             { h: 'h-6 sm:h-7' },
@@ -192,7 +192,7 @@ export const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
 
                     {/* 4. CAMERA ONLY CARD */}
                     {opt.id === 'cam_only' && (
-                      <div className="relative w-full h-full bg-[#18181B] dark:bg-[#121214] p-2 flex items-center justify-center overflow-hidden">
+                      <div className="relative w-full h-full bg-[#18181B] dark:bg-[#222836] p-2 flex items-center justify-center overflow-hidden">
                         <div className="relative w-full h-full rounded-xl sm:rounded-2xl overflow-hidden border border-white/10 bg-[#18181B] shadow-inner">
                           {!imgError ? (
                             <div className="relative w-full h-full">

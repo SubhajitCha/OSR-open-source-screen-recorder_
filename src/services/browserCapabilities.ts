@@ -53,9 +53,9 @@ export function getBestSupportedVideoMimeType(): string {
   }
 
   const preferred = [
-    'video/webm;codecs=vp9,opus',
-    'video/webm;codecs=vp8,opus',
     'video/webm;codecs=h264,opus',
+    'video/webm;codecs=vp8,opus',
+    'video/webm;codecs=vp9,opus',
     'video/mp4;codecs=avc1,mp4a.40.2',
     'video/webm',
     'video/mp4',

@@ -89,14 +89,14 @@ export async function renderProjectToVideo(
         outHeight = 720;
       }
 
-      // Aspect ratio adjustments
+      // Aspect ratio adjustments (rounded to even integers for codecs)
       const ar = project.appearance.aspectRatio;
       if (ar === '9:16') {
-        outWidth = Math.round((outHeight * 9) / 16);
+        outWidth = Math.max(2, Math.floor(((outHeight * 9) / 16) / 2) * 2);
       } else if (ar === '1:1') {
-        outWidth = outHeight;
+        outWidth = Math.max(2, Math.floor(outHeight / 2) * 2);
       } else if (ar === '4:3') {
-        outWidth = Math.round((outHeight * 4) / 3);
+        outWidth = Math.max(2, Math.floor(((outHeight * 4) / 3) / 2) * 2);
       }
 
       // 3. Setup canvas & 2D context

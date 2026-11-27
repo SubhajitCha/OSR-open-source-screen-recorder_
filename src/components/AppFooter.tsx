@@ -37,17 +37,17 @@ export const AppFooter: React.FC<AppFooterProps> = ({ onNavigate, activeView, is
   return (
     <footer
       id="app-global-footer"
-      className="w-full bg-white dark:bg-[#000000] border-t border-slate-200/90 dark:border-white/10 transition-colors duration-200 select-none z-20"
+      className="w-full bg-white dark:bg-[#161A22] border-t border-slate-200/90 dark:border-white/10 transition-colors duration-200 select-none z-20"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12 space-y-8 sm:space-y-10">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 text-left">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 space-y-6 sm:space-y-8">
+        <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-[1.45fr_1fr_1fr_1fr] gap-6 lg:gap-8 text-left">
           {/* Brand Column */}
-          <div className="sm:col-span-2 lg:col-span-2 space-y-3">
+          <div className="sm:col-span-3 md:col-span-1 space-y-2.5">
             <button
               type="button"
               onClick={() => handleNav('studio')}
               className="flex items-center gap-2 cursor-pointer group text-left border-0 bg-transparent p-0"
-              title="FSR Studio - Home"
+              aria-label="FSR Studio - Home"
             >
               <div className="w-7 h-7 rounded-lg bg-black flex items-center justify-center p-1 border border-white/10 group-hover:scale-105 transition-transform">
                 <div className="w-3.5 h-3.5 rounded-full bg-gradient-to-tr from-[#8DB355] to-[#FFEA93] p-[1px] flex items-center justify-center">
@@ -239,43 +239,12 @@ export const AppFooter: React.FC<AppFooterProps> = ({ onNavigate, activeView, is
                   {f.links.library}
                 </button>
               </li>
-              <li className="pt-1 text-[11px] text-slate-400 dark:text-zinc-600 font-semibold uppercase tracking-wider">
-                Error Pages
-              </li>
-              <li>
-                <button
-                  type="button"
-                  id="footer-404-link"
-                  onClick={() => handleNav('404')}
-                  className={`hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer text-left ${
-                    activeView === '404'
-                      ? 'font-bold text-[#D90000] dark:text-[#FFEA93]'
-                      : 'text-slate-500 dark:text-zinc-400'
-                  }`}
-                >
-                  {f.links.error404}
-                </button>
-              </li>
-              <li>
-                <button
-                  type="button"
-                  id="footer-500-link"
-                  onClick={() => handleNav('500')}
-                  className={`hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer text-left ${
-                    activeView === '500'
-                      ? 'font-bold text-[#D90000] dark:text-[#FFEA93]'
-                      : 'text-slate-500 dark:text-zinc-400'
-                  }`}
-                >
-                  {f.links.error500}
-                </button>
-              </li>
             </ul>
           </div>
         </div>
 
         {/* Global Multi-Language Selector Section for Crawlers & Global Users */}
-        <div className="pt-6 border-t border-slate-200/60 dark:border-zinc-800/60 space-y-3">
+        <div className="pt-6 border-t border-slate-200/60 dark:border-white/10 space-y-3">
           <div className="flex items-center justify-between">
             <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 flex items-center gap-1.5">
               <svg className="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -288,7 +257,7 @@ export const AppFooter: React.FC<AppFooterProps> = ({ onNavigate, activeView, is
         </div>
 
         {/* Authentic Application Keywords Index for SEO */}
-        <div className="pt-4 border-t border-slate-200/60 dark:border-zinc-800/60 space-y-3 text-center sm:text-left">
+        <div className="pt-4 border-t border-slate-200/60 dark:border-white/10 space-y-3 text-center sm:text-left">
           <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400">
             {f.searchTermsHeading}
           </h4>
@@ -296,7 +265,7 @@ export const AppFooter: React.FC<AppFooterProps> = ({ onNavigate, activeView, is
             {f.searchTerms.map((kw, i) => (
               <span
                 key={i}
-                className="px-2.5 py-1 rounded-md bg-white dark:bg-zinc-800/90 border border-slate-200/80 dark:border-zinc-700/60 font-medium text-slate-700 dark:text-zinc-300 shadow-2xs hover:border-[#D90000]/40 transition-colors"
+                className="px-2.5 py-1 rounded-md bg-white dark:bg-[#232936] border border-slate-200/80 dark:border-white/10 font-medium text-slate-700 dark:text-zinc-300 shadow-2xs hover:border-[#D90000]/40 transition-colors"
               >
                 {kw}
               </span>
@@ -305,7 +274,7 @@ export const AppFooter: React.FC<AppFooterProps> = ({ onNavigate, activeView, is
         </div>
 
         {/* Copyright & Security Disclaimer */}
-        <div className="pt-4 border-t border-slate-200/50 dark:border-zinc-800/50 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-zinc-400 text-center sm:text-left">
+        <div className="pt-4 border-t border-slate-200/50 dark:border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-zinc-400 text-center sm:text-left">
           <p>
             &copy; {new Date().getFullYear()} {f.copyright}
           </p>

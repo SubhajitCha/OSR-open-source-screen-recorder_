@@ -1,11 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import {
   Camera01Icon,
-  Tick01Icon,
   Cancel01Icon,
   RotateRight01Icon,
+  ComputerIcon,
+  SmartPhone01Icon,
 } from 'hugeicons-react';
-import { PipConfig } from '../../../types';
+import {
+  InputSourceMode,
+  MobileCameraFacing,
+  MobileConnectionStatus,
+  MobileDeviceInfo,
+  PipConfig,
+} from '../../../types';
 import { useLanguage } from '../../../context/LanguageContext';
 
 interface CameraPopoverProps {
@@ -16,6 +23,12 @@ interface CameraPopoverProps {
   isCameraActive: boolean;
   onToggleCamera: (active: boolean) => void;
   placement?: 'top' | 'left';
+  inputSource?: InputSourceMode;
+  onSelectInputSource?: (source: InputSourceMode) => void;
+  mobileStatus?: MobileConnectionStatus;
+  mobileDeviceInfo?: MobileDeviceInfo | null;
+  onOpenMobilePairModal?: () => void;
+  onFlipMobileCamera?: (facing: MobileCameraFacing) => void;
 }
 
 export const CameraPopover: React.FC<CameraPopoverProps> = ({
@@ -26,6 +39,12 @@ export const CameraPopover: React.FC<CameraPopoverProps> = ({
   isCameraActive,
   onToggleCamera,
   placement = 'left',
+  inputSource = 'system',
+  onSelectInputSource,
+  mobileStatus = 'disconnected',
+  mobileDeviceInfo = null,
+  onOpenMobilePairModal,
+  onFlipMobileCamera,
 }) => {
   const { t } = useLanguage();
   const [videoDevices, setVideoDevices] = useState<MediaDeviceInfo[]>([]);
@@ -57,9 +76,11 @@ export const CameraPopover: React.FC<CameraPopoverProps> = ({
       ? 'absolute right-full mr-3.5 top-0'
       : 'absolute bottom-full mb-3 left-1/2 -translate-x-1/2';
 
+  const isMobileConnected = mobileStatus === 'connected';
+
   return (
     <div
-      className={`${positionClass} w-80 max-h-[85vh] overflow-y-auto bg-white dark:bg-[#151718] text-slate-900 dark:text-white rounded-2xl border border-slate-200 dark:border-white/10 shadow-2xl shadow-slate-900/15 dark:shadow-black/60 p-4 z-50 backdrop-blur-xl animate-in fade-in zoom-in-95 duration-150`}
+      className={`${positionClass} w-80 max-h-[85vh] overflow-y-auto bg-white dark:bg-[#232936] text-slate-900 dark:text-white rounded-2xl border border-slate-200 dark:border-white/15 shadow-2xl shadow-slate-900/15 dark:shadow-black/45 p-4 z-50 backdrop-blur-xl animate-in fade-in zoom-in-95 duration-150`}
       onClick={(e) => e.stopPropagation()}
     >
       <div className="flex items-center justify-between pb-2.5 mb-3 border-b border-slate-100 dark:border-white/10">
@@ -81,8 +102,46 @@ export const CameraPopover: React.FC<CameraPopoverProps> = ({
       </div>
 
       <div className="space-y-3">
+        {/* Source Switcher: System vs Mobile */}
+        {onSelectInputSource && (
+          <div>
+            <label className="text-[11px] font-bold text-slate-500 dark:text-zinc-400 block mb-1.5">
+              Camera & Audio Source
+            </label>
+            <div className="grid grid-cols-2 gap-1 p-1 rounded-xl bg-slate-100 dark:bg-[#1B202B] border border-slate-200 dark:border-white/10">
+              <button
+                type="button"
+                onClick={() => onSelectInputSource('system')}
+                className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
+                  inputSource === 'system'
+                    ? 'bg-white dark:bg-[#31394D] text-slate-900 dark:text-white shadow-xs'
+                    : 'text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                <ComputerIcon className="w-3.5 h-3.5 shrink-0" />
+                <span>System</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => onSelectInputSource('mobile')}
+                className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
+                  inputSource === 'mobile'
+                    ? 'bg-white dark:bg-[#31394D] text-slate-900 dark:text-white shadow-xs'
+                    : 'text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                <SmartPhone01Icon className="w-3.5 h-3.5 shrink-0" />
+                <span>Mobile</span>
+                {isMobileConnected && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                )}
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Live Camera Toggle Button */}
-        <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 flex items-center justify-between">
+        <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.07] border border-slate-200 dark:border-white/10 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span
               className={`w-2 h-2 rounded-full ${
@@ -106,33 +165,57 @@ export const CameraPopover: React.FC<CameraPopoverProps> = ({
           </button>
         </div>
 
-        {/* Input Device Selection (When clicking camera chevron) */}
-        <div>
-          <label className="text-[11px] font-bold text-slate-500 dark:text-zinc-400 block mb-1">
-            Available Camera Devices
-          </label>
-          {videoDevices.length > 0 ? (
-            <select
-              value={selectedDeviceId}
-              onChange={(e) => setSelectedDeviceId(e.target.value)}
-              className="w-full p-2 rounded-xl bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 text-xs text-slate-800 dark:text-white focus:outline-none focus:border-blue-500 cursor-pointer"
-            >
-              {videoDevices.map((d, idx) => (
-                <option
-                  key={d.deviceId || idx}
-                  value={d.deviceId}
-                  className="bg-white dark:bg-[#181B20]"
+        {/* Input Device Selection OR Mobile Camera Controls */}
+        {inputSource === 'mobile' ? (
+          <div className="p-3 rounded-xl bg-slate-50 dark:bg-white/[0.07] border border-slate-200 dark:border-white/10 space-y-2.5">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold text-slate-600 dark:text-zinc-300">
+                {isMobileConnected
+                  ? mobileDeviceInfo?.deviceName || 'Phone Connected'
+                  : 'Phone Not Paired'}
+              </span>
+              {onOpenMobilePairModal && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    onOpenMobilePairModal();
+                  }}
+                  className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
                 >
-                  {d.label || `Camera ${idx + 1}`}
-                </option>
-              ))}
-            </select>
-          ) : (
-            <div className="p-2 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/5 text-[11px] text-slate-500 dark:text-zinc-400">
-              Default System Web Camera
+                  {isMobileConnected ? 'Manage' : 'Pair via QR'}
+                </button>
+              )}
             </div>
-          )}
-        </div>
+          </div>
+        ) : (
+          <div>
+            <label className="text-[11px] font-bold text-slate-500 dark:text-zinc-400 block mb-1">
+              Available Camera Devices
+            </label>
+            {videoDevices.length > 0 ? (
+              <select
+                value={selectedDeviceId}
+                onChange={(e) => setSelectedDeviceId(e.target.value)}
+                className="w-full p-2 rounded-xl bg-slate-50 dark:bg-[#1B202B] border border-slate-200 dark:border-white/15 text-xs text-slate-800 dark:text-white focus:outline-none focus:border-blue-500 cursor-pointer"
+              >
+                {videoDevices.map((d, idx) => (
+                  <option
+                    key={d.deviceId || idx}
+                    value={d.deviceId}
+                    className="bg-white dark:bg-[#232936]"
+                  >
+                    {d.label || `Camera ${idx + 1}`}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <div className="p-2 rounded-xl bg-slate-50 dark:bg-[#1B202B] border border-slate-200 dark:border-white/10 text-[11px] text-slate-500 dark:text-zinc-400">
+                Default System Web Camera
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Placement Presets */}
         <div>
@@ -167,8 +250,8 @@ export const CameraPopover: React.FC<CameraPopoverProps> = ({
                 }
                 className={`py-1.5 px-1 rounded-lg text-[10px] font-semibold transition-all cursor-pointer border text-center ${
                   pipConfig.position === pos.id
-                    ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-950 border-zinc-900 dark:border-white shadow-xs'
-                    : 'bg-slate-50 dark:bg-white/5 text-slate-600 dark:text-zinc-300 border-slate-200 dark:border-white/5 hover:bg-slate-100 dark:hover:bg-white/10'
+                    ? 'bg-slate-800 dark:bg-[#31394D] text-white border-slate-800 dark:border-white/25 shadow-xs'
+                    : 'bg-slate-50 dark:bg-white/[0.07] text-slate-600 dark:text-zinc-300 border-slate-200 dark:border-white/5 hover:bg-slate-100 dark:hover:bg-white/10'
                 }`}
               >
                 {pos.label}
@@ -195,8 +278,8 @@ export const CameraPopover: React.FC<CameraPopoverProps> = ({
                 onClick={() => onUpdatePipConfig({ shape: shape.id as PipConfig['shape'] })}
                 className={`py-1.5 px-1 rounded-xl text-[11px] font-semibold flex items-center justify-center gap-1 transition-all cursor-pointer border ${
                   pipConfig.shape === shape.id
-                    ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-950 border-zinc-900 dark:border-white shadow-xs'
-                    : 'bg-slate-50 dark:bg-white/5 text-slate-600 dark:text-zinc-300 border-slate-200 dark:border-white/5 hover:bg-slate-100 dark:hover:bg-white/10'
+                    ? 'bg-slate-800 dark:bg-[#31394D] text-white border-slate-800 dark:border-white/25 shadow-xs'
+                    : 'bg-slate-50 dark:bg-white/[0.07] text-slate-600 dark:text-zinc-300 border-slate-200 dark:border-white/5 hover:bg-slate-100 dark:hover:bg-white/10'
                 }`}
               >
                 <span className="text-[10px]">{shape.icon}</span>
@@ -214,7 +297,7 @@ export const CameraPopover: React.FC<CameraPopoverProps> = ({
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
               pipConfig.mirror
                 ? 'bg-zinc-900/10 dark:bg-white/10 text-zinc-900 dark:text-white border-zinc-300 dark:border-white/20'
-                : 'bg-slate-50 dark:bg-white/5 text-slate-600 dark:text-zinc-400 border-slate-200 dark:border-white/5 hover:text-slate-900 dark:hover:text-white'
+                : 'bg-slate-50 dark:bg-white/[0.07] text-slate-600 dark:text-zinc-400 border-slate-200 dark:border-white/5 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             <RotateRight01Icon className="w-3.5 h-3.5" />
@@ -227,10 +310,10 @@ export const CameraPopover: React.FC<CameraPopoverProps> = ({
                 key={sz}
                 type="button"
                 onClick={() => onUpdatePipConfig({ size: sz })}
-                className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase transition-all cursor-pointer ${
+                className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase transition-all cursor-pointer border ${
                   pipConfig.size === sz
-                    ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-950 shadow-xs'
-                    : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-zinc-400 hover:bg-slate-200 dark:hover:bg-white/10'
+                    ? 'bg-slate-800 dark:bg-[#31394D] text-white border-slate-800 dark:border-white/25 shadow-xs'
+                    : 'bg-slate-100 dark:bg-white/[0.07] text-slate-600 dark:text-zinc-400 border-transparent hover:bg-slate-200 dark:hover:bg-white/10'
                 }`}
               >
                 {sz[0]}

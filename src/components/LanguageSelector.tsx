@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useLanguage } from '../context/LanguageContext';
-import { LanguageCode } from '../i18n/types';
+import { getReviewUiStrings } from '../i18n/formatters';
 
 interface LanguageSelectorProps {
   variant?: 'compact' | 'full' | 'dropdown' | 'inline-links';
@@ -11,7 +11,8 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   variant = 'dropdown',
   className = '',
 }) => {
-  const { currentLang, currentLangMeta, setLanguage, languages } = useLanguage();
+  const { currentLang, currentLangMeta, setLanguage, languages, t } = useLanguage();
+  const ui = getReviewUiStrings(currentLang);
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const containerRef = useRef<HTMLDivElement>(null);
@@ -72,9 +73,9 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
               className={`px-2 py-1 rounded-md transition-all cursor-pointer text-xs flex items-center gap-1.5 ${
                 isSelected
                   ? 'bg-[#D90000] text-white font-semibold shadow-xs'
-                  : 'bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-zinc-800/80 dark:hover:bg-zinc-700 dark:text-zinc-300'
+                  : 'bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-[#252C3B] dark:hover:bg-[#313A4E] dark:text-zinc-200'
               }`}
-              title={`${lang.nativeName} (${lang.name})`}
+              aria-label={`${lang.nativeName} (${lang.name})`}
             >
               <span>{lang.flag}</span>
               <span>{lang.nativeName}</span>
@@ -86,7 +87,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   }
 
   return (
-    <div ref={containerRef} className={`relative ${className}`}>
+    <div ref={containerRef} className={`relative group ${className}`}>
       {/* Trigger Button */}
       <button
         id="language-selector-trigger"
@@ -100,8 +101,8 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
         aria-expanded={isOpen}
         className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-medium transition-all cursor-pointer select-none ${
           isOpen
-            ? 'bg-slate-200 text-slate-900 dark:bg-zinc-800 dark:text-white ring-2 ring-slate-400/30'
-            : 'bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-zinc-900/90 dark:hover:bg-zinc-800 dark:text-zinc-300 border border-slate-200/80 dark:border-zinc-800 shadow-2xs'
+            ? 'bg-slate-200 text-slate-900 dark:bg-[#2D3546] dark:text-white ring-2 ring-slate-400/30'
+            : 'bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-[#232936]/90 dark:hover:bg-[#2D3546] dark:text-zinc-200 border border-slate-200/80 dark:border-white/15 shadow-2xs'
         }`}
       >
         {/* Globe Icon */}
@@ -142,17 +143,26 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
         </svg>
       </button>
 
+      {/* Sleek App Tooltip when closed */}
+      {!isOpen && (
+        <div className="pointer-events-none absolute top-full left-1/2 -translate-x-1/2 mt-2 z-50 opacity-0 -translate-y-1.5 scale-95 group-hover:opacity-100 group-hover:translate-y-0 group-hover:scale-100 transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] whitespace-nowrap hidden sm:block">
+          <div className="px-2.5 py-1 rounded-lg bg-slate-900/95 dark:bg-white/95 text-white dark:text-slate-950 text-xs font-semibold shadow-xl shadow-black/20 backdrop-blur-md border border-white/10 dark:border-black/10 select-none">
+            {t.nav.selectLanguage}
+          </div>
+        </div>
+      )}
+
       {/* Dropdown Menu */}
       {isOpen && (
         <div
           id="language-dropdown-menu"
-          className="absolute right-0 top-full mt-2 w-64 max-w-[90vw] rounded-2xl bg-white dark:bg-[#12141a] border border-slate-200 dark:border-zinc-800 shadow-2xl p-2 z-50 animate-in fade-in-50 zoom-in-95 duration-100"
+          className="absolute right-0 top-full mt-2 w-64 max-w-[90vw] rounded-2xl bg-white dark:bg-[#232936] border border-slate-200 dark:border-white/15 shadow-2xl p-2 z-50 animate-in fade-in-50 zoom-in-95 duration-100"
         >
           {/* Header & Search */}
-          <div className="p-1.5 pb-2 border-b border-slate-100 dark:border-zinc-800/80">
+          <div className="p-1.5 pb-2 border-b border-slate-100 dark:border-white/10">
             <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider mb-1.5 px-1">
-              <span>Select Language</span>
-              <span>20 Languages</span>
+              <span>{t.nav.selectLanguage}</span>
+              <span>{ui.selectLanguageCount}</span>
             </div>
             <div className="relative">
               <input
@@ -160,8 +170,8 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search language / 搜索..."
-                className="w-full px-2.5 py-1.5 text-xs rounded-lg bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-red-500"
+                placeholder={ui.searchLanguagesPlaceholder}
+                className="w-full px-2.5 py-1.5 text-xs rounded-lg bg-slate-50 dark:bg-[#1B202B] border border-slate-200 dark:border-white/15 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-red-500"
               />
               {searchQuery && (
                 <button
@@ -191,7 +201,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
                     className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs text-left transition-colors cursor-pointer group ${
                       isSelected
                         ? 'bg-red-50 text-[#D90000] dark:bg-red-950/40 dark:text-red-400 font-bold'
-                        : 'hover:bg-slate-100 dark:hover:bg-zinc-800/70 text-slate-700 dark:text-zinc-200'
+                        : 'hover:bg-slate-100 dark:hover:bg-white/[0.08] text-slate-700 dark:text-zinc-200'
                     }`}
                   >
                     <div className="flex items-center gap-2.5 truncate">
@@ -223,7 +233,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
               })
             ) : (
               <div className="py-4 text-center text-xs text-slate-400 dark:text-zinc-500">
-                No language found
+                {ui.noLanguageFound}
               </div>
             )}
           </div>

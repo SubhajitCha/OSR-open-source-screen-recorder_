@@ -478,7 +478,7 @@ export const VideoEditor: React.FC<VideoEditorProps> = ({
   }, [togglePlay, toggleFullscreen, project.source.duration, currentTime]);
 
   return (
-    <div className="flex-1 flex flex-col h-[calc(100vh-4rem)] bg-slate-100 dark:bg-[#0D0D10] text-slate-900 dark:text-[#EDEDED] overflow-hidden select-none font-sans transition-colors">
+    <div className="flex-1 flex flex-col h-[calc(100vh-4rem)] bg-slate-100 dark:bg-[#161A22] text-slate-900 dark:text-[#EDEDED] overflow-hidden select-none font-sans transition-colors">
       {/* Main Studio Middle Area (Left Inspector + Center Viewport) */}
       <div className="flex-1 flex overflow-hidden min-h-0 min-w-0">
         {/* Left Sidebar: Tools & Inspector */}
@@ -503,7 +503,7 @@ export const VideoEditor: React.FC<VideoEditorProps> = ({
               setIsDraggingToolsResize(true);
             }}
             className="w-1.5 hover:w-2 -ml-1 z-20 cursor-col-resize hover:bg-[#D90000]/60 active:bg-[#D90000] transition-colors flex items-center justify-center group shrink-0 select-none"
-            title="Drag to resize studio tools"
+            aria-label="Drag to resize studio tools"
           >
             <div className="w-[2px] h-6 bg-slate-300 dark:bg-zinc-700 group-hover:bg-[#D90000] rounded-full transition-colors" />
           </div>
@@ -512,8 +512,8 @@ export const VideoEditor: React.FC<VideoEditorProps> = ({
         {/* Center: Video Viewport + Transport Scrubber Bar */}
         <div
           ref={viewportRef}
-          className={`flex-1 flex flex-col overflow-hidden bg-slate-200/60 dark:bg-[#09090B] relative min-h-0 min-w-0 transition-colors ${
-            isFullscreen ? 'fixed inset-0 z-50 bg-black' : ''
+          className={`flex-1 flex flex-col overflow-hidden bg-slate-200/60 dark:bg-[#141820] relative min-h-0 min-w-0 transition-colors ${
+            isFullscreen ? 'fixed inset-0 z-50 bg-[#12161E]' : ''
           }`}
         >
           {/* Main Video Viewport Canvas */}
@@ -523,8 +523,8 @@ export const VideoEditor: React.FC<VideoEditorProps> = ({
               <button
                 type="button"
                 onClick={() => setIsToolsCollapsed(false)}
-                className="absolute top-4 left-4 z-40 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/90 dark:bg-zinc-900/90 hover:bg-white dark:hover:bg-zinc-800 text-slate-800 dark:text-zinc-200 text-xs font-bold shadow-lg border border-slate-200 dark:border-zinc-700 backdrop-blur-md transition-all cursor-pointer hover:scale-105"
-                title="Expand Studio Tools"
+                className="absolute top-4 left-4 z-40 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/90 dark:bg-[#232936]/95 hover:bg-white dark:hover:bg-[#2B3242] text-slate-800 dark:text-zinc-200 text-xs font-bold shadow-lg border border-slate-200 dark:border-white/15 backdrop-blur-md transition-all cursor-pointer hover:scale-105"
+                aria-label="Expand Studio Tools"
               >
                 <ArrowRight01Icon className="w-3.5 h-3.5 text-[#D90000]" />
                 <span>Studio Tools</span>
@@ -548,7 +548,7 @@ export const VideoEditor: React.FC<VideoEditorProps> = ({
                 <button
                   onClick={toggleFullscreen}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-black/75 hover:bg-black/90 text-white text-xs font-semibold backdrop-blur-md border border-white/20 shadow-lg cursor-pointer transition-all"
-                  title="Exit Fullscreen (ESC / F)"
+                  aria-label="Exit Fullscreen (ESC / F)"
                 >
                   <Minimize01Icon className="w-4 h-4 text-blue-400" />
                   <span>Exit Fullscreen (ESC)</span>
@@ -558,10 +558,10 @@ export const VideoEditor: React.FC<VideoEditorProps> = ({
           </div>
 
           {/* Under-Preview Video Transport & Scrubber Bar */}
-          <div className="h-12 bg-white dark:bg-[#121215] border-t border-slate-200 dark:border-zinc-800 px-5 flex items-center justify-between shrink-0 select-none transition-colors">
+          <div className="h-12 bg-white dark:bg-[#1E232E] border-t border-slate-200 dark:border-white/10 px-5 flex items-center justify-between shrink-0 select-none transition-colors">
             {/* Left Transport Info */}
             <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-zinc-400">
-              <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 font-mono text-[10px] text-slate-700 dark:text-zinc-300">
+              <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-[#252C3B] border border-slate-200 dark:border-white/10 font-mono text-[10px] text-slate-700 dark:text-zinc-300">
                 {project.source.width}×{project.source.height}
               </span>
               <span className="hidden sm:inline font-mono text-[11px] text-slate-500 dark:text-zinc-400">
@@ -571,41 +571,61 @@ export const VideoEditor: React.FC<VideoEditorProps> = ({
 
             {/* Center Playback Transport Buttons */}
             <div className="flex items-center gap-3">
-              <button
-                onClick={() => setCurrentTime((t) => Math.max(0, t - 5))}
-                className="p-1.5 rounded-lg text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
-                title="Rewind 5s"
-              >
-                <ArrowLeft01Icon className="w-4 h-4" />
-              </button>
+              <div className="relative group">
+                <button
+                  onClick={() => setCurrentTime((t) => Math.max(0, t - 5))}
+                  className="p-1.5 rounded-lg text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#2B3242] transition-colors cursor-pointer"
+                  aria-label="Rewind 5s"
+                >
+                  <ArrowLeft01Icon className="w-4 h-4" />
+                </button>
+                <div className="pointer-events-none opacity-0 group-hover:opacity-100 transition-all duration-150 absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 rounded-lg bg-slate-900/95 dark:bg-white/95 text-white dark:text-slate-950 text-xs font-semibold shadow-xl whitespace-nowrap z-50 border border-white/10 dark:border-black/10">
+                  Rewind 5s
+                </div>
+              </div>
 
-              <button
-                onClick={togglePlay}
-                className="w-8 h-8 rounded-full bg-[#D90000] hover:bg-[#b80000] text-white flex items-center justify-center shadow-md shadow-[#D90000]/25 transition-transform active:scale-95 cursor-pointer font-bold"
-                title="Play / Pause (Space)"
-              >
-                {isPlaying ? <PauseIcon className="w-4 h-4" /> : <PlayIcon className="w-4 h-4 ml-0.5" />}
-              </button>
+              <div className="relative group">
+                <button
+                  onClick={togglePlay}
+                  className="w-8 h-8 rounded-full bg-[#D90000] hover:bg-[#b80000] text-white flex items-center justify-center shadow-md shadow-[#D90000]/25 transition-transform active:scale-95 cursor-pointer font-bold"
+                  aria-label="Play / Pause (Space)"
+                >
+                  {isPlaying ? <PauseIcon className="w-4 h-4" /> : <PlayIcon className="w-4 h-4 ml-0.5" />}
+                </button>
+                <div className="pointer-events-none opacity-0 group-hover:opacity-100 transition-all duration-150 absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 rounded-lg bg-slate-900/95 dark:bg-white/95 text-white dark:text-slate-950 text-xs font-semibold shadow-xl whitespace-nowrap z-50 border border-white/10 dark:border-black/10">
+                  {isPlaying ? 'Pause (Space)' : 'Play (Space)'}
+                </div>
+              </div>
 
-              <button
-                onClick={() => setCurrentTime((t) => Math.min(project.source.duration, t + 5))}
-                className="p-1.5 rounded-lg text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
-                title="Forward 5s"
-              >
-                <ArrowRight01Icon className="w-4 h-4" />
-              </button>
+              <div className="relative group">
+                <button
+                  onClick={() => setCurrentTime((t) => Math.min(project.source.duration, t + 5))}
+                  className="p-1.5 rounded-lg text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#2B3242] transition-colors cursor-pointer"
+                  aria-label="Forward 5s"
+                >
+                  <ArrowRight01Icon className="w-4 h-4" />
+                </button>
+                <div className="pointer-events-none opacity-0 group-hover:opacity-100 transition-all duration-150 absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 rounded-lg bg-slate-900/95 dark:bg-white/95 text-white dark:text-slate-950 text-xs font-semibold shadow-xl whitespace-nowrap z-50 border border-white/10 dark:border-black/10">
+                  Forward 5s
+                </div>
+              </div>
             </div>
 
             {/* Right Transport Controls (Volume + Maximize Fullscreen) */}
             <div className="flex items-center gap-3 text-xs">
               <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setIsMuted((m) => !m)}
-                  className="text-slate-500 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-white transition-colors cursor-pointer"
-                  title={isMuted ? 'Unmute' : 'Mute'}
-                >
-                  <VolumeHighIcon className="w-4 h-4" />
-                </button>
+                <div className="relative group flex items-center">
+                  <button
+                    onClick={() => setIsMuted((m) => !m)}
+                    className="text-slate-500 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-white transition-colors cursor-pointer"
+                    aria-label={isMuted ? 'Unmute' : 'Mute'}
+                  >
+                    <VolumeHighIcon className="w-4 h-4" />
+                  </button>
+                  <div className="pointer-events-none opacity-0 group-hover:opacity-100 transition-all duration-150 absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 rounded-lg bg-slate-900/95 dark:bg-white/95 text-white dark:text-slate-950 text-xs font-semibold shadow-xl whitespace-nowrap z-50 border border-white/10 dark:border-black/10">
+                    {isMuted ? 'Unmute' : 'Mute'}
+                  </div>
+                </div>
                 <input
                   type="range"
                   min="0"
@@ -615,23 +635,28 @@ export const VideoEditor: React.FC<VideoEditorProps> = ({
                     setVolume(parseInt(e.target.value, 10));
                     setIsMuted(false);
                   }}
-                  className="w-16 h-1 bg-slate-200 dark:bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-[#D90000]"
+                  className="w-16 h-1 bg-slate-200 dark:bg-white/15 rounded-lg appearance-none cursor-pointer accent-[#D90000]"
                 />
               </div>
 
               {/* Maximize Fullscreen Button beside Volume */}
-              <button
-                type="button"
-                onClick={toggleFullscreen}
-                className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
-                title={isFullscreen ? 'Exit Fullscreen (F)' : 'Maximize Video (F)'}
-              >
-                {isFullscreen ? (
-                  <Minimize01Icon className="w-4 h-4 text-[#D90000]" />
-                ) : (
-                  <Maximize01Icon className="w-4 h-4" />
-                )}
-              </button>
+              <div className="relative group">
+                <button
+                  type="button"
+                  onClick={toggleFullscreen}
+                  className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#2B3242] transition-colors cursor-pointer"
+                  aria-label={isFullscreen ? 'Exit Fullscreen (F)' : 'Maximize Video (F)'}
+                >
+                  {isFullscreen ? (
+                    <Minimize01Icon className="w-4 h-4 text-[#D90000]" />
+                  ) : (
+                    <Maximize01Icon className="w-4 h-4" />
+                  )}
+                </button>
+                <div className="pointer-events-none opacity-0 group-hover:opacity-100 transition-all duration-150 absolute bottom-full right-0 mb-2 px-2.5 py-1 rounded-lg bg-slate-900/95 dark:bg-white/95 text-white dark:text-slate-950 text-xs font-semibold shadow-xl whitespace-nowrap z-50 border border-white/10 dark:border-black/10">
+                  {isFullscreen ? 'Exit Fullscreen (F)' : 'Maximize Video (F)'}
+                </div>
+              </div>
             </div>
           </div>
         </div>

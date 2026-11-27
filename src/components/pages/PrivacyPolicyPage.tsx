@@ -72,14 +72,14 @@ export const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({
       </header>
 
       {/* Live Privacy Sandbox Indicator Card */}
-      <div className="bg-white dark:bg-zinc-900/80 rounded-2xl border border-slate-200 dark:border-zinc-800 p-5 sm:p-6 shadow-xs space-y-4">
+      <div className="bg-white dark:bg-[#1E232E] rounded-2xl border border-slate-200 dark:border-white/10 p-5 sm:p-6 shadow-xs space-y-4">
         <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-emerald-500" />
           Live Client-Side Verification Status
         </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
-          <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-100 dark:border-zinc-800 space-y-1">
+          <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#252C3B] border border-slate-100 dark:border-white/10 space-y-1">
             <span className="text-slate-500 dark:text-zinc-400">Cloud Data Uploads</span>
             <div className="font-mono font-bold text-sm text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
               <CheckmarkCircle01Icon className="w-4 h-4" />
@@ -87,7 +87,7 @@ export const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({
             </div>
           </div>
 
-          <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-100 dark:border-zinc-800 space-y-1">
+          <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#252C3B] border border-slate-100 dark:border-white/10 space-y-1">
             <span className="text-slate-500 dark:text-zinc-400">Tracking Cookies</span>
             <div className="font-mono font-bold text-sm text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
               <CheckmarkCircle01Icon className="w-4 h-4" />
@@ -95,7 +95,7 @@ export const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({
             </div>
           </div>
 
-          <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-100 dark:border-zinc-800 space-y-1">
+          <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#252C3B] border border-slate-100 dark:border-white/10 space-y-1">
             <span className="text-slate-500 dark:text-zinc-400">Local Device Storage</span>
             <div className="font-mono font-bold text-sm text-slate-900 dark:text-zinc-100 flex items-center gap-1.5">
               <HardDriveIcon className="w-4 h-4 text-blue-500" />
@@ -103,7 +103,7 @@ export const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({
             </div>
           </div>
 
-          <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-100 dark:border-zinc-800 space-y-1">
+          <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#252C3B] border border-slate-100 dark:border-white/10 space-y-1">
             <span className="text-slate-500 dark:text-zinc-400">Third-Party Telemetry</span>
             <div className="font-mono font-bold text-sm text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
               <CheckmarkCircle01Icon className="w-4 h-4" />
@@ -211,23 +211,34 @@ export const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({
           <p>
             If you have questions, inquiries, or suggestions regarding this Privacy Policy or our architectural security choices, please contact our team directly:
           </p>
-          <div className="p-4 rounded-xl bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 flex items-center gap-3">
-            <Mail01Icon className="w-5 h-5 text-slate-500 dark:text-zinc-400" />
-            <div>
-              <p className="font-semibold text-slate-900 dark:text-white text-sm">Privacy &amp; Security Team</p>
-              <a
-                href="mailto:design.subhajit@gmail.com"
-                className="text-xs sm:text-sm text-blue-600 dark:text-blue-400 hover:underline font-mono"
-              >
-                design.subhajit@gmail.com
-              </a>
+          <div className="p-4 rounded-xl bg-slate-100 dark:bg-[#1E232E] border border-slate-200 dark:border-white/10 flex items-center justify-between gap-3 flex-wrap">
+            <div className="flex items-center gap-3">
+              <Mail01Icon className="w-5 h-5 text-slate-500 dark:text-zinc-400" />
+              <div>
+                <p className="font-semibold text-slate-900 dark:text-white text-sm">Privacy &amp; Security Team</p>
+                <p className="text-xs text-slate-600 dark:text-zinc-400">
+                  Submit privacy inquiries directly through our support form.
+                </p>
+              </div>
             </div>
+            <a
+              href="?view=contact"
+              onClick={(e) => {
+                if (onNavigate) {
+                  e.preventDefault();
+                  onNavigate('contact');
+                }
+              }}
+              className="px-3.5 py-2 rounded-lg bg-slate-900 dark:bg-white text-white dark:text-black text-xs font-bold hover:opacity-90 transition-opacity"
+            >
+              Contact Privacy Team
+            </a>
           </div>
         </section>
       </div>
 
       {/* Bottom Navigation Links */}
-      <div className="pt-8 border-t border-slate-200 dark:border-zinc-800 flex flex-wrap items-center justify-between gap-4 text-xs">
+      <div className="pt-8 border-t border-slate-200 dark:border-white/10 flex flex-wrap items-center justify-between gap-4 text-xs">
         <div className="flex items-center gap-4 text-slate-500 dark:text-zinc-400">
           <a
             href="?view=about"

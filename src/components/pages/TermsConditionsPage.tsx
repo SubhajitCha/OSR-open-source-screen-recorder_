@@ -35,7 +35,7 @@ export const TermsConditionsPage: React.FC<TermsConditionsPageProps> = ({
         </a>
 
         <div className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 border border-slate-200 dark:border-zinc-700">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 dark:bg-[#252C3B] text-slate-700 dark:text-zinc-300 border border-slate-200 dark:border-white/10">
             Terms of Service
           </span>
           <span className="text-xs text-slate-400 dark:text-zinc-500">
@@ -181,23 +181,34 @@ export const TermsConditionsPage: React.FC<TermsConditionsPageProps> = ({
           <p>
             For legal inquiries, licensing questions, or terms feedback, please reach out to our team at:
           </p>
-          <div className="p-4 rounded-xl bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 flex items-center gap-3">
-            <Mail01Icon className="w-5 h-5 text-slate-500 dark:text-zinc-400" />
-            <div>
-              <p className="font-semibold text-slate-900 dark:text-white text-sm">Legal &amp; Developer Relations</p>
-              <a
-                href="mailto:design.subhajit@gmail.com"
-                className="text-xs sm:text-sm text-blue-600 dark:text-blue-400 hover:underline font-mono"
-              >
-                design.subhajit@gmail.com
-              </a>
+          <div className="p-4 rounded-xl bg-slate-100 dark:bg-[#1E232E] border border-slate-200 dark:border-white/10 flex items-center justify-between gap-3 flex-wrap">
+            <div className="flex items-center gap-3">
+              <Mail01Icon className="w-5 h-5 text-slate-500 dark:text-zinc-400" />
+              <div>
+                <p className="font-semibold text-slate-900 dark:text-white text-sm">Legal &amp; Developer Relations</p>
+                <p className="text-xs text-slate-600 dark:text-zinc-400">
+                  Reach our team anytime through the online inquiry form.
+                </p>
+              </div>
             </div>
+            <a
+              href="?view=contact"
+              onClick={(e) => {
+                if (onNavigate) {
+                  e.preventDefault();
+                  onNavigate('contact');
+                }
+              }}
+              className="px-3.5 py-2 rounded-lg bg-slate-900 dark:bg-white text-white dark:text-black text-xs font-bold hover:opacity-90 transition-opacity"
+            >
+              Open Contact Form
+            </a>
           </div>
         </section>
       </div>
 
       {/* Bottom Navigation Links */}
-      <div className="pt-8 border-t border-slate-200 dark:border-zinc-800 flex flex-wrap items-center justify-between gap-4 text-xs">
+      <div className="pt-8 border-t border-slate-200 dark:border-white/10 flex flex-wrap items-center justify-between gap-4 text-xs">
         <div className="flex items-center gap-4 text-slate-500 dark:text-zinc-400">
           <a
             href="?view=about"

@@ -20,7 +20,7 @@ export const SeoContentSection: React.FC<SeoContentSectionProps> = ({ onNavigate
     <section
       id="seo-knowledge-base"
       aria-label="Comprehensive Free Online Screen Recorder Guide"
-      className="w-full border-t border-slate-200 dark:border-zinc-800/80 bg-slate-50/50 dark:bg-[#0c0e12] text-slate-800 dark:text-zinc-200 py-12 sm:py-16 px-4 sm:px-6 lg:px-8 transition-colors select-text"
+      className="w-full border-t border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-[#1A1F29] text-slate-800 dark:text-zinc-200 py-12 sm:py-16 px-4 sm:px-6 lg:px-8 transition-colors select-text"
     >
       <div className="max-w-5xl mx-auto space-y-12">
         {/* Header & Main Keyword Introduction */}
@@ -56,7 +56,7 @@ export const SeoContentSection: React.FC<SeoContentSectionProps> = ({ onNavigate
         </article>
 
         {/* Section 2: Step-by-Step Workflow */}
-        <article className="space-y-4 bg-white dark:bg-zinc-900/60 p-6 sm:p-8 rounded-2xl border border-slate-200/80 dark:border-zinc-800 shadow-sm">
+        <article className="space-y-4 bg-white dark:bg-[#212734] p-6 sm:p-8 rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-sm">
           <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
             {seo.section2Title}
           </h2>
@@ -69,7 +69,7 @@ export const SeoContentSection: React.FC<SeoContentSectionProps> = ({ onNavigate
             {seo.steps.map((item, idx) => (
               <div
                 key={idx}
-                className="p-4 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-200/60 dark:border-zinc-700/60 space-y-1.5"
+                className="p-4 rounded-xl bg-slate-50 dark:bg-[#283040]/85 border border-slate-200/60 dark:border-white/10 space-y-1.5"
               >
                 <span className="text-xs font-bold text-[#D90000] dark:text-red-400 uppercase tracking-wider">
                   {item.step}
@@ -98,7 +98,7 @@ export const SeoContentSection: React.FC<SeoContentSectionProps> = ({ onNavigate
         </article>
 
         {/* Section 4: Privacy & Client-Side Advantages */}
-        <article className="space-y-4 bg-slate-100/70 dark:bg-zinc-900/40 p-6 sm:p-8 rounded-2xl border border-slate-200/60 dark:border-zinc-800">
+        <article className="space-y-4 bg-slate-100/70 dark:bg-[#212734]/85 p-6 sm:p-8 rounded-2xl border border-slate-200/60 dark:border-white/10">
           <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
             {seo.section4Title}
           </h2>
@@ -134,12 +134,12 @@ export const SeoContentSection: React.FC<SeoContentSectionProps> = ({ onNavigate
             {seo.faqs.map((faq, idx) => (
               <div
                 key={idx}
-                className="border border-slate-200 dark:border-zinc-800 rounded-xl overflow-hidden bg-white dark:bg-zinc-900/50"
+                className="border border-slate-200 dark:border-white/10 rounded-xl overflow-hidden bg-white dark:bg-[#212734]"
               >
                 <button
                   type="button"
                   onClick={() => toggleFaq(idx)}
-                  className="w-full flex items-center justify-between p-4 text-left font-semibold text-sm sm:text-base text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-zinc-800/40 transition-colors cursor-pointer"
+                  className="w-full flex items-center justify-between p-4 text-left font-semibold text-sm sm:text-base text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-white/[0.05] transition-colors cursor-pointer"
                 >
                   <span>{faq.q}</span>
                   <span className="text-slate-400 dark:text-zinc-500 font-mono text-base ml-2">
@@ -147,7 +147,7 @@ export const SeoContentSection: React.FC<SeoContentSectionProps> = ({ onNavigate
                   </span>
                 </button>
                 {activeFaq === idx && (
-                  <div className="px-4 pb-4 pt-1 text-xs sm:text-sm text-slate-600 dark:text-zinc-300 leading-relaxed border-t border-slate-100 dark:border-zinc-800/60">
+                  <div className="px-4 pb-4 pt-1 text-xs sm:text-sm text-slate-600 dark:text-zinc-300 leading-relaxed border-t border-slate-100 dark:border-white/10">
                     {faq.a}
                   </div>
                 )}

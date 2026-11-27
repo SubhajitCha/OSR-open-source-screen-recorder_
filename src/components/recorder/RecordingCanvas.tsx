@@ -97,19 +97,67 @@ export const RecordingCanvas: React.FC<RecordingCanvasProps> = ({
   // Layer selection for direct manipulation (cyan outline + 4 corner handles)
   const [selectedLayer, setSelectedLayer] = useState<'screen' | 'cam' | null>(null);
 
-  // Alignment guidelines active state when moving a frame in the middle
-  const [alignmentGuides, setAlignmentGuides] = useState<{ x: boolean; y: boolean }>({ x: false, y: false });
+  // Screen surface type ('monitor' | 'window' | 'browser') & natural resolution
+  const [screenResolution, setScreenResolution] = useState<{ width: number; height: number } | null>(null);
+  const [, setScreenSurfaceType] = useState<string>('monitor');
+  const [, setIsSelfCapture] = useState<boolean>(false);
+
+  const stageAspectNumeric = useMemo(() => {
+    switch (aspectRatio) {
+      case '9:16':
+        return 9 / 16;
+      case '1:1':
+        return 1;
+      case '4:5':
+        return 4 / 5;
+      case '4:3':
+        return 4 / 3;
+      case '16:9':
+      default:
+        return 16 / 9;
+    }
+  }, [aspectRatio]);
+
+  const screenAspectNumeric = useMemo(() => {
+    if (screenResolution && screenResolution.width > 0 && screenResolution.height > 0) {
+      return screenResolution.width / screenResolution.height;
+    }
+    return 16 / 9;
+  }, [screenResolution]);
+
+  const computeDefaultScreenRect = useCallback(
+    (targetLayout: CompositionLayout): LayerRect => {
+      const marginPct =
+        targetLayout === 'spaced-far' ? 15 : targetLayout === 'framed' ? 7 : 0;
+      const slotW = 100 - marginPct * 2;
+      const slotH = 100 - marginPct * 2;
+      const ratio = screenAspectNumeric / stageAspectNumeric;
+
+      let width = slotW;
+      let height = slotH;
+      if (ratio >= 1) {
+        width = slotW;
+        height = slotW / ratio;
+      } else {
+        height = slotH;
+        width = slotH * ratio;
+      }
+
+      const x = marginPct + (slotW - width) / 2;
+      const y = marginPct + (slotH - height) / 2;
+
+      return {
+        x: Math.round(x * 10) / 10,
+        y: Math.round(y * 10) / 10,
+        width: Math.round(width * 10) / 10,
+        height: Math.round(height * 10) / 10,
+      };
+    },
+    [screenAspectNumeric, stageAspectNumeric]
+  );
 
   // Screen transform layer rectangle (percentages)
-  const [screenRect, setScreenRect] = useState<LayerRect>(() => {
-    if (layout === 'spaced-far') {
-      return { x: 15, y: 15, width: 70, height: 70 };
-    }
-    if (layout === 'framed') {
-      return { x: 7, y: 7, width: 86, height: 86 };
-    }
-    return { x: 0, y: 0, width: 100, height: 100 };
-  });
+  const [screenRect, setScreenRect] = useState<LayerRect>(() => computeDefaultScreenRect(layout));
 
   // Camera transform layer rectangle (percentages synchronized with pipConfig and layout)
   const [camRect, setCamRect] = useState<LayerRect>(() => {
@@ -122,15 +170,9 @@ export const RecordingCanvas: React.FC<RecordingCanvasProps> = ({
     };
   });
 
-  // Synchronize screenRect and camRect with active layout preset
+  // Synchronize screenRect and camRect with active layout preset, aspectRatio, and stream aspect
   useEffect(() => {
-    if (layout === 'spaced-far') {
-      setScreenRect({ x: 15, y: 15, width: 70, height: 70 });
-    } else if (layout === 'framed') {
-      setScreenRect({ x: 7, y: 7, width: 86, height: 86 });
-    } else {
-      setScreenRect({ x: 0, y: 0, width: 100, height: 100 });
-    }
+    setScreenRect(computeDefaultScreenRect(layout));
 
     const stage = innerStageRef.current?.getBoundingClientRect();
     const stageW = stage?.width || 1920;
@@ -160,7 +202,7 @@ export const RecordingCanvas: React.FC<RecordingCanvasProps> = ({
       width: metrics.widthPct,
       height: metrics.heightPct,
     });
-  }, [layout]);
+  }, [layout, computeDefaultScreenRect]);
 
   // Synchronize camera box placement, dimensions, and shape with pipConfig and layout
   useEffect(() => {
@@ -228,12 +270,8 @@ export const RecordingCanvas: React.FC<RecordingCanvasProps> = ({
     [onUpdatePipConfig]
   );
 
-  // Screen surface type ('monitor' | 'window' | 'browser')
-  const [screenSurfaceType, setScreenSurfaceType] = useState<string>('monitor');
-  const [screenResolution, setScreenResolution] = useState<{ width: number; height: number } | null>(null);
-
-  // Detect surface type & capture handle on stream change
-  const [isSelfCapture, setIsSelfCapture] = useState<boolean>(false);
+  // Alignment guidelines active state when moving a frame in the middle
+  const [alignmentGuides, setAlignmentGuides] = useState<{ x: boolean; y: boolean }>({ x: false, y: false });
 
   useEffect(() => {
     if (screenStream) {
@@ -257,19 +295,14 @@ export const RecordingCanvas: React.FC<RecordingCanvasProps> = ({
     }
   }, [screenStream]);
 
-  // Store stream resolution and maintain clean stage framing consistent with the recording compositor
-  const handleScreenMetadata = useCallback((videoEl: HTMLVideoElement) => {
-    if (!videoEl || !videoEl.videoWidth || !videoEl.videoHeight) return;
-    setScreenResolution({ width: videoEl.videoWidth, height: videoEl.videoHeight });
-
-    if (layout === 'spaced-far') {
-      setScreenRect({ x: 15, y: 15, width: 70, height: 70 });
-    } else if (layout === 'framed') {
-      setScreenRect({ x: 7, y: 7, width: 86, height: 86 });
-    } else {
-      setScreenRect({ x: 0, y: 0, width: 100, height: 100 });
-    }
-  }, [layout]);
+  // Store stream resolution and retain clean stage framing consistent with the recording compositor
+  const handleScreenMetadata = useCallback(
+    (videoEl: HTMLVideoElement) => {
+      if (!videoEl || !videoEl.videoWidth || !videoEl.videoHeight) return;
+      setScreenResolution({ width: videoEl.videoWidth, height: videoEl.videoHeight });
+    },
+    []
+  );
 
   // Camera dimensions and positioning are unified and managed via calculatePipMetrics above
 
@@ -289,20 +322,26 @@ export const RecordingCanvas: React.FC<RecordingCanvasProps> = ({
     });
   }, [webcamStream, layout, mode]);
 
-  // Attach screen stream to all active screen video elements with hardware sync
+  // Attach screen stream only briefly to read metadata, keeping hidden preview paused during recording
+  // (the Ready-to-Record shield covers 100% of this element, so live decoding would waste GPU/CPU).
   useEffect(() => {
     const scrVideos = [screenVideoRef.current, splitScreenVideoRef.current];
     scrVideos.forEach((v) => {
       if (v) {
-        if (screenStream && v.srcObject !== screenStream) {
-          v.srcObject = screenStream;
-          v.play().catch(() => {});
+        if (screenStream && !isRecording) {
+          if (v.srcObject !== screenStream) {
+            v.srcObject = screenStream;
+            v.play().catch(() => {});
+          }
           if (v.videoWidth > 0) {
             handleScreenMetadata(v);
+            v.pause();
           }
-        } else if (!screenStream && v.srcObject) {
+        } else {
           v.pause();
-          v.srcObject = null;
+          if (!screenStream && v.srcObject) {
+            v.srcObject = null;
+          }
         }
       }
     });
@@ -315,7 +354,7 @@ export const RecordingCanvas: React.FC<RecordingCanvasProps> = ({
         }
       });
     };
-  }, [screenStream, handleScreenMetadata, layout]);
+  }, [screenStream, handleScreenMetadata, layout, isRecording]);
 
   // Teleprompter auto-scroll logic
   useEffect(() => {
@@ -355,7 +394,7 @@ export const RecordingCanvas: React.FC<RecordingCanvasProps> = ({
   // Canvas background style
   const getCanvasBackgroundStyle = (): React.CSSProperties => {
     if (background.type === 'none') {
-      return { backgroundColor: '#111418' };
+      return { backgroundColor: '#1C212C' };
     }
     if (background.type === 'solid') {
       return { backgroundColor: background.value };
@@ -372,34 +411,51 @@ export const RecordingCanvas: React.FC<RecordingCanvasProps> = ({
     if (background.type === 'gradient' || background.type === 'grain') {
       return { background: background.value };
     }
-    return { backgroundColor: '#111418' };
+    return { backgroundColor: '#1C212C' };
   };
 
+  const splitLayoutBoxes = useMemo(() => {
+    const slotW = 66;
+    const slotH = 82;
+    const slotAspect = (slotW * stageAspectNumeric) / slotH;
+
+    let scrWidthPct = slotW;
+    let scrHeightPct = slotH;
+    if (screenAspectNumeric >= slotAspect) {
+      scrWidthPct = slotW;
+      scrHeightPct = (slotW * stageAspectNumeric) / screenAspectNumeric;
+    } else {
+      scrHeightPct = slotH;
+      scrWidthPct = (slotH * screenAspectNumeric) / stageAspectNumeric;
+    }
+    const scrLeftPct = 30 + (slotW - scrWidthPct) / 2;
+    const scrTopPct = 9 + (slotH - scrHeightPct) / 2;
+
+    const camWidthPct = 24;
+    const camHeightPct = Math.min(82, Math.max(camWidthPct * stageAspectNumeric * 1.15, scrHeightPct));
+    const camLeftPct = 4;
+    const camTopPct = (100 - camHeightPct) / 2;
+
+    return {
+      cam: { left: `${camLeftPct}%`, top: `${camTopPct}%`, width: `${camWidthPct}%`, height: `${camHeightPct}%` },
+      scr: { left: `${scrLeftPct}%`, top: `${scrTopPct}%`, width: `${scrWidthPct}%`, height: `${scrHeightPct}%` },
+    };
+  }, [screenAspectNumeric, stageAspectNumeric]);
+
   const isScreenTweaked = useMemo(() => {
-    const defaultRect =
-      layout === 'spaced-far'
-        ? { x: 15, y: 15, width: 70, height: 70 }
-        : layout === 'framed'
-        ? { x: 7, y: 7, width: 86, height: 86 }
-        : { x: 0, y: 0, width: 100, height: 100 };
+    const defaultRect = computeDefaultScreenRect(layout);
 
     return (
-      Math.abs(screenRect.x - defaultRect.x) > 0.5 ||
-      Math.abs(screenRect.y - defaultRect.y) > 0.5 ||
-      Math.abs(screenRect.width - defaultRect.width) > 0.5 ||
-      Math.abs(screenRect.height - defaultRect.height) > 0.5
+      Math.abs(screenRect.x - defaultRect.x) > 0.8 ||
+      Math.abs(screenRect.y - defaultRect.y) > 0.8 ||
+      Math.abs(screenRect.width - defaultRect.width) > 0.8 ||
+      Math.abs(screenRect.height - defaultRect.height) > 0.8
     );
-  }, [screenRect, layout]);
+  }, [screenRect, layout, computeDefaultScreenRect]);
 
   const resetScreenTransform = () => {
     setAlignmentGuides({ x: false, y: false });
-    if (layout === 'spaced-far') {
-      setScreenRect({ x: 15, y: 15, width: 70, height: 70 });
-    } else if (layout === 'framed') {
-      setScreenRect({ x: 7, y: 7, width: 86, height: 86 });
-    } else {
-      setScreenRect({ x: 0, y: 0, width: 100, height: 100 });
-    }
+    setScreenRect(computeDefaultScreenRect(layout));
   };
 
   const resetCamTransform = () => {
@@ -414,6 +470,17 @@ export const RecordingCanvas: React.FC<RecordingCanvasProps> = ({
     });
   };
 
+  const isFullBleedScreen =
+    Boolean(screenStream) &&
+    mode !== 'audio_only' &&
+    mode !== 'cam_only' &&
+    layout !== 'framed' &&
+    layout !== 'spaced-far' &&
+    layout !== 'split' &&
+    !isScreenTweaked &&
+    screenRect.width >= 99.5 &&
+    screenRect.height >= 99.5;
+
   return (
     <div
       ref={containerRef}
@@ -425,36 +492,47 @@ export const RecordingCanvas: React.FC<RecordingCanvasProps> = ({
       <div
         ref={stageRef}
         id="recording-hero-stage"
-        style={getCanvasBackgroundStyle()}
-        className={`relative ${getAspectClass()} rounded-2xl border border-slate-700/40 dark:border-white/10 shadow-2xl shadow-slate-900/15 dark:shadow-black/70 overflow-hidden flex flex-col justify-between transition-[background-color,border-color,box-shadow] duration-150`}
+        className={`relative ${getAspectClass()} rounded-2xl bg-[#181D27] border border-slate-300/80 dark:border-[#343C4D] shadow-2xl shadow-slate-900/15 dark:shadow-black/45 overflow-hidden flex flex-col justify-between transition-[background-color,border-color,box-shadow] duration-150`}
       >
-        {/* Subtle dot pattern */}
-        <div
-          className="absolute inset-0 opacity-10 pointer-events-none"
-          style={{
-            backgroundImage:
-              'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.4) 1px, transparent 0)',
-            backgroundSize: '24px 24px',
-          }}
-        />
-
-        {/* Organic Film Grain Overlay */}
-        {(background.type === 'grain' ||
-          background.value?.includes('grain') ||
-          BACKGROUND_PRESETS.find((p) => p.value === background.value)?.hasGrain) && (
+        {/* Canvas Background Layer (kept inside stage bounds so gradients never bleed into the outer border) */}
+        {!isFullBleedScreen && (
           <div
-            className="absolute inset-0 pointer-events-none mix-blend-overlay z-0 opacity-40"
+            aria-hidden="true"
+            style={getCanvasBackgroundStyle()}
+            className="absolute inset-0 pointer-events-none z-0"
+          />
+        )}
+
+        {/* Subtle dot pattern */}
+        {!isFullBleedScreen && (
+          <div
+            className="absolute inset-0 opacity-10 pointer-events-none z-0"
             style={{
-              backgroundImage: `url("${NOISE_SVG_DATA_URL}")`,
-              backgroundRepeat: 'repeat',
+              backgroundImage:
+                'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.4) 1px, transparent 0)',
+              backgroundSize: '24px 24px',
             }}
           />
         )}
 
+        {/* Organic Film Grain Overlay */}
+        {!isFullBleedScreen &&
+          (background.type === 'grain' ||
+            background.value?.includes('grain') ||
+            BACKGROUND_PRESETS.find((p) => p.value === background.value)?.hasGrain) && (
+            <div
+              className="absolute inset-0 pointer-events-none mix-blend-overlay z-0 opacity-40"
+              style={{
+                backgroundImage: `url("${NOISE_SVG_DATA_URL}")`,
+                backgroundRepeat: 'repeat',
+              }}
+            />
+          )}
+
         {/* Full-Stage Direct Composition Canvas (No invisible padding walls) */}
         <div
           ref={innerStageRef}
-          className="relative w-full h-full rounded-2xl overflow-hidden bg-transparent flex items-center justify-center"
+          className="relative z-10 w-full h-full rounded-2xl overflow-hidden bg-transparent flex items-center justify-center"
         >
             {/* 0. AUDIO ONLY MODE */}
             {mode === 'audio_only' ? (
@@ -479,7 +557,7 @@ export const RecordingCanvas: React.FC<RecordingCanvasProps> = ({
                     disabled={isRecording}
                     onAlignChange={setAlignmentGuides}
                   >
-                    <div className="relative w-full h-full flex items-center justify-center bg-black/90 shadow-2xl overflow-hidden rounded-lg ring-1 ring-white/10 [transform:translateZ(0)]">
+                    <div className="relative w-full h-full flex items-center justify-center bg-[#1B202C]/90 shadow-2xl overflow-hidden rounded-lg ring-1 ring-white/10 [transform:translateZ(0)]">
                       <video
                         ref={camOnlyVideoRef}
                         autoPlay
@@ -516,10 +594,13 @@ export const RecordingCanvas: React.FC<RecordingCanvasProps> = ({
                 )}
               </div>
             ) : layout === 'split' ? (
-              /* 2. BESIDE PRESET (Camera sits beside the screen with visible background around both) */
-              <div className="w-full h-full flex items-center justify-between p-4 sm:p-6 lg:p-8 gap-3 sm:gap-4 bg-transparent select-none">
+              /* 2. BESIDE PRESET (Matches compositor geometry 1:1 with true screen aspect ratio) */
+              <div className="relative w-full h-full bg-transparent select-none">
                 {/* 2A. LEFT: PRESENTER CAMERA CARD */}
-                <div className="relative w-[26%] h-[84%] max-h-[90%] rounded-2xl overflow-hidden flex items-center justify-center bg-zinc-950 shadow-2xl shadow-black/60 ring-1 ring-white/20 shrink-0 isolate [transform:translateZ(0)]">
+                <div
+                  style={splitLayoutBoxes.cam}
+                  className="absolute rounded-2xl overflow-hidden flex items-center justify-center bg-[#1E2432] shadow-2xl shadow-black/50 ring-1 ring-white/20 isolate [transform:translateZ(0)]"
+                >
                   {webcamStream ? (
                     <video
                       ref={splitCamVideoRef}
@@ -531,19 +612,22 @@ export const RecordingCanvas: React.FC<RecordingCanvasProps> = ({
                       }`}
                     />
                   ) : (
-                    <div className="p-4 flex flex-col items-center justify-center text-center">
-                      <Camera01Icon className="w-8 h-8 text-[#bef264] mb-2" />
+                    <div className="p-3 flex flex-col items-center justify-center text-center">
+                      <Camera01Icon className="w-7 h-7 text-[#bef264] mb-1.5" />
                       <span className="text-xs font-bold text-zinc-200">Presenter Camera</span>
                       <span className="text-[10px] text-zinc-400 mt-0.5">Camera feed</span>
                     </div>
                   )}
                 </div>
 
-                {/* 2B. RIGHT: CAPTURED SCREEN CARD */}
-                <div className="relative flex-1 h-[84%] max-h-[90%] rounded-2xl overflow-hidden flex items-center justify-center shadow-2xl shadow-black/60 ring-1 ring-white/20 isolate [transform:translateZ(0)] bg-zinc-900/40">
+                {/* 2B. RIGHT: CAPTURED SCREEN CARD (aspect-ratio locked) */}
+                <div
+                  style={splitLayoutBoxes.scr}
+                  className="absolute rounded-2xl overflow-hidden flex items-center justify-center shadow-2xl shadow-black/50 ring-1 ring-white/20 isolate [transform:translateZ(0)] bg-[#1E2432]/65"
+                >
                   {screenStream ? (
                     <>
-                      {/* LIVE SCREEN VIDEO (subtle preview running behind frosted glass shield) */}
+                      {/* LIVE SCREEN VIDEO (aspect-preserved) */}
                       <video
                         ref={splitScreenVideoRef}
                         autoPlay
@@ -552,11 +636,11 @@ export const RecordingCanvas: React.FC<RecordingCanvasProps> = ({
                         onLoadedMetadata={(e) => {
                           handleScreenMetadata(e.currentTarget);
                         }}
-                        className="absolute inset-0 w-full h-full object-cover pointer-events-none rounded-2xl opacity-90 [transform:translateZ(0)]"
+                        className="absolute inset-0 w-full h-full object-contain pointer-events-none rounded-2xl opacity-90 [transform:translateZ(0)]"
                       />
 
                       {/* CLEAN STABLE SHIELD WITH GREEN CHECKMARK */}
-                      <div className="absolute inset-0 p-4 flex flex-col items-center justify-center text-center bg-slate-900/90 dark:bg-zinc-950/90 w-full h-full z-20 select-none rounded-2xl border border-white/10">
+                      <div className="absolute inset-0 p-4 flex flex-col items-center justify-center text-center bg-slate-900/90 dark:bg-[#1E2432]/92 w-full h-full z-20 select-none rounded-2xl">
                         <div className="w-9 h-9 rounded-full bg-emerald-500 text-white flex items-center justify-center mb-1.5 shadow-md shadow-emerald-500/25">
                           <Tick01Icon className="w-4 h-4 stroke-[2.5]" />
                         </div>
@@ -565,7 +649,7 @@ export const RecordingCanvas: React.FC<RecordingCanvasProps> = ({
                       </div>
                     </>
                   ) : (
-                    <div className="p-4 flex flex-col items-center justify-center text-center w-full h-full bg-zinc-950 rounded-2xl">
+                    <div className="p-4 flex flex-col items-center justify-center text-center w-full h-full bg-[#1E2432] rounded-2xl">
                       <ComputerIcon className="w-8 h-8 text-zinc-300 mb-2" />
                       <span className="text-xs font-semibold text-zinc-200">{t.canvas?.screenLabel || 'Screen'}</span>
                       <span className="text-[10px] text-zinc-400 mt-0.5">{t.canvas?.selectScreenToShare || 'Select screen to share'}</span>
@@ -592,7 +676,7 @@ export const RecordingCanvas: React.FC<RecordingCanvasProps> = ({
                   onReset={isScreenTweaked ? resetScreenTransform : undefined}
                 >
                   <div
-                    className={`relative w-full h-full flex items-center justify-center bg-zinc-950/60 overflow-hidden group select-none transition-[border-color,box-shadow,background-color] duration-150 ${
+                    className={`relative w-full h-full flex items-center justify-center bg-[#1B202C]/70 overflow-hidden group select-none transition-[border-color,box-shadow,background-color] duration-150 ${
                       layout === 'framed' || layout === 'spaced-far'
                         ? 'rounded-2xl ring-1 ring-white/10 shadow-2xl shadow-black/50'
                         : 'rounded-2xl'
@@ -600,7 +684,7 @@ export const RecordingCanvas: React.FC<RecordingCanvasProps> = ({
                   >
                     {screenStream ? (
                       <>
-                        {/* 1. LIVE SCREEN VIDEO (subtle preview running behind frosted glass shield) */}
+                        {/* 1. LIVE SCREEN VIDEO (aspect-preserved behind frosted glass shield) */}
                         <video
                           ref={screenVideoRef}
                           autoPlay
@@ -609,11 +693,15 @@ export const RecordingCanvas: React.FC<RecordingCanvasProps> = ({
                           onLoadedMetadata={(e) => {
                             handleScreenMetadata(e.currentTarget);
                           }}
-                          className="absolute inset-0 w-full h-full object-cover pointer-events-none rounded-2xl opacity-90 [transform:translateZ(0)]"
+                          className="absolute inset-0 w-full h-full object-contain pointer-events-none rounded-2xl opacity-90 [transform:translateZ(0)]"
                         />
 
                         {/* CLEAN STABLE SHIELD WITH GREEN CHECKMARK (Prevents infinite mirror GPU jitter) */}
-                        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-6 text-center bg-slate-900/92 dark:bg-zinc-950/92 select-none rounded-2xl border border-white/10">
+                        <div
+                          className={`absolute inset-0 z-20 flex flex-col items-center justify-center p-6 text-center bg-slate-900/92 dark:bg-[#1E2432]/92 select-none rounded-2xl ${
+                            isFullBleedScreen ? '' : 'border border-white/10'
+                          }`}
+                        >
                           {/* Soft Green Checkmark */}
                           <div className="w-14 h-14 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/25 mb-3">
                             <Tick01Icon className="w-8 h-8 stroke-[2.5]" />
@@ -682,7 +770,7 @@ export const RecordingCanvas: React.FC<RecordingCanvasProps> = ({
                     onAlignChange={setAlignmentGuides}
                   >
                     <div
-                      className="relative w-full h-full flex items-center justify-center bg-black/90 shadow-2xl overflow-hidden transition-[border-color,box-shadow] duration-150 [transform:translateZ(0)]"
+                      className="relative w-full h-full flex items-center justify-center bg-[#1B202C]/90 shadow-2xl overflow-hidden transition-[border-color,box-shadow] duration-150 [transform:translateZ(0)]"
                       style={{
                         borderRadius:
                           pipConfig.shape === 'circle'
@@ -726,7 +814,7 @@ export const RecordingCanvas: React.FC<RecordingCanvasProps> = ({
         {/* Floating Teleprompter Card */}
         {prompter.enabled && (
           <div
-            className="absolute top-3 left-1/2 -translate-x-1/2 z-40 w-11/12 max-w-md bg-black/85 backdrop-blur-xl border border-white/20 rounded-2xl p-3 shadow-2xl text-white animate-in fade-in duration-200"
+            className="absolute top-3 left-1/2 -translate-x-1/2 z-40 w-11/12 max-w-md bg-[#1F2533]/88 backdrop-blur-xl border border-white/20 rounded-2xl p-3 shadow-2xl text-white animate-in fade-in duration-200"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between pb-1.5 mb-1.5 border-b border-white/15">

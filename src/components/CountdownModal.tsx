@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
 import { Cancel01Icon } from 'hugeicons-react';
 
 interface CountdownModalProps {
@@ -99,24 +98,15 @@ export const CountdownModal: React.FC<CountdownModalProps> = ({
   return (
     <div
       id="countdown-modal-overlay"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 select-none pointer-events-auto"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 backdrop-blur-xs select-none pointer-events-auto"
       style={{ willChange: 'opacity' }}
     >
       <div className="flex flex-col items-center justify-center p-6 text-center select-none">
-        {/* Simple, Ultra-crisp Countdown Circle */}
-        <div className="relative flex items-center justify-center w-36 h-36 mb-5 rounded-full bg-zinc-900/95 border-2 border-white/15 shadow-2xl">
-          <AnimatePresence mode="wait">
-            <motion.span
-              key={currentCount}
-              initial={{ scale: 1.25, opacity: 0.4 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.85, opacity: 0 }}
-              transition={{ duration: 0.18, ease: 'easeOut' }}
-              className="text-6xl sm:text-7xl font-mono font-black text-white tracking-tight"
-            >
-              {currentCount}
-            </motion.span>
-          </AnimatePresence>
+        {/* Simple, Static Countdown Circle (no laggy scale animation) */}
+        <div className="relative flex items-center justify-center w-32 h-32 mb-5 rounded-full bg-[#232936]/95 border border-white/15 shadow-xl">
+          <span className="text-6xl sm:text-7xl font-mono font-black text-white tracking-tight">
+            {currentCount}
+          </span>
         </div>
 
         {/* Minimal Subtitle */}

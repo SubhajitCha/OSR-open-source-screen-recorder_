@@ -18,6 +18,40 @@ export interface DrawSceneOptions {
 }
 
 /**
+ * Computes an aspect-ratio-preserved rectangle centered within (slotX, slotY, slotW, slotH).
+ */
+function fitRectToAspect(
+  srcW: number,
+  srcH: number,
+  slotX: number,
+  slotY: number,
+  slotW: number,
+  slotH: number
+): { x: number; y: number; w: number; h: number } {
+  const safeSrcW = srcW > 0 ? srcW : slotW;
+  const safeSrcH = srcH > 0 ? srcH : slotH;
+  const srcAspect = safeSrcW / (safeSrcH || 1);
+  const slotAspect = slotW / (slotH || 1);
+
+  let w = slotW;
+  let h = slotH;
+  if (srcAspect > slotAspect) {
+    w = slotW;
+    h = slotW / srcAspect;
+  } else {
+    h = slotH;
+    w = slotH * srcAspect;
+  }
+
+  return {
+    x: slotX + (slotW - w) / 2,
+    y: slotY + (slotH - h) / 2,
+    w,
+    h,
+  };
+}
+
+/**
  * Universal rounded rectangle path helper ensuring identical rendering on all browsers
  */
 function drawRoundedRectPath(
@@ -188,11 +222,13 @@ export function drawCompositionScene({
     cameraHidden = false,
   } = appearance;
 
-  const scaleFactor = width / 1920;
+  const scaleFactor = Math.min(width, height) / 1080;
   const bgValue =
     typeof background === 'string' && background.length > 0
       ? background
       : DEFAULT_BACKGROUND_VALUE;
+  const srcScreenW = screenVideo.videoWidth || project.source.width || 1920;
+  const srcScreenH = screenVideo.videoHeight || project.source.height || 1080;
 
   // Compute Active Zoom Transform
   const zoom = computeZoomTransformAtTime(currentTime, zoomSegments, 0.45, appearance);
@@ -212,16 +248,28 @@ export function drawCompositionScene({
 
   // -------------------------------------------------------------
   // LAYOUT 1: BESIDE ('split')
-  // Camera sits beside the screen with visible background
+  // Camera sits beside the screen with visible background & true screen aspect ratio
   // -------------------------------------------------------------
   if (layout === 'split') {
     ctx.clearRect(0, 0, width, height);
     renderBackgroundToCanvas(ctx, width, height, bgValue);
 
     if (isCameraPresent) {
-      // Left Column: Camera Presenter Card (24% width, 82% height, 4% left margin)
+      // Right Column Screen Slot (66% width, max 82% height, 30% left offset), fitted cleanly to screen aspect
+      const slotX = width * 0.30;
+      const slotW = width * 0.66;
+      const slotH = height * 0.82;
+      const slotY = (height - slotH) / 2;
+      const fittedScr = fitRectToAspect(srcScreenW, srcScreenH, slotX, slotY, slotW, slotH);
+      const scrX = fittedScr.x;
+      const scrY = fittedScr.y;
+      const scrW = fittedScr.w;
+      const scrH = fittedScr.h;
+      const scrRadius = 20 * scaleFactor;
+
+      // Left Column: Camera Presenter Card (24% width, top/bottom aligned with screen card)
       const camW = width * 0.24;
-      const camH = height * 0.82;
+      const camH = Math.min(height * 0.82, Math.max(camW * 1.15, scrH));
       const camX = width * 0.04;
       const camY = (height - camH) / 2;
       const camRadius = 20 * scaleFactor;
@@ -251,13 +299,6 @@ export function drawCompositionScene({
         2 * scaleFactor,
         'rgba(255, 255, 255, 0.25)'
       );
-
-      // Right Column: Captured Screen Card (66% width, 82% height, 30% left margin)
-      const scrW = width * 0.66;
-      const scrH = height * 0.82;
-      const scrX = width * 0.3;
-      const scrY = (height - scrH) / 2;
-      const scrRadius = 20 * scaleFactor;
 
       // Screen Shadow
       ctx.save();
@@ -327,11 +368,19 @@ export function drawCompositionScene({
       ctx.stroke();
       ctx.restore();
     } else {
-      // Clean fallback if camera is inactive: Center screen cleanly
-      const scrW = width * 0.86;
-      const scrH = height * 0.82;
-      const scrX = (width - scrW) / 2;
-      const scrY = (height - scrH) / 2;
+      // Clean fallback if camera is inactive: Center screen cleanly retaining aspect ratio
+      const fittedScr = fitRectToAspect(
+        srcScreenW,
+        srcScreenH,
+        width * 0.07,
+        height * 0.07,
+        width * 0.86,
+        height * 0.86
+      );
+      const scrX = fittedScr.x;
+      const scrY = fittedScr.y;
+      const scrW = fittedScr.w;
+      const scrH = fittedScr.h;
       const scrRadius = 20 * scaleFactor;
 
       ctx.save();
@@ -372,23 +421,32 @@ export function drawCompositionScene({
   }
 
   // -------------------------------------------------------------
-  // LAYOUT 2: SPACING AROUND ('framed')
-  // Screen is framed with space around it (7% margin), visible background, corner camera
+  // LAYOUT 2: SPACING AROUND ('framed' / 'spaced-far')
+  // Screen is framed with space around it, visible background, corner camera
   // -------------------------------------------------------------
-  if (layout === 'framed') {
+  if (layout === 'framed' || layout === 'spaced-far') {
     ctx.clearRect(0, 0, width, height);
     renderBackgroundToCanvas(ctx, width, height, bgValue);
 
-    const padX = width * 0.07;
-    const padY = height * 0.07;
-    const scrW = width * 0.86;
-    const scrH = height * 0.86;
-    const scrRadius = 18 * scaleFactor;
+    const marginRatio = layout === 'spaced-far' ? 0.15 : 0.07;
+    const fittedScr = fitRectToAspect(
+      srcScreenW,
+      srcScreenH,
+      width * marginRatio,
+      height * marginRatio,
+      width * (1 - marginRatio * 2),
+      height * (1 - marginRatio * 2)
+    );
+    const padX = fittedScr.x;
+    const padY = fittedScr.y;
+    const scrW = fittedScr.w;
+    const scrH = fittedScr.h;
+    const scrRadius = (layout === 'spaced-far' ? 22 : 18) * scaleFactor;
 
     // Soft drop shadow behind screen
     ctx.save();
     ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
-    ctx.shadowBlur = 32 * scaleFactor;
+    ctx.shadowBlur = (layout === 'spaced-far' ? 36 : 32) * scaleFactor;
     ctx.shadowOffsetY = 8 * scaleFactor;
     ctx.fillStyle = '#090a0f';
     ctx.beginPath();
@@ -485,14 +543,24 @@ export function drawCompositionScene({
 
   // -------------------------------------------------------------
   // LAYOUT 3: FLOATING CORNER ('corner-cam')
-  // Full edge-to-edge screen capture with floating camera (2.5% margin)
+  // Full screen capture (aspect-safe) with floating camera (2.5% margin)
   // -------------------------------------------------------------
   if (layout === 'corner-cam') {
+    const scr = fitRectToAspect(srcScreenW, srcScreenH, 0, 0, width, height);
+    const isLetterboxed = scr.x > 1 || scr.y > 1;
     ctx.clearRect(0, 0, width, height);
+    if (isLetterboxed) {
+      renderBackgroundToCanvas(ctx, width, height, bgValue);
+    }
 
-    // Full screen capture
+    // Screen capture (clipped to fitted frame)
     ctx.save();
-    applyVirtualCameraTransform(ctx, 0, 0, width, height, zoom);
+    if (isLetterboxed) {
+      ctx.beginPath();
+      ctx.rect(scr.x, scr.y, scr.w, scr.h);
+      ctx.clip();
+    }
+    applyVirtualCameraTransform(ctx, scr.x, scr.y, scr.w, scr.h, zoom);
 
     try {
       if (zoom.isTransitioning && zoom.motionBlurEnabled && zoom.motionBlurPx > 0.2) {
@@ -500,33 +568,33 @@ export function drawCompositionScene({
         ctx.save();
         ctx.filter = `blur(${blurAmount}px)`;
         ctx.globalAlpha = 0.58;
-        ctx.drawImage(screenVideo, 0, 0, width, height);
+        ctx.drawImage(screenVideo, scr.x, scr.y, scr.w, scr.h);
         ctx.restore();
 
         ctx.save();
         ctx.globalAlpha = 0.9;
-        ctx.drawImage(screenVideo, 0, 0, width, height);
+        ctx.drawImage(screenVideo, scr.x, scr.y, scr.w, scr.h);
         ctx.restore();
       } else {
-        ctx.drawImage(screenVideo, 0, 0, width, height);
+        ctx.drawImage(screenVideo, scr.x, scr.y, scr.w, scr.h);
       }
     } catch (_) {}
 
     if (metadata.clicks && metadata.clicks.length > 0) {
-      drawClickEffects(ctx, metadata.clicks, currentTime, width, height, clickEffect, 0.6, 0, 0);
+      drawClickEffects(ctx, metadata.clicks, currentTime, scr.w, scr.h, clickEffect, 0.6, scr.x, scr.y);
     }
     if (showCursor && metadata.cursor && metadata.cursor.length > 0) {
       const cur = interpolateCursorPosition(metadata.cursor, currentTime, appearance.cursorOffsetMs || 0);
       if (cur.visible) {
-        const curScreenX = cur.x * width;
-        const curScreenY = cur.y * height;
+        const curScreenX = scr.x + cur.x * scr.w;
+        const curScreenY = scr.y + cur.y * scr.h;
         const cursorZoomScale = Math.max(0.75, (cursorScale * scaleFactor) / Math.pow(zoom.scale, 0.3));
         drawSyntheticCursor(ctx, curScreenX, curScreenY, cursorZoomScale, cursorStyle);
       }
     }
 
     if (selectedZoomId) {
-      drawZoomCrosshair(ctx, selectedZoomId, zoomSegments, 0, 0, width, height);
+      drawZoomCrosshair(ctx, selectedZoomId, zoomSegments, scr.x, scr.y, scr.w, scr.h);
     }
 
     ctx.restore(); // virtual camera
@@ -564,12 +632,22 @@ export function drawCompositionScene({
 
   // -------------------------------------------------------------
   // LAYOUT 4: END TO END ('overlay')
-  // Full edge-to-edge screen capture with corner camera flush on edge (0 margin)
+  // Full screen capture (aspect-safe) with corner camera flush on edge (0 margin)
   // -------------------------------------------------------------
+  const scr = fitRectToAspect(srcScreenW, srcScreenH, 0, 0, width, height);
+  const isLetterboxed = scr.x > 1 || scr.y > 1;
   ctx.clearRect(0, 0, width, height);
+  if (isLetterboxed) {
+    renderBackgroundToCanvas(ctx, width, height, bgValue);
+  }
 
   ctx.save();
-  applyVirtualCameraTransform(ctx, 0, 0, width, height, zoom);
+  if (isLetterboxed) {
+    ctx.beginPath();
+    ctx.rect(scr.x, scr.y, scr.w, scr.h);
+    ctx.clip();
+  }
+  applyVirtualCameraTransform(ctx, scr.x, scr.y, scr.w, scr.h, zoom);
 
   try {
     if (zoom.isTransitioning && zoom.motionBlurEnabled && zoom.motionBlurPx > 0.2) {
@@ -577,33 +655,33 @@ export function drawCompositionScene({
       ctx.save();
       ctx.filter = `blur(${blurAmount}px)`;
       ctx.globalAlpha = 0.58;
-      ctx.drawImage(screenVideo, 0, 0, width, height);
+      ctx.drawImage(screenVideo, scr.x, scr.y, scr.w, scr.h);
       ctx.restore();
 
       ctx.save();
       ctx.globalAlpha = 0.9;
-      ctx.drawImage(screenVideo, 0, 0, width, height);
+      ctx.drawImage(screenVideo, scr.x, scr.y, scr.w, scr.h);
       ctx.restore();
     } else {
-      ctx.drawImage(screenVideo, 0, 0, width, height);
+      ctx.drawImage(screenVideo, scr.x, scr.y, scr.w, scr.h);
     }
   } catch (_) {}
 
   if (metadata.clicks && metadata.clicks.length > 0) {
-    drawClickEffects(ctx, metadata.clicks, currentTime, width, height, clickEffect, 0.6, 0, 0);
+    drawClickEffects(ctx, metadata.clicks, currentTime, scr.w, scr.h, clickEffect, 0.6, scr.x, scr.y);
   }
   if (showCursor && metadata.cursor && metadata.cursor.length > 0) {
     const cur = interpolateCursorPosition(metadata.cursor, currentTime, appearance.cursorOffsetMs || 0);
     if (cur.visible) {
-      const curScreenX = cur.x * width;
-      const curScreenY = cur.y * height;
+      const curScreenX = scr.x + cur.x * scr.w;
+      const curScreenY = scr.y + cur.y * scr.h;
       const cursorZoomScale = Math.max(0.75, (cursorScale * scaleFactor) / Math.pow(zoom.scale, 0.3));
       drawSyntheticCursor(ctx, curScreenX, curScreenY, cursorZoomScale, cursorStyle);
     }
   }
 
   if (selectedZoomId) {
-    drawZoomCrosshair(ctx, selectedZoomId, zoomSegments, 0, 0, width, height);
+    drawZoomCrosshair(ctx, selectedZoomId, zoomSegments, scr.x, scr.y, scr.w, scr.h);
   }
 
   ctx.restore(); // virtual camera

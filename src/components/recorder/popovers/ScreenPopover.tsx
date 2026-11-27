@@ -40,7 +40,7 @@ export const ScreenPopover: React.FC<ScreenPopoverProps> = ({
 
   return (
     <div
-      className={`${positionClass} w-80 bg-white dark:bg-[#151718] text-slate-900 dark:text-white rounded-2xl border border-slate-200 dark:border-white/10 shadow-2xl shadow-slate-900/15 dark:shadow-black/60 p-4 z-50 backdrop-blur-xl animate-in fade-in zoom-in-95 duration-150`}
+      className={`${positionClass} w-80 bg-white dark:bg-[#232936] text-slate-900 dark:text-white rounded-2xl border border-slate-200 dark:border-white/15 shadow-2xl shadow-slate-900/15 dark:shadow-black/45 p-4 z-50 backdrop-blur-xl animate-in fade-in zoom-in-95 duration-150`}
       onClick={(e) => e.stopPropagation()}
     >
       <div className="flex items-center justify-between pb-2.5 mb-3 border-b border-slate-100 dark:border-white/10">
@@ -60,7 +60,7 @@ export const ScreenPopover: React.FC<ScreenPopoverProps> = ({
       <div className="space-y-3">
         {/* Live Preview Toggle Button */}
         {onToggleScreen && (
-          <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 flex items-center justify-between">
+          <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.07] border border-slate-200 dark:border-white/10 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span
                 className={`w-2 h-2 rounded-full ${
@@ -92,7 +92,7 @@ export const ScreenPopover: React.FC<ScreenPopoverProps> = ({
               includeSystemAudio: !audioSettings.includeSystemAudio,
             })
           }
-          className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.04] hover:bg-slate-100 dark:hover:bg-white/[0.07] border border-slate-200 dark:border-white/5 cursor-pointer transition-colors"
+          className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.07] hover:bg-slate-100 dark:hover:bg-white/[0.07] border border-slate-200 dark:border-white/5 cursor-pointer transition-colors"
         >
           <div className="flex items-center gap-2.5">
             <div

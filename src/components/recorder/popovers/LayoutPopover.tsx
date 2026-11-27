@@ -90,7 +90,7 @@ export const LayoutPopover: React.FC<LayoutPopoverProps> = ({
     <div
       className={`${positionClass} ${
         isSingleSource ? 'w-[420px]' : 'w-[520px]'
-      } max-w-[calc(100vw-80px)] max-h-[85vh] overflow-y-auto bg-white dark:bg-[#151718] text-slate-900 dark:text-white rounded-2xl border border-slate-200 dark:border-white/10 shadow-2xl shadow-slate-900/20 dark:shadow-black/70 p-4 z-50 backdrop-blur-xl animate-in fade-in zoom-in-95 duration-150`}
+      } max-w-[calc(100vw-80px)] max-h-[85vh] overflow-y-auto bg-white dark:bg-[#232936] text-slate-900 dark:text-white rounded-2xl border border-slate-200 dark:border-white/15 shadow-2xl shadow-slate-900/20 dark:shadow-black/45 p-4 z-50 backdrop-blur-xl animate-in fade-in zoom-in-95 duration-150`}
       onClick={(e) => e.stopPropagation()}
     >
       {/* Header */}
@@ -131,7 +131,6 @@ export const LayoutPopover: React.FC<LayoutPopoverProps> = ({
               <button
                 key={item.id}
                 type="button"
-                title={item.title}
                 aria-label={item.title}
                 onClick={() => {
                   onSelectLayout(item.id);
@@ -140,7 +139,7 @@ export const LayoutPopover: React.FC<LayoutPopoverProps> = ({
                 className={`group relative flex flex-col rounded-xl p-1.5 transition-all cursor-pointer border-2 ${
                   isSelected
                     ? 'border-[#f97316] bg-orange-50/70 dark:bg-[#f97316]/15 shadow-md shadow-[#f97316]/20 ring-2 ring-[#f97316]/30'
-                    : 'border-slate-200 dark:border-white/10 bg-slate-50/70 dark:bg-white/[0.02] hover:border-slate-300 dark:hover:border-white/20 hover:bg-slate-100/70 dark:hover:bg-white/[0.05]'
+                    : 'border-slate-200 dark:border-white/10 bg-slate-50/70 dark:bg-[#1B202B] hover:border-slate-300 dark:hover:border-white/25 hover:bg-slate-100/70 dark:hover:bg-[#2B3242]'
                 }`}
               >
                 {/* Visual Active Check Indicator */}
@@ -151,23 +150,23 @@ export const LayoutPopover: React.FC<LayoutPopoverProps> = ({
                 )}
 
                 {/* Graphical Layout Diagram (matching user screenshot) */}
-                <div className="relative w-full aspect-[16/11] rounded-lg overflow-hidden border border-black/10 dark:border-white/10 flex items-center justify-center transition-transform group-hover:scale-[1.02] bg-slate-200/90 dark:bg-zinc-800">
+                <div className="relative w-full aspect-[16/11] rounded-lg overflow-hidden border border-black/10 dark:border-white/10 flex items-center justify-center transition-transform group-hover:scale-[1.02] bg-slate-200/90 dark:bg-[#333C4F]">
                   {/* 1. End to End (Edge-to-edge white card with wireframe lines) */}
                   {item.type === 'end-to-end-single' && (
-                    <div className="relative w-full h-full bg-white dark:bg-zinc-900 flex flex-col items-center justify-center p-2">
-                      <div className="w-5 h-0.5 sm:h-1 rounded-full bg-slate-300 dark:bg-zinc-600 mb-1" />
-                      <div className="w-9 h-1 sm:h-1.5 rounded-full bg-slate-400 dark:bg-zinc-400 mb-1" />
-                      <div className="w-5 h-0.5 sm:h-1 rounded-full bg-slate-300 dark:bg-zinc-600" />
+                    <div className="relative w-full h-full bg-white dark:bg-[#2A3142] flex flex-col items-center justify-center p-2">
+                      <div className="w-5 h-0.5 sm:h-1 rounded-full bg-slate-300 dark:bg-zinc-500 mb-1" />
+                      <div className="w-9 h-1 sm:h-1.5 rounded-full bg-slate-400 dark:bg-zinc-300 mb-1" />
+                      <div className="w-5 h-0.5 sm:h-1 rounded-full bg-slate-300 dark:bg-zinc-500" />
                     </div>
                   )}
 
                   {/* 2. Little zoomed out (Medium centered card with space around) */}
                   {item.type === 'framed-single' && (
                     <div className="relative w-full h-full flex items-center justify-center p-1">
-                      <div className="w-[80%] h-[76%] rounded-md bg-white dark:bg-zinc-900 border border-black/10 dark:border-white/10 shadow-xs flex flex-col items-center justify-center p-1">
-                        <div className="w-4 h-0.5 rounded-full bg-slate-300 dark:bg-zinc-600 mb-0.5" />
-                        <div className="w-7 h-1 rounded-full bg-slate-400 dark:bg-zinc-400 mb-0.5" />
-                        <div className="w-4 h-0.5 rounded-full bg-slate-300 dark:bg-zinc-600" />
+                      <div className="w-[80%] h-[76%] rounded-md bg-white dark:bg-[#2A3142] border border-black/10 dark:border-white/15 shadow-xs flex flex-col items-center justify-center p-1">
+                        <div className="w-4 h-0.5 rounded-full bg-slate-300 dark:bg-zinc-500 mb-0.5" />
+                        <div className="w-7 h-1 rounded-full bg-slate-400 dark:bg-zinc-300 mb-0.5" />
+                        <div className="w-4 h-0.5 rounded-full bg-slate-300 dark:bg-zinc-500" />
                       </div>
                     </div>
                   )}
@@ -175,13 +174,18 @@ export const LayoutPopover: React.FC<LayoutPopoverProps> = ({
                   {/* 3. Little bit more zoomed out (Smaller centered card with more space around) */}
                   {item.type === 'spaced-far-single' && (
                     <div className="relative w-full h-full flex items-center justify-center p-1">
-                      <div className="w-[58%] h-[56%] rounded-sm bg-white dark:bg-zinc-900 border border-black/10 dark:border-white/10 shadow-xs flex flex-col items-center justify-center p-0.5">
-                        <div className="w-3 h-0.5 rounded-full bg-slate-300 dark:bg-zinc-600 mb-0.5" />
-                        <div className="w-5 h-0.5 rounded-full bg-slate-400 dark:bg-zinc-400 mb-0.5" />
-                        <div className="w-3 h-0.5 rounded-full bg-slate-300 dark:bg-zinc-600" />
+                      <div className="w-[58%] h-[56%] rounded-sm bg-white dark:bg-[#2A3142] border border-black/10 dark:border-white/15 shadow-xs flex flex-col items-center justify-center p-0.5">
+                        <div className="w-3 h-0.5 rounded-full bg-slate-300 dark:bg-zinc-500 mb-0.5" />
+                        <div className="w-5 h-0.5 rounded-full bg-slate-400 dark:bg-zinc-300 mb-0.5" />
+                        <div className="w-3 h-0.5 rounded-full bg-slate-300 dark:bg-zinc-500" />
                       </div>
                     </div>
                   )}
+                </div>
+                <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 z-30 opacity-0 translate-y-1 scale-95 group-hover:opacity-100 group-hover:translate-y-0 group-hover:scale-100 transition-all duration-150 whitespace-nowrap">
+                  <div className="px-2 py-0.5 rounded-md bg-slate-900/95 dark:bg-white/95 text-white dark:text-slate-950 text-[11px] font-semibold shadow-lg select-none">
+                    {item.title}
+                  </div>
                 </div>
               </button>
             );
@@ -196,7 +200,6 @@ export const LayoutPopover: React.FC<LayoutPopoverProps> = ({
               <button
                 key={item.id}
                 type="button"
-                title={item.title}
                 aria-label={item.title}
                 onClick={() => {
                   onSelectLayout(item.id);
@@ -205,7 +208,7 @@ export const LayoutPopover: React.FC<LayoutPopoverProps> = ({
                 className={`group relative flex flex-col rounded-xl p-1.5 transition-all cursor-pointer border-2 ${
                   isSelected
                     ? 'border-[#f97316] bg-orange-50/70 dark:bg-[#f97316]/15 shadow-md shadow-[#f97316]/20 ring-2 ring-[#f97316]/30'
-                    : 'border-slate-200 dark:border-white/10 bg-slate-50/70 dark:bg-white/[0.02] hover:border-slate-300 dark:hover:border-white/20 hover:bg-slate-100/70 dark:hover:bg-white/[0.05]'
+                    : 'border-slate-200 dark:border-white/10 bg-slate-50/70 dark:bg-[#1B202B] hover:border-slate-300 dark:hover:border-white/25 hover:bg-slate-100/70 dark:hover:bg-[#2B3242]'
                 }`}
               >
                 {/* Visual Active Check Indicator */}
@@ -229,7 +232,7 @@ export const LayoutPopover: React.FC<LayoutPopoverProps> = ({
                 >
                   {/* 1. End to End (Screen edge-to-edge, camera sitting flush at corner) */}
                   {item.type === 'end-to-end' && (
-                    <div className="relative w-full h-full bg-white dark:bg-zinc-800 flex flex-col items-center justify-center p-1.5">
+                    <div className="relative w-full h-full bg-white dark:bg-[#2A3142] flex flex-col items-center justify-center p-1.5">
                       <div className="w-8 h-1 rounded-full bg-slate-300 dark:bg-zinc-600 mb-1" />
                       <div className="w-5 h-1 rounded-full bg-slate-200 dark:bg-zinc-700" />
 
@@ -244,7 +247,7 @@ export const LayoutPopover: React.FC<LayoutPopoverProps> = ({
 
                   {/* 2. Floating Corner (Screen edge-to-edge, floating camera with margin) */}
                   {item.type === 'corner-cam' && (
-                    <div className="relative w-full h-full bg-white dark:bg-zinc-800 flex flex-col items-center justify-center p-1.5">
+                    <div className="relative w-full h-full bg-white dark:bg-[#2A3142] flex flex-col items-center justify-center p-1.5">
                       <div className="w-8 h-1 rounded-full bg-slate-300 dark:bg-zinc-600 mb-1" />
                       <div className="w-5 h-1 rounded-full bg-slate-200 dark:bg-zinc-700" />
 
@@ -260,7 +263,7 @@ export const LayoutPopover: React.FC<LayoutPopoverProps> = ({
                   {/* 3. Spacing Around (Framed with visible background, corner camera) */}
                   {item.type === 'spaced' && (
                     <div className="relative w-full h-full flex items-center justify-center p-1.5">
-                      <div className="w-[82%] h-[82%] rounded-md bg-white dark:bg-zinc-900 border border-black/10 dark:border-white/10 shadow-sm flex flex-col items-center justify-center">
+                      <div className="w-[82%] h-[82%] rounded-md bg-white dark:bg-[#2A3142] border border-black/10 dark:border-white/10 shadow-sm flex flex-col items-center justify-center">
                         <div className="w-6 h-1 rounded-full bg-slate-300 dark:bg-zinc-600 mb-0.5" />
                         <div className="w-4 h-1 rounded-full bg-slate-200 dark:bg-zinc-700" />
                       </div>
@@ -282,12 +285,17 @@ export const LayoutPopover: React.FC<LayoutPopoverProps> = ({
                         </svg>
                       </div>
 
-                      <div className="flex-1 h-[82%] rounded-md bg-white dark:bg-zinc-900 border border-black/10 dark:border-white/10 shadow-sm flex flex-col items-center justify-center">
+                      <div className="flex-1 h-[82%] rounded-md bg-white dark:bg-[#2A3142] border border-black/10 dark:border-white/10 shadow-sm flex flex-col items-center justify-center">
                         <div className="w-7 h-1 rounded-full bg-slate-300 dark:bg-zinc-600 mb-0.5" />
                         <div className="w-4 h-1 rounded-full bg-slate-200 dark:bg-zinc-700" />
                       </div>
                     </div>
                   )}
+                </div>
+                <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 z-30 opacity-0 translate-y-1 scale-95 group-hover:opacity-100 group-hover:translate-y-0 group-hover:scale-100 transition-all duration-150 whitespace-nowrap">
+                  <div className="px-2 py-0.5 rounded-md bg-slate-900/95 dark:bg-white/95 text-white dark:text-slate-950 text-[11px] font-semibold shadow-lg select-none">
+                    {item.title}
+                  </div>
                 </div>
               </button>
             );

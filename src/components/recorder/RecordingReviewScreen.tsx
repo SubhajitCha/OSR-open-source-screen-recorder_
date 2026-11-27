@@ -20,6 +20,8 @@ import { formatBytes } from '../../services/db';
 import { downloadBlob } from '../../services/videoTrimmer';
 import { convertWebmToMp4, ensureMp4Blob } from '../../services/mp4Converter';
 import { CompositionLayout, RecorderBackgroundConfig, RecordingMetadata, VideoBookmark } from '../../types';
+import { useLanguage } from '../../context/LanguageContext';
+import { getReviewUiStrings } from '../../i18n/formatters';
 
 interface RecordingReviewScreenProps {
   videoBlob: Blob;
@@ -47,6 +49,9 @@ export const RecordingReviewScreen: React.FC<RecordingReviewScreenProps> = ({
   onRetake,
   onSaveToLibrary,
 }) => {
+  const { currentLang, t } = useLanguage();
+  const ui = getReviewUiStrings(currentLang);
+
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [currentTime, setCurrentTime] = useState<number>(0);
@@ -55,12 +60,14 @@ export const RecordingReviewScreen: React.FC<RecordingReviewScreenProps> = ({
   const [volume, setVolume] = useState<number>(1);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [isEditingTitle, setIsEditingTitle] = useState<boolean>(false);
-  const [title, setTitle] = useState<string>(() => {
+  const [timestampSuffix] = useState<string>(() => {
     const d = new Date();
     const dateStr = d.toISOString().slice(0, 10);
     const timeStr = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }).replace(':', '-');
-    return `Recording_${dateStr}_${timeStr}`;
+    return `${dateStr}_${timeStr}`;
   });
+  const [hasCustomTitle, setHasCustomTitle] = useState<boolean>(false);
+  const [title, setTitle] = useState<string>(() => `${ui.recordingPrefix}_${timestampSuffix}`);
   const [isDownloaded, setIsDownloaded] = useState<boolean>(false);
   const [isSaved, setIsSaved] = useState<boolean>(false);
   const [videoContainerWidth, setVideoContainerWidth] = useState<number | null>(null);
@@ -72,9 +79,34 @@ export const RecordingReviewScreen: React.FC<RecordingReviewScreenProps> = ({
   const [conversionStatus, setConversionStatus] = useState<string>('');
   const [isDownloadMenuOpen, setIsDownloadMenuOpen] = useState<boolean>(false);
 
+  const [isFrameReady, setIsFrameReady] = useState<boolean>(false);
+  const [isPlayerHovered, setIsPlayerHovered] = useState<boolean>(false);
+  const [hideControlsUntilMove, setHideControlsUntilMove] = useState<boolean>(false);
+
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const titleInputRef = useRef<HTMLInputElement | null>(null);
+  const hasPrimedInitialFrameRef = useRef<boolean>(false);
+  const isPrimingFrameRef = useRef<boolean>(false);
+  const primeTimerRef = useRef<number | null>(null);
+  const userMutedRef = useRef<boolean>(false);
+  const userVolumeRef = useRef<number>(1);
+  const playStartedAtRef = useRef<number>(0);
+
+  // Sync default generated recording title prefix when active language changes (unless customized)
+  useEffect(() => {
+    if (!hasCustomTitle) {
+      setTitle(`${ui.recordingPrefix}_${timestampSuffix}`);
+    }
+  }, [ui.recordingPrefix, timestampSuffix, hasCustomTitle]);
+
+  useEffect(() => {
+    userMutedRef.current = isMuted;
+  }, [isMuted]);
+
+  useEffect(() => {
+    userVolumeRef.current = volume;
+  }, [volume]);
 
   const formatLabel = mimeType.includes('mp4') ? 'MP4 (H.264/AAC)' : 'WebM (VP9/Opus)';
 
@@ -99,9 +131,24 @@ export const RecordingReviewScreen: React.FC<RecordingReviewScreenProps> = ({
 
   // Create & revoke object URL for video
   useEffect(() => {
+    hasPrimedInitialFrameRef.current = false;
+    isPrimingFrameRef.current = false;
+    if (primeTimerRef.current !== null) {
+      window.clearTimeout(primeTimerRef.current);
+      primeTimerRef.current = null;
+    }
+    setIsFrameReady(false);
+    setIsPlaying(false);
+    setHideControlsUntilMove(false);
+    setCurrentTime(0);
     const url = URL.createObjectURL(videoBlob);
     setVideoUrl(url);
     return () => {
+      if (primeTimerRef.current !== null) {
+        window.clearTimeout(primeTimerRef.current);
+        primeTimerRef.current = null;
+      }
+      isPrimingFrameRef.current = false;
       URL.revokeObjectURL(url);
     };
   }, [videoBlob]);
@@ -132,14 +179,92 @@ export const RecordingReviewScreen: React.FC<RecordingReviewScreenProps> = ({
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const handleTogglePlay = () => {
-    if (!videoRef.current) return;
-    if (videoRef.current.paused) {
-      videoRef.current.play().catch(() => {});
-      setIsPlaying(true);
-    } else {
-      videoRef.current.pause();
+  // Decode & present frame 0 immediately via a silent muted 1-frame warm-up
+  const primeInitialVideoFrame = async (vid: HTMLVideoElement) => {
+    if (hasPrimedInitialFrameRef.current) return;
+    hasPrimedInitialFrameRef.current = true;
+
+    if (mimeType.startsWith('audio/')) {
+      setIsFrameReady(true);
+      return;
+    }
+
+    isPrimingFrameRef.current = true;
+    const finishPrime = () => {
+      if (!isPrimingFrameRef.current) return;
+      isPrimingFrameRef.current = false;
+      if (primeTimerRef.current !== null) {
+        window.clearTimeout(primeTimerRef.current);
+        primeTimerRef.current = null;
+      }
+      if (videoRef.current === vid) {
+        try {
+          if (!vid.paused) vid.pause();
+          vid.muted = userMutedRef.current || userVolumeRef.current === 0;
+          vid.volume = userVolumeRef.current;
+        } catch (_) {}
+      }
       setIsPlaying(false);
+      setHideControlsUntilMove(false);
+      setIsFrameReady(true);
+    };
+
+    try {
+      vid.muted = true;
+      await vid.play();
+      const vWithCallback = vid as HTMLVideoElement & {
+        requestVideoFrameCallback?: (cb: () => void) => number;
+      };
+      if (typeof vWithCallback.requestVideoFrameCallback === 'function') {
+        vWithCallback.requestVideoFrameCallback(() => {
+          finishPrime();
+        });
+        primeTimerRef.current = window.setTimeout(finishPrime, 260);
+      } else {
+        primeTimerRef.current = window.setTimeout(finishPrime, 120);
+      }
+    } catch {
+      try {
+        const dur = Number.isFinite(vid.duration) && vid.duration > 0 ? vid.duration : duration;
+        vid.currentTime = Math.min(0.08, Math.max(0.02, (dur || 1) * 0.05));
+      } catch (_) {}
+      finishPrime();
+    }
+  };
+
+  const handleTogglePlay = () => {
+    const vid = videoRef.current;
+    if (!vid) return;
+
+    // If user clicked Play while the initial silent 1-frame prime is in flight, seamlessly transition into real playback
+    if (isPrimingFrameRef.current) {
+      isPrimingFrameRef.current = false;
+      if (primeTimerRef.current !== null) {
+        window.clearTimeout(primeTimerRef.current);
+        primeTimerRef.current = null;
+      }
+      vid.muted = userMutedRef.current || userVolumeRef.current === 0;
+      vid.volume = userVolumeRef.current;
+      playStartedAtRef.current = Date.now();
+      setIsFrameReady(true);
+      setIsPlaying(true);
+      setHideControlsUntilMove(true);
+      if (vid.paused) {
+        vid.play().catch(() => {});
+      }
+      return;
+    }
+
+    if (vid.paused) {
+      const total = Number.isFinite(vid.duration) && vid.duration > 0 ? vid.duration : duration;
+      if (vid.ended || (total > 0 && vid.currentTime >= total - 0.05)) {
+        try {
+          vid.currentTime = Math.min(0.05, total * 0.05);
+        } catch (_) {}
+      }
+      vid.play().catch(() => {});
+    } else {
+      vid.pause();
     }
   };
 
@@ -205,7 +330,7 @@ export const RecordingReviewScreen: React.FC<RecordingReviewScreenProps> = ({
 
     setIsConvertingMp4(true);
     setConversionProgress(5);
-    setConversionStatus('Initializing MP4 transcode...');
+    setConversionStatus(ui.initializingMp4);
 
     try {
       const converted = await convertWebmToMp4(videoBlob, {
@@ -240,7 +365,7 @@ export const RecordingReviewScreen: React.FC<RecordingReviewScreenProps> = ({
   return (
     <div
       id="recording-review-screen"
-      className="w-full flex-1 flex flex-col justify-between bg-white dark:bg-[#090B0E] text-slate-900 dark:text-white select-none transition-colors duration-200 overflow-x-hidden min-h-[calc(100vh-3.75rem)]"
+      className="w-full flex-1 flex flex-col justify-between bg-white dark:bg-[#161A22] text-slate-900 dark:text-white select-none transition-colors duration-200 overflow-x-hidden min-h-[calc(100vh-3.75rem)]"
     >
       <main className="w-full flex-1 flex flex-col items-center justify-center px-4 py-3 min-h-0 my-auto">
         {/* Centered Preview + Vertical Buttons cluster */}
@@ -259,41 +384,51 @@ export const RecordingReviewScreen: React.FC<RecordingReviewScreenProps> = ({
                       ref={titleInputRef}
                       type="text"
                       value={title}
-                      onChange={(e) => setTitle(e.target.value)}
+                      onChange={(e) => {
+                        setHasCustomTitle(true);
+                        setTitle(e.target.value);
+                      }}
                       onBlur={() => setIsEditingTitle(false)}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') setIsEditingTitle(false);
                       }}
-                      className="text-xs font-semibold bg-white dark:bg-zinc-900 border border-zinc-400 dark:border-zinc-600 rounded px-2 py-0.5 text-slate-900 dark:text-white outline-none focus:ring-1 focus:ring-blue-500"
+                      className="text-xs font-semibold bg-white dark:bg-[#252C3B] border border-zinc-400 dark:border-white/20 rounded px-2 py-0.5 text-slate-900 dark:text-white outline-none focus:ring-1 focus:ring-blue-500"
                     />
                     <button
                       type="button"
                       onClick={() => setIsEditingTitle(false)}
                       className="p-1 rounded bg-slate-900 dark:bg-white text-white dark:text-slate-950 hover:opacity-90 cursor-pointer"
-                      title="Save title"
+                      aria-label={ui.saveTitle}
                     >
                       <CheckmarkCircle02Icon className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 ) : (
-                  <button
-                    type="button"
-                    onClick={() => setIsEditingTitle(true)}
-                    className="group flex items-center gap-1.5 text-xs font-medium text-slate-700 dark:text-zinc-300 hover:text-slate-950 dark:hover:text-white transition-colors cursor-pointer truncate"
-                    title="Click to rename recording"
-                  >
-                    <span className="truncate max-w-[200px] sm:max-w-[320px]">{title}</span>
-                    <PencilEdit02Icon className="w-3.5 h-3.5 text-slate-400 group-hover:text-blue-500 shrink-0 transition-colors" />
-                  </button>
+                  <div className="relative group/rename flex items-center min-w-0">
+                    <button
+                      type="button"
+                      onClick={() => setIsEditingTitle(true)}
+                      className="group flex items-center gap-1.5 text-xs font-medium text-slate-700 dark:text-zinc-300 hover:text-slate-950 dark:hover:text-white transition-colors cursor-pointer truncate"
+                      aria-label={ui.clickToRename}
+                    >
+                      <span className="truncate max-w-[200px] sm:max-w-[320px]">{title}</span>
+                      <PencilEdit02Icon className="w-3.5 h-3.5 text-slate-400 group-hover:text-blue-500 shrink-0 transition-colors" />
+                    </button>
+                    <div className="pointer-events-none absolute top-full left-0 mt-1.5 z-40 opacity-0 -translate-y-1 scale-95 group-hover/rename:opacity-100 group-hover/rename:translate-y-0 group-hover/rename:scale-100 transition-all duration-150 whitespace-nowrap hidden sm:block">
+                      <div className="px-2 py-0.5 rounded-md bg-slate-900/95 dark:bg-white/95 text-white dark:text-slate-950 text-[11px] font-semibold shadow-lg select-none">
+                        {ui.clickToRename}
+                      </div>
+                    </div>
+                  </div>
                 )}
               </div>
 
-              <div className="flex items-center gap-1.5 shrink-0 text-[11px] text-slate-400 dark:text-zinc-500">
-                <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-zinc-800/80 border border-slate-200/60 dark:border-zinc-700/60 font-mono">
+              <div className="flex items-center gap-1.5 shrink-0 text-[11px] text-slate-400 dark:text-zinc-400">
+                <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-[#252C3B] border border-slate-200/60 dark:border-white/10 font-mono">
                   {formatTimer(duration)}
                 </span>
-                <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-zinc-800/80 border border-slate-200/60 dark:border-zinc-700/60 font-mono">
-                  {formatBytes(videoBlob.size)}
+                <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-[#252C3B] border border-slate-200/60 dark:border-white/10 font-mono">
+                  {formatBytes(videoBlob.size, 1, currentLang)}
                 </span>
               </div>
             </div>
@@ -301,10 +436,24 @@ export const RecordingReviewScreen: React.FC<RecordingReviewScreenProps> = ({
             {/* Direct Video Player matching preview stage frame */}
             <div
               ref={containerRef}
+              onMouseEnter={() => {
+                setIsPlayerHovered(true);
+                setHideControlsUntilMove(false);
+              }}
+              onMouseMove={() => {
+                if (!isPlayerHovered) setIsPlayerHovered(true);
+                if (hideControlsUntilMove && Date.now() - playStartedAtRef.current > 220) {
+                  setHideControlsUntilMove(false);
+                }
+              }}
+              onMouseLeave={() => {
+                setIsPlayerHovered(false);
+                setHideControlsUntilMove(false);
+              }}
               className={`${
                 isFullscreen
-                  ? 'w-full h-full max-h-screen rounded-none border-none'
-                  : 'relative group rounded-2xl overflow-hidden shadow-2xl shadow-slate-900/15 dark:shadow-black/70 bg-black border border-slate-700/40 dark:border-white/10 flex items-center justify-center shrink-0 transition-[background-color,border-color,box-shadow] duration-150'
+                  ? 'relative group w-full h-full max-h-screen rounded-none border-none'
+                  : 'relative group rounded-2xl overflow-hidden shadow-2xl shadow-slate-900/15 dark:shadow-black/45 bg-[#12161E] border border-slate-700/40 dark:border-white/15 flex items-center justify-center shrink-0 transition-[background-color,border-color,box-shadow] duration-150'
               }`}
             >
               {/* Crisp Border Overlay across the Video Preview */}
@@ -316,6 +465,7 @@ export const RecordingReviewScreen: React.FC<RecordingReviewScreenProps> = ({
                 <video
                   ref={videoRef}
                   src={videoUrl}
+                  preload="auto"
                   playsInline
                   onClick={handleTogglePlay}
                   onLoadedMetadata={() => {
@@ -324,10 +474,41 @@ export const RecordingReviewScreen: React.FC<RecordingReviewScreenProps> = ({
                       if (rect.width > 0) setVideoContainerWidth(Math.round(rect.width));
                     }
                   }}
-                  onTimeUpdate={(e) => setCurrentTime(e.currentTarget.currentTime)}
-                  onEnded={() => setIsPlaying(false)}
-                  onPlay={() => setIsPlaying(true)}
-                  onPause={() => setIsPlaying(false)}
+                  onLoadedData={(e) => {
+                    const vid = e.currentTarget;
+                    if (containerRef.current) {
+                      const rect = containerRef.current.getBoundingClientRect();
+                      if (rect.width > 0) setVideoContainerWidth(Math.round(rect.width));
+                    }
+                    void primeInitialVideoFrame(vid);
+                  }}
+                  onSeeked={() => {
+                    if (!isPrimingFrameRef.current) {
+                      setIsFrameReady(true);
+                    }
+                  }}
+                  onTimeUpdate={(e) => {
+                    if (!isPrimingFrameRef.current) {
+                      setCurrentTime(e.currentTarget.currentTime);
+                    }
+                  }}
+                  onEnded={() => {
+                    if (isPrimingFrameRef.current) return;
+                    setIsPlaying(false);
+                    setHideControlsUntilMove(false);
+                  }}
+                  onPlaying={() => {
+                    if (isPrimingFrameRef.current) return;
+                    playStartedAtRef.current = Date.now();
+                    setIsFrameReady(true);
+                    setIsPlaying(true);
+                    setHideControlsUntilMove(true);
+                  }}
+                  onPause={() => {
+                    if (isPrimingFrameRef.current) return;
+                    setIsPlaying(false);
+                    setHideControlsUntilMove(false);
+                  }}
                   className={`${
                     isFullscreen
                       ? 'w-full h-full object-contain cursor-pointer'
@@ -336,20 +517,20 @@ export const RecordingReviewScreen: React.FC<RecordingReviewScreenProps> = ({
                 />
               )}
 
-            {/* Center Play/Pause Overlay Icon on hover/pause */}
-            {!isPlaying && (
-              <button
-                type="button"
-                onClick={handleTogglePlay}
-                className="absolute inset-0 m-auto w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-black/55 hover:bg-black/80 backdrop-blur-md border border-white/25 text-white flex items-center justify-center transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-2xl cursor-pointer z-10"
-                title="Play video"
-              >
-                <PlayIcon className="w-7 h-7 sm:w-8 sm:h-8 fill-white text-white ml-0.5" />
-              </button>
-            )}
+              {videoUrl && !isFrameReady && !mimeType.startsWith('audio/') && (
+                <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-[#12161E]">
+                  <div className="w-7 h-7 rounded-full border-2 border-white/20 border-t-white/80 animate-spin" />
+                </div>
+              )}
 
-            {/* Video Scrubber & Playback Controls with Subtle Bottom Gradient Overlay, smoothly fading on unhover */}
-            <div className="absolute inset-x-0 bottom-0 pt-10 pb-3 px-4 sm:px-5 bg-gradient-to-t from-black/70 via-black/35 to-transparent text-white space-y-2 z-10 select-none opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-300 ease-in-out">
+            {/* Video Scrubber & Playback Controls: visible by default when paused, fades away on play, reappears on hover */}
+            <div
+              className={`absolute inset-x-0 bottom-0 pt-10 pb-3 px-4 sm:px-5 bg-gradient-to-t from-black/70 via-black/35 to-transparent text-white space-y-2 z-10 select-none transition-opacity duration-300 ease-in-out ${
+                !isPlaying || (isPlayerHovered && !hideControlsUntilMove)
+                  ? 'opacity-100 pointer-events-auto'
+                  : 'opacity-0 pointer-events-none'
+              }`}
+            >
               {/* Progress Bar Scrubber */}
               {(() => {
                 const progressPercent =
@@ -389,26 +570,33 @@ export const RecordingReviewScreen: React.FC<RecordingReviewScreenProps> = ({
               <div className="flex items-center justify-between gap-3 text-xs">
                 <div className="flex items-center gap-2.5">
                   {/* Play / Pause */}
-                  <button
-                    type="button"
-                    onClick={handleTogglePlay}
-                    className="p-1.5 hover:text-blue-400 hover:bg-white/10 rounded-lg transition-colors cursor-pointer"
-                    title={isPlaying ? 'Pause (Space)' : 'Play (Space)'}
-                  >
-                    {isPlaying ? (
-                      <PauseIcon className="w-4 h-4 fill-white" />
-                    ) : (
-                      <PlayIcon className="w-4 h-4 fill-white" />
-                    )}
-                  </button>
+                  <div className="relative group/play flex items-center">
+                    <button
+                      type="button"
+                      onClick={handleTogglePlay}
+                      className="p-1.5 hover:text-blue-400 hover:bg-white/10 rounded-lg transition-colors cursor-pointer"
+                      aria-label={isPlaying ? ui.pauseVideo : ui.playVideo}
+                    >
+                      {isPlaying ? (
+                        <PauseIcon className="w-4 h-4 fill-white" />
+                      ) : (
+                        <PlayIcon className="w-4 h-4 fill-white" />
+                      )}
+                    </button>
+                    <div className="pointer-events-none absolute bottom-full left-0 mb-2 z-30 opacity-0 translate-y-1 scale-95 group-hover/play:opacity-100 group-hover/play:translate-y-0 group-hover/play:scale-100 transition-all duration-150 whitespace-nowrap hidden sm:block">
+                      <div className="px-2 py-0.5 rounded-md bg-slate-900/95 text-white text-[11px] font-semibold shadow-lg border border-white/15 select-none">
+                        {isPlaying ? ui.pauseVideo : ui.playVideo}
+                      </div>
+                    </div>
+                  </div>
 
                   {/* Mute / Volume */}
-                  <div className="flex items-center group/volume">
+                  <div className="relative flex items-center group/volume">
                     <button
                       type="button"
                       onClick={handleToggleMute}
                       className="p-1.5 hover:text-blue-400 hover:bg-white/10 rounded-lg transition-colors cursor-pointer"
-                      title={isMuted ? 'Unmute (M)' : 'Mute (M)'}
+                      aria-label={isMuted ? ui.unmute : ui.mute}
                     >
                       {isMuted || volume === 0 ? (
                         <VolumeMute01Icon className="w-4 h-4 text-zinc-400" />
@@ -456,45 +644,52 @@ export const RecordingReviewScreen: React.FC<RecordingReviewScreenProps> = ({
                   </div>
 
                   {/* Fullscreen Expand Button */}
-                  <button
-                    type="button"
-                    onClick={handleToggleFullscreen}
-                    className="p-1.5 hover:text-white hover:bg-white/10 rounded-lg transition-colors cursor-pointer"
-                    title={isFullscreen ? 'Exit Fullscreen (F)' : 'Enter Fullscreen (F)'}
-                  >
-                    {isFullscreen ? (
-                      <Minimize01Icon className="w-4 h-4" />
-                    ) : (
-                      <Maximize01Icon className="w-4 h-4" />
-                    )}
-                  </button>
+                  <div className="relative group/fs flex items-center">
+                    <button
+                      type="button"
+                      onClick={handleToggleFullscreen}
+                      className="p-1.5 hover:text-white hover:bg-white/10 rounded-lg transition-colors cursor-pointer"
+                      aria-label={isFullscreen ? ui.exitFullscreen : ui.enterFullscreen}
+                    >
+                      {isFullscreen ? (
+                        <Minimize01Icon className="w-4 h-4" />
+                      ) : (
+                        <Maximize01Icon className="w-4 h-4" />
+                      )}
+                    </button>
+                    <div className="pointer-events-none absolute bottom-full right-0 mb-2 z-30 opacity-0 translate-y-1 scale-95 group-hover/fs:opacity-100 group-hover/fs:translate-y-0 group-hover/fs:scale-100 transition-all duration-150 whitespace-nowrap hidden sm:block">
+                      <div className="px-2 py-0.5 rounded-md bg-slate-900/95 text-white text-[11px] font-semibold shadow-lg border border-white/15 select-none">
+                        {isFullscreen ? ui.exitFullscreen : ui.enterFullscreen}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Vertical Buttons beside Video Window: centered with the preview screen, compact vertical gap */}
-        <aside className="shrink-0 flex flex-col items-center justify-center gap-2 sm:gap-2.5 z-40 w-10 sm:w-11 select-none md:translate-y-3">
+        {/* Vertical Buttons beside Video Window: centered with the preview screen, z-30 so header dropdowns stay on top */}
+        <aside className="shrink-0 flex flex-col items-center justify-center gap-2 sm:gap-2.5 z-30 w-10 sm:w-11 select-none md:translate-y-3">
           {/* 1. RETAKE BUTTON */}
             <div className="relative flex items-center justify-center group">
               <button
                 id="action-retake-recording"
                 type="button"
                 onClick={onRetake}
-                title="Discard this take and record again"
+                aria-label={ui.retakeTitle}
                 className="cursor-pointer"
               >
-                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center transition-all duration-150 shadow-sm bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/20 text-slate-600 dark:text-zinc-300 hover:scale-105 active:scale-95">
+                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center transition-all duration-150 shadow-sm bg-slate-200 dark:bg-[#262C3A] hover:bg-slate-300 dark:hover:bg-[#333B4D] text-slate-600 dark:text-zinc-200 hover:scale-105 active:scale-95">
                   <RotateLeft01Icon className="w-5 h-5 stroke-[1.8]" />
                 </div>
               </button>
 
               {/* Sleek Tooltip Label on Hover (smooth left-to-right emergence with easing) */}
-              <div className="pointer-events-none absolute left-full ml-3 top-1/2 -translate-y-1/2 z-40 opacity-0 -translate-x-2.5 scale-95 group-hover:opacity-100 group-hover:translate-x-0 group-hover:scale-100 transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] whitespace-nowrap">
+              <div className="pointer-events-none absolute left-full ml-3 top-1/2 -translate-y-1/2 z-30 opacity-0 -translate-x-2.5 scale-95 group-hover:opacity-100 group-hover:translate-x-0 group-hover:scale-100 transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] whitespace-nowrap">
                 <div className="px-2.5 py-1 rounded-lg bg-slate-900/95 dark:bg-white/95 text-white dark:text-slate-950 text-xs font-semibold shadow-xl shadow-black/20 backdrop-blur-md border border-white/10 dark:border-black/10 flex items-center gap-1.5 select-none">
                   <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                  <span>Retake</span>
+                  <span>{ui.retake}</span>
                 </div>
               </div>
             </div>
@@ -505,19 +700,19 @@ export const RecordingReviewScreen: React.FC<RecordingReviewScreenProps> = ({
                 id="action-edit-recording"
                 type="button"
                 onClick={onEdit}
-                title="Open video in Screen Studio editor"
+                aria-label={t.review.openInEditor}
                 className="cursor-pointer"
               >
-                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center transition-all duration-150 shadow-sm bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/20 text-slate-600 dark:text-zinc-300 hover:scale-105 active:scale-95">
+                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center transition-all duration-150 shadow-sm bg-slate-200 dark:bg-[#262C3A] hover:bg-slate-300 dark:hover:bg-[#333B4D] text-slate-600 dark:text-zinc-200 hover:scale-105 active:scale-95">
                   <Video01Icon className="w-5 h-5 stroke-[1.8]" />
                 </div>
               </button>
 
               {/* Sleek Tooltip Label on Hover */}
-              <div className="pointer-events-none absolute left-full ml-3 top-1/2 -translate-y-1/2 z-40 opacity-0 -translate-x-2.5 scale-95 group-hover:opacity-100 group-hover:translate-x-0 group-hover:scale-100 transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] whitespace-nowrap">
+              <div className="pointer-events-none absolute left-full ml-3 top-1/2 -translate-y-1/2 z-30 opacity-0 -translate-x-2.5 scale-95 group-hover:opacity-100 group-hover:translate-x-0 group-hover:scale-100 transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] whitespace-nowrap">
                 <div className="px-2.5 py-1 rounded-lg bg-slate-900/95 dark:bg-white/95 text-white dark:text-slate-950 text-xs font-semibold shadow-xl shadow-black/20 backdrop-blur-md border border-white/10 dark:border-black/10 flex items-center gap-1.5 select-none">
                   <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
-                  <span>Edit in Studio</span>
+                  <span>{t.review.openInEditor}</span>
                 </div>
               </div>
             </div>
@@ -531,14 +726,14 @@ export const RecordingReviewScreen: React.FC<RecordingReviewScreenProps> = ({
                   onSaveToLibrary();
                   setIsSaved(true);
                 }}
-                title={isSaved ? 'Saved to Library' : 'Save to Library'}
+                aria-label={isSaved ? t.review.savedSuccess : t.review.saveToLibrary}
                 className="cursor-pointer"
               >
                 <div
                   className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center transition-all duration-150 shadow-sm hover:scale-105 active:scale-95 ${
                     isSaved
                       ? 'bg-[#8DB355] text-white shadow-md shadow-[#8DB355]/30'
-                      : 'bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/20 text-slate-600 dark:text-zinc-300'
+                      : 'bg-slate-200 dark:bg-[#262C3A] hover:bg-slate-300 dark:hover:bg-[#333B4D] text-slate-600 dark:text-zinc-200'
                   }`}
                 >
                   {isSaved ? (
@@ -550,28 +745,28 @@ export const RecordingReviewScreen: React.FC<RecordingReviewScreenProps> = ({
               </button>
 
               {/* Sleek Tooltip Label on Hover */}
-              <div className="pointer-events-none absolute left-full ml-3 top-1/2 -translate-y-1/2 z-40 opacity-0 -translate-x-2.5 scale-95 group-hover:opacity-100 group-hover:translate-x-0 group-hover:scale-100 transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] whitespace-nowrap">
+              <div className="pointer-events-none absolute left-full ml-3 top-1/2 -translate-y-1/2 z-30 opacity-0 -translate-x-2.5 scale-95 group-hover:opacity-100 group-hover:translate-x-0 group-hover:scale-100 transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] whitespace-nowrap">
                 <div className="px-2.5 py-1 rounded-lg bg-slate-900/95 dark:bg-white/95 text-white dark:text-slate-950 text-xs font-semibold shadow-xl shadow-black/20 backdrop-blur-md border border-white/10 dark:border-black/10 flex items-center gap-1.5 select-none">
                   <span
                     className={`w-1.5 h-1.5 rounded-full ${
                       isSaved ? 'bg-[#8DB355]' : 'bg-indigo-400'
                     }`}
                   />
-                  <span>{isSaved ? 'Saved to Library' : 'Save to Library'}</span>
+                  <span>{isSaved ? t.review.savedSuccess : t.review.saveToLibrary}</span>
                 </div>
               </div>
             </div>
 
             {/* 4. DOWNLOAD BUTTON WITH FORMAT CHOICES */}
-            <div className="relative flex items-center justify-center">
+            <div className="relative flex items-center justify-center group">
               <button
                 id="action-download-recording"
                 type="button"
                 onClick={() => setIsDownloadMenuOpen((prev) => !prev)}
-                title={
+                aria-label={
                   isConvertingMp4
-                    ? `Converting to MP4 (${conversionProgress}%)...`
-                    : 'Download Recording (MP4 or WebM)'
+                    ? `${ui.convertingMp4} (${conversionProgress}%)...`
+                    : ui.downloadTitle
                 }
                 className="cursor-pointer"
               >
@@ -594,7 +789,7 @@ export const RecordingReviewScreen: React.FC<RecordingReviewScreenProps> = ({
 
               {/* Sleek Tooltip Label on Hover (when menu is closed) */}
               {!isDownloadMenuOpen && (
-                <div className="pointer-events-none absolute left-full ml-3 top-1/2 -translate-y-1/2 z-40 opacity-0 -translate-x-2.5 scale-95 hover:opacity-100 group-hover:opacity-100 group-hover:translate-x-0 group-hover:scale-100 transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] whitespace-nowrap">
+                <div className="pointer-events-none absolute left-full ml-3 top-1/2 -translate-y-1/2 z-30 opacity-0 -translate-x-2.5 scale-95 group-hover:opacity-100 group-hover:translate-x-0 group-hover:scale-100 transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] whitespace-nowrap">
                   <div className="px-2.5 py-1 rounded-lg bg-slate-900/95 dark:bg-white/95 text-white dark:text-slate-950 text-xs font-semibold shadow-xl shadow-black/20 backdrop-blur-md border border-white/10 dark:border-black/10 flex items-center gap-1.5 select-none">
                     <span
                       className={`w-1.5 h-1.5 rounded-full ${
@@ -607,10 +802,10 @@ export const RecordingReviewScreen: React.FC<RecordingReviewScreenProps> = ({
                     />
                     <span>
                       {isDownloaded
-                        ? 'Downloaded'
+                        ? ui.downloaded
                         : isConvertingMp4
-                        ? `Converting MP4 (${conversionProgress}%)`
-                        : 'Download (MP4 / WebM)'}
+                        ? `${ui.convertingMp4} (${conversionProgress}%)`
+                        : ui.download}
                     </span>
                   </div>
                 </div>
@@ -620,22 +815,22 @@ export const RecordingReviewScreen: React.FC<RecordingReviewScreenProps> = ({
               {isDownloadMenuOpen && (
                 <>
                   <div
-                    className="fixed inset-0 z-40 bg-transparent"
+                    className="fixed inset-0 z-30 bg-transparent"
                     onClick={() => {
                       if (!isConvertingMp4) setIsDownloadMenuOpen(false);
                     }}
                   />
-                  <div className="absolute left-full ml-3 bottom-0 z-50 w-44 sm:w-48 p-2 bg-white dark:bg-[#12141a] rounded-2xl shadow-2xl border border-slate-200 dark:border-zinc-800 animate-in fade-in zoom-in-95 duration-150 select-none">
-                    <div className="flex items-center justify-between px-1.5 py-1 mb-1 border-b border-slate-100 dark:border-zinc-800/80">
+                  <div className="absolute left-full ml-3 bottom-0 z-40 w-44 sm:w-48 p-2 bg-white dark:bg-[#232936] rounded-2xl shadow-2xl border border-slate-200 dark:border-white/15 animate-in fade-in zoom-in-95 duration-150 select-none">
+                    <div className="flex items-center justify-between px-1.5 py-1 mb-1 border-b border-slate-100 dark:border-white/10">
                       <span className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">
-                        Format
+                        {ui.format}
                       </span>
                       <button
                         type="button"
                         onClick={() => setIsDownloadMenuOpen(false)}
                         disabled={isConvertingMp4}
-                        className="p-1 -mr-1 rounded-md text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer disabled:opacity-50"
-                        title="Close format menu"
+                        className="p-1 -mr-1 rounded-md text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors cursor-pointer disabled:opacity-50"
+                        aria-label={ui.closeMenu}
                       >
                         <Cancel01Icon className="w-3.5 h-3.5" />
                       </button>
@@ -647,24 +842,24 @@ export const RecordingReviewScreen: React.FC<RecordingReviewScreenProps> = ({
                         type="button"
                         onClick={handleDownloadMp4}
                         disabled={isConvertingMp4}
-                        className="w-full flex flex-col p-2 rounded-xl border border-slate-200/80 dark:border-zinc-800 hover:border-[#D90000] dark:hover:border-[#D90000] bg-slate-50/70 dark:bg-zinc-900/60 hover:bg-red-50/40 dark:hover:bg-red-950/20 transition-all cursor-pointer group/opt text-left"
+                        className="w-full flex flex-col p-2 rounded-xl border border-slate-200/80 dark:border-white/10 hover:border-[#D90000] dark:hover:border-[#D90000] bg-slate-50/70 dark:bg-[#2B3242] hover:bg-red-50/40 dark:hover:bg-[#343C4F] transition-all cursor-pointer group/opt text-left"
                       >
                         <div className="flex items-center justify-between w-full">
                           <span className="font-bold text-xs text-slate-900 dark:text-white">
                             MP4
                           </span>
                           <span className="px-1.5 py-0.5 text-[9px] font-bold rounded-md bg-[#D90000]/10 text-[#D90000] border border-[#D90000]/20">
-                            Universal
+                            {ui.universal}
                           </span>
                         </div>
 
                         {isConvertingMp4 && (
-                          <div className="mt-1.5 w-full pt-1.5 border-t border-slate-200/60 dark:border-zinc-800">
+                          <div className="mt-1.5 w-full pt-1.5 border-t border-slate-200/60 dark:border-white/10">
                             <div className="flex items-center justify-between text-[10px] font-bold text-amber-600 dark:text-amber-400 mb-1">
-                              <span className="truncate mr-1">{conversionStatus || 'Converting...'}</span>
+                              <span className="truncate mr-1">{conversionStatus || `${ui.convertingMp4}...`}</span>
                               <span>{conversionProgress}%</span>
                             </div>
-                            <div className="w-full h-1 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
+                            <div className="w-full h-1 bg-slate-200 dark:bg-zinc-700 rounded-full overflow-hidden">
                               <div
                                 className="h-full bg-gradient-to-r from-amber-500 to-[#D90000] transition-all duration-150 rounded-full"
                                 style={{ width: `${conversionProgress}%` }}
@@ -679,13 +874,13 @@ export const RecordingReviewScreen: React.FC<RecordingReviewScreenProps> = ({
                         type="button"
                         onClick={handleDownloadWebm}
                         disabled={isConvertingMp4}
-                        className="w-full flex items-center justify-between p-2 rounded-xl border border-slate-200/80 dark:border-zinc-800 hover:border-slate-400 dark:hover:border-zinc-600 bg-slate-50/70 dark:bg-zinc-900/60 hover:bg-slate-100/60 dark:hover:bg-zinc-800/40 transition-all cursor-pointer group/opt text-left"
+                        className="w-full flex items-center justify-between p-2 rounded-xl border border-slate-200/80 dark:border-white/10 hover:border-slate-400 dark:hover:border-white/25 bg-slate-50/70 dark:bg-[#2B3242] hover:bg-slate-100/60 dark:hover:bg-[#343C4F] transition-all cursor-pointer group/opt text-left"
                       >
                         <span className="font-bold text-xs text-slate-900 dark:text-white">
                           WebM
                         </span>
-                        <span className="px-1.5 py-0.5 text-[9px] font-bold rounded-md bg-slate-200 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300">
-                          Original
+                        <span className="px-1.5 py-0.5 text-[9px] font-bold rounded-md bg-slate-200 dark:bg-[#1E232E] text-slate-700 dark:text-zinc-300">
+                          {ui.original}
                         </span>
                       </button>
                     </div>

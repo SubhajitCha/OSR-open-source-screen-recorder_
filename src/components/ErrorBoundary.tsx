@@ -37,7 +37,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   public render(): ReactNode {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen bg-slate-50 dark:bg-[#000000] text-slate-900 dark:text-white flex flex-col">
+        <div className="min-h-screen bg-slate-50 dark:bg-[#161A22] text-slate-900 dark:text-white flex flex-col">
           <ServerErrorPage
             error={this.state.error}
             errorInfo={this.state.errorInfo}

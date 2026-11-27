@@ -73,6 +73,28 @@ export interface AudioSettings {
   autoGainControl: boolean;
 }
 
+export type InputSourceMode = 'system' | 'mobile';
+
+export type MobileConnectionStatus =
+  | 'disconnected'
+  | 'initializing'
+  | 'waiting_for_phone'
+  | 'connecting'
+  | 'connected'
+  | 'error';
+
+export type MobileCameraFacing = 'user' | 'environment';
+
+export interface MobileDeviceInfo {
+  deviceName: string;
+  facing: MobileCameraFacing;
+  hasVideo: boolean;
+  hasAudio: boolean;
+  videoResolution?: { width: number; height: number };
+  micMuted: boolean;
+  camMuted: boolean;
+}
+
 export interface VideoSettings {
   resolution: ResolutionPreset;
   fps: FrameRatePreset;
@@ -80,6 +102,7 @@ export interface VideoSettings {
   bitrateMbps: number; // e.g. 5, 8, 12
   countdownSeconds: 0 | 3 | 5 | 10;
   directSaveToFileSystem: boolean;
+  cameraDeviceId?: string;
 }
 
 export interface VideoBookmark {

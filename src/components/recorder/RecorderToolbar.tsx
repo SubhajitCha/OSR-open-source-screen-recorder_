@@ -23,6 +23,10 @@ import {
   AudioSettings,
   VideoSettings,
   RecordingMode,
+  InputSourceMode,
+  MobileConnectionStatus,
+  MobileDeviceInfo,
+  MobileCameraFacing,
 } from '../../types';
 import { ScreenPopover } from './popovers/ScreenPopover';
 import { CameraPopover } from './popovers/CameraPopover';
@@ -63,6 +67,12 @@ interface RecorderToolbarProps {
   disabled?: boolean;
   orientation?: 'vertical' | 'horizontal';
   height?: number | null;
+  inputSource?: InputSourceMode;
+  onSelectInputSource?: (source: InputSourceMode) => void;
+  mobileStatus?: MobileConnectionStatus;
+  mobileDeviceInfo?: MobileDeviceInfo | null;
+  onOpenMobilePairModal?: () => void;
+  onFlipMobileCamera?: (facing: MobileCameraFacing) => void;
 }
 
 type ActivePopover =
@@ -106,6 +116,12 @@ export const RecorderToolbar: React.FC<RecorderToolbarProps> = ({
   disabled = false,
   orientation = 'vertical',
   height,
+  inputSource = 'system',
+  onSelectInputSource,
+  mobileStatus = 'disconnected',
+  mobileDeviceInfo = null,
+  onOpenMobilePairModal,
+  onFlipMobileCamera,
 }) => {
   const { t } = useLanguage();
   const [activePopover, setActivePopover] = useState<ActivePopover>(null);
@@ -146,14 +162,14 @@ export const RecorderToolbar: React.FC<RecorderToolbarProps> = ({
             <button
               type="button"
               onClick={() => onToggleCamera(!isCameraActive)}
-              title={isCameraActive ? (t.recorder?.hideCamera || 'Hide camera') : (t.recorder?.addCamera || 'Add camera')}
+              aria-label={isCameraActive ? (t.recorder?.hideCamera || 'Hide camera') : (t.recorder?.addCamera || 'Add camera')}
               className="cursor-pointer"
             >
               <div
                 className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-150 shadow-sm ${
                   isCameraActive
                     ? 'bg-[#8DB355] hover:bg-[#7ea248] text-white shadow-md shadow-[#8DB355]/30'
-                    : 'bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/20 text-slate-600 dark:text-zinc-400'
+                    : 'bg-slate-200 dark:bg-[#262C3A] hover:bg-slate-300 dark:hover:bg-[#333B4D] text-slate-600 dark:text-zinc-300'
                 }`}
               >
                 {isCameraActive ? (
@@ -167,15 +183,15 @@ export const RecorderToolbar: React.FC<RecorderToolbarProps> = ({
             {/* Dedicated Chevron for Camera Device Selection */}
             <button
               type="button"
-              title="Choose Camera Device & Settings"
+              aria-label="Choose Camera Device & Settings"
               onClick={(e) => {
                 e.stopPropagation();
                 togglePopover('camera');
               }}
               className={`absolute -bottom-0.5 -right-0.5 w-4.5 h-4.5 rounded-full flex items-center justify-center border shadow-xs cursor-pointer hover:scale-115 transition-all z-20 ${
                 activePopover === 'camera'
-                  ? 'bg-black dark:bg-white text-white dark:text-black border-zinc-700 dark:border-white'
-                  : 'bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 border-slate-300 dark:border-white/20 hover:bg-slate-100 dark:hover:bg-zinc-700'
+                  ? 'bg-slate-800 dark:bg-[#31394D] text-white border-slate-700 dark:border-white/30'
+                  : 'bg-white dark:bg-[#2E3546] text-slate-700 dark:text-zinc-200 border-slate-300 dark:border-white/20 hover:bg-slate-100 dark:hover:bg-[#3B4459]'
               }`}
             >
               <ArrowDown01Icon className="w-2.5 h-2.5 stroke-[2.5]" />
@@ -202,6 +218,12 @@ export const RecorderToolbar: React.FC<RecorderToolbarProps> = ({
             isCameraActive={isCameraActive}
             onToggleCamera={onToggleCamera}
             placement={popoverPlacement}
+            inputSource={inputSource}
+            onSelectInputSource={onSelectInputSource}
+            mobileStatus={mobileStatus}
+            mobileDeviceInfo={mobileDeviceInfo}
+            onOpenMobilePairModal={onOpenMobilePairModal}
+            onFlipMobileCamera={onFlipMobileCamera}
           />
         </div>
 
@@ -233,7 +255,7 @@ export const RecorderToolbar: React.FC<RecorderToolbarProps> = ({
           {isMicBlocked ? (
             <div
               id="mic-permission-error-pill"
-              className="absolute left-full ml-3 top-1/2 -translate-y-1/2 z-50 flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-red-50 dark:bg-[#1a0808] text-[#D90000] dark:text-red-400 border border-red-200 dark:border-red-900/60 shadow-xl shadow-red-950/15 backdrop-blur-md text-[11px] font-medium whitespace-nowrap animate-in fade-in slide-in-from-left-2 duration-200"
+              className="absolute left-full ml-3 top-1/2 -translate-y-1/2 z-50 flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-red-50 dark:bg-[#2D1418] text-[#D90000] dark:text-red-300 border border-red-200 dark:border-red-900/60 shadow-xl shadow-red-950/15 backdrop-blur-md text-[11px] font-medium whitespace-nowrap animate-in fade-in slide-in-from-left-2 duration-200"
             >
               <AlertCircleIcon className="w-3.5 h-3.5 shrink-0 text-[#D90000]" />
               <span>Mic blocked by browser</span>
@@ -245,7 +267,7 @@ export const RecorderToolbar: React.FC<RecorderToolbarProps> = ({
                   else if (onToggleMic) onToggleMic(true);
                 }}
                 className="ml-1 px-1.5 py-0.5 text-[10px] font-bold bg-[#D90000] hover:bg-[#b80000] text-white rounded-md transition-colors cursor-pointer"
-                title="Retry requesting microphone access"
+                aria-label="Retry requesting microphone access"
               >
                 Allow
               </button>
@@ -272,6 +294,11 @@ export const RecorderToolbar: React.FC<RecorderToolbarProps> = ({
             isMicActive={isMicActive}
             onToggleMic={onToggleMic}
             placement={popoverPlacement}
+            inputSource={inputSource}
+            onSelectInputSource={onSelectInputSource}
+            mobileStatus={mobileStatus}
+            mobileDeviceInfo={mobileDeviceInfo}
+            onOpenMobilePairModal={onOpenMobilePairModal}
           />
         </div>
 
@@ -285,14 +312,14 @@ export const RecorderToolbar: React.FC<RecorderToolbarProps> = ({
                   onToggleScreen(!isScreenActive);
                 }
               }}
-              title={isScreenActive ? 'Stop sharing screen' : 'Start sharing screen'}
+              aria-label={isScreenActive ? 'Stop sharing screen' : 'Start sharing screen'}
               className="cursor-pointer"
             >
               <div
                 className={`relative shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-150 shadow-sm ${
                   isScreenActive
                     ? 'bg-[#8DB355] hover:bg-[#7ea248] text-white shadow-md shadow-[#8DB355]/30'
-                    : 'bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/20 text-slate-600 dark:text-zinc-400'
+                    : 'bg-slate-200 dark:bg-[#262C3A] hover:bg-slate-300 dark:hover:bg-[#333B4D] text-slate-600 dark:text-zinc-300'
                 }`}
               >
                 <ArrowUp01Icon className="w-5 h-5 stroke-[2.5]" />
@@ -335,10 +362,10 @@ export const RecorderToolbar: React.FC<RecorderToolbarProps> = ({
               onClick={() => {
                 if (!disabled) togglePopover('layout');
               }}
-              title="Choose Recording Composition Layout"
+              aria-label="Choose Recording Composition Layout"
               className={`cursor-pointer ${disabled ? 'opacity-35 cursor-not-allowed' : ''}`}
             >
-              <div className="relative w-10 h-10 rounded-full bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/20 text-slate-600 dark:text-zinc-300 flex items-center justify-center transition-all duration-150 shadow-sm">
+              <div className="relative w-10 h-10 rounded-full bg-slate-200 dark:bg-[#262C3A] hover:bg-slate-300 dark:hover:bg-[#333B4D] text-slate-600 dark:text-zinc-200 flex items-center justify-center transition-all duration-150 shadow-sm">
                 <Layers01Icon className="w-5 h-5 stroke-[1.8]" />
               </div>
             </button>
@@ -367,20 +394,20 @@ export const RecorderToolbar: React.FC<RecorderToolbarProps> = ({
           <button
             type="button"
             onClick={() => togglePopover('background')}
-            title="Choose Stage Background & Backdrop"
+            aria-label="Choose Stage Background & Backdrop"
             className="cursor-pointer"
           >
-            <div className="relative w-10 h-10 rounded-full bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/20 text-slate-600 dark:text-zinc-300 flex items-center justify-center transition-all duration-150 shadow-sm">
+            <div className="relative w-10 h-10 rounded-full bg-slate-200 dark:bg-[#262C3A] hover:bg-slate-300 dark:hover:bg-[#333B4D] text-slate-600 dark:text-zinc-200 flex items-center justify-center transition-all duration-150 shadow-sm">
               <ColorsIcon className="w-5 h-5 stroke-[1.8]" />
               <span
-                className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full border border-white dark:border-zinc-800 shadow-sm"
+                className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full border border-white dark:border-[#262C3A] shadow-sm"
                 style={{
                   background:
                     background.type === 'solid'
                       ? background.value
                       : background.type === 'gradient'
                       ? background.value
-                      : '#111418',
+                      : '#1C212C',
                 }}
               />
             </div>
@@ -421,10 +448,10 @@ export const RecorderToolbar: React.FC<RecorderToolbarProps> = ({
               if (onOpenSettings) onOpenSettings();
               else togglePopover('smart');
             }}
-            title="Audio, Video & AI Studio Settings"
+            aria-label="Audio, Video & AI Studio Settings"
             className="cursor-pointer"
           >
-            <div className="relative w-10 h-10 rounded-full bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/20 text-slate-600 dark:text-zinc-300 flex items-center justify-center transition-all duration-150 shadow-sm">
+            <div className="relative w-10 h-10 rounded-full bg-slate-200 dark:bg-[#262C3A] hover:bg-slate-300 dark:hover:bg-[#333B4D] text-slate-600 dark:text-zinc-200 flex items-center justify-center transition-all duration-150 shadow-sm">
               <Settings01Icon className="w-5 h-5 stroke-[1.8]" />
             </div>
           </button>
@@ -466,14 +493,14 @@ export const RecorderToolbar: React.FC<RecorderToolbarProps> = ({
             <button
               type="button"
               onClick={() => onToggleCamera(!isCameraActive)}
-              title={isCameraActive ? 'Hide camera' : 'Add camera'}
+              aria-label={isCameraActive ? 'Hide camera' : 'Add camera'}
               className="group flex flex-col items-center cursor-pointer"
             >
               <div
                 className={`relative w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center transition-all duration-150 shadow-sm ${
                   isCameraActive
                     ? 'bg-[#8DB355] hover:bg-[#7a9d47] text-white shadow-md shadow-[#8DB355]/30'
-                    : 'bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/20 text-slate-600 dark:text-zinc-400'
+                    : 'bg-slate-200 dark:bg-[#262C3A] hover:bg-slate-300 dark:hover:bg-[#333B4D] text-slate-600 dark:text-zinc-300'
                 }`}
               >
                 {isCameraActive ? (
@@ -486,15 +513,15 @@ export const RecorderToolbar: React.FC<RecorderToolbarProps> = ({
 
             <button
               type="button"
-              title="Choose Camera Device & Settings"
+              aria-label="Choose Camera Device & Settings"
               onClick={(e) => {
                 e.stopPropagation();
                 togglePopover('camera');
               }}
               className={`absolute -bottom-0.5 -right-0.5 w-4.5 h-4.5 rounded-full flex items-center justify-center border shadow-xs cursor-pointer hover:scale-115 transition-all z-20 ${
                 activePopover === 'camera'
-                  ? 'bg-black dark:bg-white text-white dark:text-black border-zinc-700 dark:border-white'
-                  : 'bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 border-slate-300 dark:border-white/20 hover:bg-slate-100 dark:hover:bg-zinc-700'
+                  ? 'bg-slate-800 dark:bg-[#31394D] text-white border-slate-700 dark:border-white/30'
+                  : 'bg-white dark:bg-[#2E3546] text-slate-700 dark:text-zinc-200 border-slate-300 dark:border-white/20 hover:bg-slate-100 dark:hover:bg-[#3B4459]'
               }`}
             >
               <ArrowDown01Icon className="w-2.5 h-2.5 stroke-[2.5]" />
@@ -520,6 +547,12 @@ export const RecorderToolbar: React.FC<RecorderToolbarProps> = ({
             isCameraActive={isCameraActive}
             onToggleCamera={onToggleCamera}
             placement={popoverPlacement}
+            inputSource={inputSource}
+            onSelectInputSource={onSelectInputSource}
+            mobileStatus={mobileStatus}
+            mobileDeviceInfo={mobileDeviceInfo}
+            onOpenMobilePairModal={onOpenMobilePairModal}
+            onFlipMobileCamera={onFlipMobileCamera}
           />
         </div>
 
@@ -548,12 +581,12 @@ export const RecorderToolbar: React.FC<RecorderToolbarProps> = ({
           {isMicBlocked ? (
             <div
               id="mic-blocked-badge-horizontal"
-              className="flex items-center gap-1 px-1.5 py-0.5 mt-1 rounded-md bg-red-50 dark:bg-[#1a0808] text-[#D90000] dark:text-red-400 border border-red-200 dark:border-red-900/60 text-[10px] font-semibold whitespace-nowrap cursor-pointer"
+              className="flex items-center gap-1 px-1.5 py-0.5 mt-1 rounded-md bg-red-50 dark:bg-[#2D1418] text-[#D90000] dark:text-red-300 border border-red-200 dark:border-red-900/60 text-[10px] font-semibold whitespace-nowrap cursor-pointer"
               onClick={() => {
                 if (onEnableMic) onEnableMic();
                 else if (onToggleMic) onToggleMic(true);
               }}
-              title="Microphone blocked by browser — click to allow"
+              aria-label="Microphone blocked by browser — click to allow"
             >
               <AlertCircleIcon className="w-2.5 h-2.5 text-[#D90000] shrink-0" />
               <span>Mic blocked</span>
@@ -585,6 +618,11 @@ export const RecorderToolbar: React.FC<RecorderToolbarProps> = ({
             isMicActive={isMicActive}
             onToggleMic={onToggleMic}
             placement={popoverPlacement}
+            inputSource={inputSource}
+            onSelectInputSource={onSelectInputSource}
+            mobileStatus={mobileStatus}
+            mobileDeviceInfo={mobileDeviceInfo}
+            onOpenMobilePairModal={onOpenMobilePairModal}
           />
         </div>
 
@@ -597,14 +635,14 @@ export const RecorderToolbar: React.FC<RecorderToolbarProps> = ({
                 onToggleScreen(!isScreenActive);
               }
             }}
-            title={isScreenActive ? 'Stop sharing screen' : 'Start sharing screen'}
+            aria-label={isScreenActive ? 'Stop sharing screen' : 'Start sharing screen'}
             className="group flex flex-col items-center gap-1 cursor-pointer"
           >
             <div
               className={`relative w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center transition-all duration-150 shadow-sm ${
                 isScreenActive
                   ? 'bg-[#8DB355] hover:bg-[#7a9d47] text-white shadow-md shadow-[#8DB355]/30'
-                  : 'bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/20 text-slate-600 dark:text-zinc-400'
+                  : 'bg-slate-200 dark:bg-[#262C3A] hover:bg-slate-300 dark:hover:bg-[#333B4D] text-slate-600 dark:text-zinc-300'
               }`}
             >
               <ArrowUp01Icon className="w-5 h-5 stroke-[2.5]" />
@@ -649,14 +687,14 @@ export const RecorderToolbar: React.FC<RecorderToolbarProps> = ({
                   togglePopover('layout');
                 }
               }}
-              title="Choose Recording Composition Layout"
+              aria-label="Choose Recording Composition Layout"
               className={`group flex flex-col items-center gap-1 transition-all ${
                 disabled
                   ? 'opacity-35 cursor-not-allowed'
                   : 'cursor-pointer hover:opacity-90'
               }`}
             >
-              <div className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/20 text-slate-600 dark:text-zinc-300 flex items-center justify-center transition-all duration-150 shadow-sm">
+              <div className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-slate-200 dark:bg-[#262C3A] hover:bg-slate-300 dark:hover:bg-[#333B4D] text-slate-600 dark:text-zinc-200 flex items-center justify-center transition-all duration-150 shadow-sm">
                 <Layers01Icon className="w-5 h-5 stroke-[1.8]" />
               </div>
               <span className="text-xs font-semibold text-slate-600 dark:text-zinc-400 whitespace-nowrap">
@@ -683,17 +721,17 @@ export const RecorderToolbar: React.FC<RecorderToolbarProps> = ({
             onClick={() => togglePopover('background')}
             className="group flex flex-col items-center gap-1 cursor-pointer"
           >
-            <div className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/20 text-slate-600 dark:text-zinc-300 flex items-center justify-center transition-all duration-150 shadow-sm">
+            <div className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-slate-200 dark:bg-[#262C3A] hover:bg-slate-300 dark:hover:bg-[#333B4D] text-slate-600 dark:text-zinc-200 flex items-center justify-center transition-all duration-150 shadow-sm">
               <ColorsIcon className="w-5 h-5 stroke-[1.8]" />
               <span
-                className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full border border-white dark:border-zinc-800 shadow-sm"
+                className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full border border-white dark:border-[#262C3A] shadow-sm"
                 style={{
                   background:
                     background.type === 'solid'
                       ? background.value
                       : background.type === 'gradient'
                       ? background.value
-                      : '#111418',
+                      : '#1C212C',
                 }}
               />
             </div>
@@ -721,7 +759,7 @@ export const RecorderToolbar: React.FC<RecorderToolbarProps> = ({
             }}
             className="group flex flex-col items-center gap-1 cursor-pointer"
           >
-            <div className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/20 text-slate-600 dark:text-zinc-300 flex items-center justify-center transition-all duration-150 shadow-sm">
+            <div className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-slate-200 dark:bg-[#262C3A] hover:bg-slate-300 dark:hover:bg-[#333B4D] text-slate-600 dark:text-zinc-200 flex items-center justify-center transition-all duration-150 shadow-sm">
               <Settings01Icon className="w-5 h-5 stroke-[1.8]" />
             </div>
             <span className="text-xs font-semibold text-slate-600 dark:text-zinc-400 whitespace-nowrap">

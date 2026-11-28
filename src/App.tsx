@@ -37,7 +37,6 @@ import { RecorderDashboard } from './components/RecorderDashboard';
 import { VideoEditor } from './components/editor/VideoEditor';
 import { RecordingsLibrary } from './components/RecordingsLibrary';
 import { ServicesStatusPage } from './components/ServicesStatusPage';
-import { CountdownModal } from './components/CountdownModal';
 import { SettingsModal } from './components/SettingsModal';
 import { TechDocsPage } from './components/TechDocsPage';
 import { LogbookPage } from './components/LogbookPage';
@@ -278,7 +277,7 @@ export default function App() {
     fps: 30,
     codec: 'video/webm;codecs=h264,opus',
     bitrateMbps: 6,
-    countdownSeconds: 0,
+    countdownSeconds: 3,
     directSaveToFileSystem: false,
   });
 
@@ -478,16 +477,14 @@ export default function App() {
   const countdownStartTimerRef = useRef<number | null>(null);
 
   const handleCountdownComplete = useCallback(() => {
-    // 1. Immediately dismiss countdown overlay and transition state
+    // 1. Immediately dismiss countdown banner and transition state
     setRecordingState('recording');
 
     if (countdownStartTimerRef.current) {
       window.clearTimeout(countdownStartTimerRef.current);
     }
 
-    // 2. Allow browser, OS window capture pipeline, and compositor 500ms
-    // to completely flush out any frames showing the countdown modal,
-    // guaranteeing that the timer is completely gone before MediaRecorder starts.
+    // 2. Yield briefly (1-2 frames) so the small banner unmounts cleanly before recording begins
     countdownStartTimerRef.current = window.setTimeout(() => {
       countdownStartTimerRef.current = null;
       try {
@@ -506,7 +503,7 @@ export default function App() {
         setRecordingState('idle');
         showToast('Could not start recording', 'error');
       }
-    }, 500);
+    }, 32);
   }, [showToast, updateActiveWebcamStream]);
 
   const handleCountdownCancel = useCallback(() => {
@@ -1479,6 +1476,9 @@ export default function App() {
         onOpenEditorExport={() => {
           window.dispatchEvent(new CustomEvent('open-editor-export-modal'));
         }}
+        countdownSeconds={videoSettings.countdownSeconds}
+        onCountdownComplete={handleCountdownComplete}
+        onCountdownCancel={handleCountdownCancel}
       />
 
       {/* Main Content Area */}
@@ -1734,15 +1734,6 @@ export default function App() {
             setActiveView(view);
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
-        />
-      )}
-
-      {/* Countdown Overlay Modal */}
-      {recordingState === 'countdown' && (
-        <CountdownModal
-          seconds={videoSettings.countdownSeconds}
-          onComplete={handleCountdownComplete}
-          onCancel={handleCountdownCancel}
         />
       )}
 

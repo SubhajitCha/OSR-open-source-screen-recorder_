@@ -16,6 +16,7 @@ import { ActiveView, RecordingMode } from '../types';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
 import { LanguageSelector } from './LanguageSelector';
+import { CountdownBanner } from './CountdownBanner';
 
 interface NavbarProps {
   activeView: ActiveView;
@@ -35,6 +36,9 @@ interface NavbarProps {
   hasSelectedInitialMode?: boolean;
   onOpenEditorExport?: () => void;
   onGoHome?: () => void;
+  countdownSeconds?: number;
+  onCountdownComplete?: () => void;
+  onCountdownCancel?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -54,6 +58,9 @@ export const Navbar: React.FC<NavbarProps> = ({
   hasSelectedInitialMode = false,
   onOpenEditorExport,
   onGoHome,
+  countdownSeconds = 0,
+  onCountdownComplete,
+  onCountdownCancel,
 }) => {
   const { resolvedTheme, toggleTheme } = useTheme();
   const { t } = useLanguage();
@@ -74,7 +81,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         const deltaY = currentY - prevYRef.current;
         // Google Labs scroll interaction:
         // Keep header locked visible in hero area (< 180px) so cards pass behind frosted blur
-        if (!isRecording) {
+        if (!isRecording && recordingState !== 'countdown') {
           if (currentY < 180) {
             setCanHide(false);
           } else if (deltaY > 10 && currentY > 200) {
@@ -93,7 +100,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [isRecording]);
+  }, [isRecording, recordingState]);
 
   const isModeSwitcherVisible =
     !isRecording &&
@@ -605,16 +612,32 @@ export const Navbar: React.FC<NavbarProps> = ({
                     onClick={onStartRecording}
                     disabled={recordingState === 'countdown'}
                     aria-label={t.recorder.startRecordBtn}
-                    className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1.5 rounded-full bg-[#D90000] hover:bg-[#b80000] active:scale-95 text-white font-bold text-xs sm:text-sm shadow-md shadow-[#D90000]/30 transition-all cursor-pointer whitespace-nowrap"
+                    className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1.5 rounded-full bg-[#D90000] text-white font-bold text-xs sm:text-sm shadow-md shadow-[#D90000]/30 transition-all whitespace-nowrap ${
+                      recordingState === 'countdown'
+                        ? 'opacity-80 cursor-wait'
+                        : 'hover:bg-[#b80000] active:scale-95 cursor-pointer'
+                    }`}
                   >
                     <span className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-white animate-pulse" />
                     <span>{t.common.record}</span>
                   </button>
-                  <div className="pointer-events-none absolute top-full right-0 mt-2 z-50 opacity-0 -translate-y-1.5 scale-95 group-hover:opacity-100 group-hover:translate-y-0 group-hover:scale-100 transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] whitespace-nowrap hidden sm:block">
-                    <div className="px-2.5 py-1 rounded-lg bg-slate-900/95 dark:bg-white/95 text-white dark:text-slate-950 text-xs font-semibold shadow-xl shadow-black/20 backdrop-blur-md border border-white/10 dark:border-black/10 select-none">
-                      {t.recorder.startRecordBtn}
+                  {recordingState !== 'countdown' && (
+                    <div className="pointer-events-none absolute top-full right-0 mt-2 z-50 opacity-0 -translate-y-1.5 scale-95 group-hover:opacity-100 group-hover:translate-y-0 group-hover:scale-100 transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] whitespace-nowrap hidden sm:block">
+                      <div className="px-2.5 py-1 rounded-lg bg-slate-900/95 dark:bg-white/95 text-white dark:text-slate-950 text-xs font-semibold shadow-xl shadow-black/20 backdrop-blur-md border border-white/10 dark:border-black/10 select-none">
+                        {t.recorder.startRecordBtn}
+                      </div>
                     </div>
-                  </div>
+                  )}
+                  {recordingState === 'countdown' &&
+                    countdownSeconds > 0 &&
+                    onCountdownComplete &&
+                    onCountdownCancel && (
+                      <CountdownBanner
+                        seconds={countdownSeconds}
+                        onComplete={onCountdownComplete}
+                        onCancel={onCountdownCancel}
+                      />
+                    )}
                 </div>
               ) : (
                 /* Stop Button ONLY */
